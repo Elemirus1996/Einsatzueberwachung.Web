@@ -1,0 +1,187 @@
+@* Toast-Notification-System für Benutzer-Feedback *@
+@inject IJSRuntime JS
+
+<div class="toast-container position-fixed top-0 end-0 p-3">
+    @foreach (var toast in _toasts)
+    {
+        <div class="toast show @GetToastClass(toast.Type)" role="alert">
+            <div class="toast-header">
+                <i class="bi @GetIcon(toast.Type) me-2"></i>
+                <strong class="me-auto">@GetTitle(toast.Type)</strong>
+                <small>@toast.Timestamp.ToString("HH:mm:ss")</small>
+                <button type="button" class="btn-close" @onclick="() => RemoveToast(toast.Id)"></button>
+            </div>
+            <div class="toast-body">
+                @toast.Message
+            </div>
+        </div>
+    }
+</div>
+
+<style>
+    .toast-container {
+        z-index: 9999;
+        max-width: 400px;
+    }
+
+    .toast {
+        margin-bottom: 0.5rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .toast.toast-success {
+        border-left: 4px solid #28a745;
+    }
+
+    .toast.toast-error {
+        border-left: 4px solid #dc3545;
+    }
+
+    .toast.toast-warning {
+        border-left: 4px solid #ffc107;
+    }
+
+    .toast.toast-info {
+        border-left: 4px solid #17a2b8;
+    }
+
+    .toast-header {
+        background: rgba(255, 255, 255, 0.95);
+        border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    }
+
+    [data-bs-theme="dark"] .toast-header {
+        background: rgba(33, 37, 41, 0.95);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        color: #E0E0E0;
+    }
+
+    [data-bs-theme="dark"] .toast-body {
+        background: rgba(33, 37, 41, 0.95);
+        color: #E0E0E0;
+    }
+</style>
+
+@code {
+private List<ToastItem> _toasts = new();
+private System.Threading.Timer? _cleanupTimer;
+
+protected override void OnInitialized()
+{
+    _cleanupTimer = new System.Threading.Timer(_ => CleanupOldToasts(), null, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(1));
+}
+
+public void ShowSuccess(string message)
+{
+    ShowToast(ToastType.Success, message);
+}
+
+public void ShowError(string message)
+{
+    ShowToast(ToastType.Error, message);
+}
+
+public void ShowWarning(string message)
+{
+    ShowToast(ToastType.Warning, message);
+}
+
+public void ShowInfo(string message)
+{
+    ShowToast(ToastType.Info, message);
+}
+
+    private void ShowToast(ToastType type, string message)
+    {
+        var toast = new ToastItem
+        {
+            Id = Guid.NewGuid().ToString(),
+            Type = type,
+            Message = message,
+            Timestamp = DateTime.Now
+        };
+
+        _toasts.Add(toast);
+        InvokeAsync(StateHasChanged);
+
+        // Auto-remove nach 5 Sekunden
+        _ = Task.Delay(5000).ContinueWith(_ =>
+        {
+            RemoveToast(toast.Id);
+        });
+    }
+
+    private void RemoveToast(string id)
+    {
+        var toast = _toasts.FirstOrDefault(t => t.Id == id);
+        if (toast != null)
+        {
+            _toasts.Remove(toast);
+            InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private void CleanupOldToasts()
+    {
+        var oldToasts = _toasts.Where(t => (DateTime.Now - t.Timestamp).TotalSeconds > 10).ToList();
+        foreach (var toast in oldToasts)
+        {
+            _toasts.Remove(toast);
+        }
+        
+        if (oldToasts.Any())
+        {
+            InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private string GetToastClass(ToastType type)
+    {
+        return $"toast-{type.ToString().ToLower()}";
+    }
+
+    private string GetIcon(ToastType type)
+    {
+        return type switch
+        {
+            ToastType.Success => "bi-check-circle-fill text-success",
+            ToastType.Error => "bi-x-circle-fill text-danger",
+            ToastType.Warning => "bi-exclamation-triangle-fill text-warning",
+            ToastType.Info => "bi-info-circle-fill text-info",
+            _ => "bi-info-circle-fill"
+        };
+    }
+
+    private string GetTitle(ToastType type)
+    {
+        return type switch
+        {
+            ToastType.Success => "Erfolg",
+            ToastType.Error => "Fehler",
+            ToastType.Warning => "Warnung",
+            ToastType.Info => "Information",
+            _ => "Hinweis"
+        };
+    }
+
+    public void Dispose()
+    {
+        _cleanupTimer?.Dispose();
+    }
+
+    private class ToastItem
+    {
+        public string Id { get; set; } = "";
+        public ToastType Type { get; set; }
+        public string Message { get; set; } = "";
+        public DateTime Timestamp { get; set; }
+    }
+
+    public enum ToastType
+    {
+        Success,
+        Error,
+        Warning,
+        Info
+    }
+}

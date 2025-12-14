@@ -1,0 +1,69 @@
+@* Icon-Helper Component für einheitliche Icons *@
+@code {
+    [Parameter]
+    public string IconName { get; set; } = "";
+    
+    [Parameter]
+    public string Size { get; set; } = "1.2em";
+
+    private string GetIconClass()
+    {
+        return IconName switch
+        {
+            "alarm" => "bi bi-alarm",
+            "bar-chart" => "bi bi-bar-chart-fill",
+            "clipboard" => "bi bi-clipboard-data",
+            "gear" => "bi bi-gear-fill",
+            "clock" => "bi bi-clock-history",
+            "map" => "bi bi-map-fill",
+            "file-pdf" => "bi bi-file-pdf-fill",
+            "people" => "bi bi-people-fill",
+            "person" => "bi bi-person-fill",
+            "building" => "bi bi-building",
+            "plus-circle" => "bi bi-plus-circle-fill",
+            "pencil" => "bi bi-pencil-fill",
+            "trash" => "bi bi-trash-fill",
+            "check-circle" => "bi bi-check-circle-fill",
+            "x-circle" => "bi bi-x-circle-fill",
+            "save" => "bi bi-save-fill",
+            "arrow-left" => "bi bi-arrow-left",
+            "play" => "bi bi-play-fill",
+            "pause" => "bi bi-pause-fill",
+            "stop" => "bi bi-stop-fill",
+            "arrow-repeat" => "bi bi-arrow-repeat",
+            "exclamation-triangle" => "bi bi-exclamation-triangle-fill",
+            "info-circle" => "bi bi-info-circle-fill",
+            "house" => "bi bi-house-fill",
+            "search" => "bi bi-search",
+            "dog" => "bi bi-heart-fill", // Hundeherz als Symbol
+            "drone" => "bi bi-triangle-fill", // Dreieck für Drohne
+            "tools" => "bi bi-tools",
+            "flag" => "bi bi-flag-fill",
+            "geo" => "bi bi-geo-alt-fill",
+            "telephone" => "bi bi-telephone-fill",
+            "envelope" => "bi bi-envelope-fill",
+            _ => "bi bi-circle-fill"
+        };
+    }
+
+    private string GetIconHtml()
+    {
+        // Fallback für Icons die nicht in Bootstrap Icons sind
+        return IconName switch
+        {
+            "dog-custom" => "&#x1F415;", // Hund Emoji (falls benötigt)
+            "drone-custom" => "&#x1F6E9;", // Drohne Emoji (falls benötigt)
+            "alarm-custom" => "&#x1F6A8;", // Alarm Emoji (falls benötigt)
+            _ => ""
+        };
+    }
+}
+
+@if (!string.IsNullOrEmpty(GetIconHtml()))
+{
+    <span style="font-size: @Size;">@((MarkupString)GetIconHtml())</span>
+}
+else
+{
+    <i class="@GetIconClass()" style="font-size: @Size;"></i>
+}

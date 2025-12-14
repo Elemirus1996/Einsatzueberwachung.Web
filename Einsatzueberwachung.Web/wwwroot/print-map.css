@@ -1,0 +1,344 @@
+/* ========================================
+   PRINT STYLES - Karten-Druck
+   ======================================== */
+
+@media print {
+    /* Verstecke Navigation und UI-Elemente beim Drucken */
+    .sidebar,
+    .page-header,
+    .btn,
+    button,
+    .btn-group,
+    .nav-tabs,
+    .modal-backdrop,
+    .modal,
+    .card-header,
+    .table-responsive,
+    .input-group,
+    .badge:not(.print-legend *) {
+        display: none !important;
+    }
+    
+    /* Verstecke die zweite Card (Suchgebiete-Liste) */
+    .map-container > .card:nth-child(3),
+    .map-container > .card:last-child {
+        display: none !important;
+    }
+    
+    /* Karte auf volle Seite - OHNE LEGENDE */
+    #einsatzMap {
+        height: 90vh !important;
+        width: 100% !important;
+        page-break-inside: avoid;
+        page-break-after: always !important;
+        border: 2px solid #333 !important;
+        position: relative !important;
+    }
+    
+    .map-container {
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+    
+    .card {
+        border: none !important;
+        box-shadow: none !important;
+        page-break-after: avoid !important;
+        margin-bottom: 0 !important;
+    }
+    
+    .card-body {
+        padding: 0 !important;
+        position: relative !important;
+    }
+    
+    /* Leaflet-Controls beim Drucken reduzieren */
+    .leaflet-control-zoom,
+    .leaflet-draw,
+    .leaflet-control-attribution,
+    .leaflet-control-layers {
+        display: none !important;
+    }
+    
+    /* Leaflet-Marker sollten sichtbar bleiben */
+    .leaflet-marker-icon,
+    .leaflet-marker-shadow,
+    .leaflet-overlay-pane,
+    .leaflet-pane {
+        display: block !important;
+        opacity: 1 !important;
+    }
+    
+    /* Info-Box für Druck */
+    @page {
+        size: landscape;
+        margin: 1cm;
+    }
+    
+    body {
+        background: white !important;
+    }
+    
+    html, body {
+        height: auto !important;
+        overflow: visible !important;
+    }
+    
+    /* ===============================================
+       Druck-Kopfzeile - ERZWUNGENE ANZEIGE
+       =============================================== */
+    .print-header {
+        display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        text-align: center !important;
+        margin-bottom: 15px !important;
+        padding: 15px !important;
+        background: #f8f9fa !important;
+        border: 2px solid #333 !important;
+        font-weight: bold !important;
+        font-size: 14pt !important;
+        page-break-inside: avoid !important;
+        position: relative !important;
+        z-index: 1000 !important;
+    }
+    
+    .print-header * {
+        display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+    }
+    
+    .print-header h2 {
+        margin: 0 !important;
+        font-size: 18pt !important;
+        color: #000 !important;
+        display: block !important;
+    }
+    
+    .print-header p {
+        margin: 5px 0 0 0 !important;
+        font-size: 12pt !important;
+        color: #333 !important;
+        display: block !important;
+    }
+    
+    /* ===============================================
+       Legende - AUF SEPARATER SEITE
+       =============================================== */
+    .print-legend {
+        display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        position: relative !important;
+        background: white !important;
+        padding: 30px !important;
+        border: 3px solid #333 !important;
+        font-size: 11pt !important;
+        max-width: 100% !important;
+        margin: 0 !important;
+        page-break-before: always !important;
+        page-break-inside: avoid !important;
+        page-break-after: avoid !important;
+    }
+    
+    .print-legend * {
+        visibility: visible !important;
+        opacity: 1 !important;
+    }
+    
+    .print-legend h4 {
+        display: block !important;
+        margin: 0 0 20px 0 !important;
+        font-size: 18pt !important;
+        border-bottom: 3px solid #333 !important;
+        padding-bottom: 10px !important;
+        color: #000 !important;
+        text-align: center !important;
+    }
+    
+    .print-legend h5 {
+        display: block !important;
+        margin: 20px 0 10px 0 !important;
+        font-size: 14pt !important;
+        color: #333 !important;
+        font-weight: bold !important;
+    }
+    
+    .print-legend .legend-section {
+        display: block !important;
+        margin-bottom: 25px !important;
+    }
+    
+    .print-legend .legend-item {
+        display: flex !important;
+        align-items: flex-start !important;
+        margin: 15px 0 !important;
+        padding: 10px !important;
+        border: 1px solid #ddd !important;
+        background: #f8f9fa !important;
+        border-radius: 5px !important;
+    }
+    
+    .print-legend .legend-item:last-child {
+        border: 1px solid #ddd !important;
+    }
+    
+    .print-legend .legend-color {
+        display: inline-block !important;
+        width: 30px !important;
+        height: 30px !important;
+        min-width: 30px !important;
+        margin-right: 15px !important;
+        border-radius: 5px !important;
+        flex-shrink: 0 !important;
+        border: 2px solid #333 !important;
+    }
+    
+    .print-legend .legend-marker {
+        display: inline-block !important;
+        font-size: 24px !important;
+        margin-right: 15px !important;
+        flex-shrink: 0 !important;
+    }
+    
+    .print-legend .legend-details {
+        display: block !important;
+        flex: 1 !important;
+        font-size: 11pt !important;
+        line-height: 1.6 !important;
+    }
+    
+    .print-legend .legend-details strong {
+        display: inline !important;
+        font-size: 13pt !important;
+        color: #000 !important;
+    }
+    
+    .print-legend .legend-details br {
+        display: block !important;
+    }
+    
+    .print-legend .legend-details small {
+        display: inline !important;
+    }
+    
+    .print-legend .team-badge,
+    .print-legend .area-badge,
+    .print-legend .status-badge {
+        display: inline-block !important;
+        padding: 4px 10px !important;
+        border-radius: 4px !important;
+        font-size: 10pt !important;
+        margin-right: 8px !important;
+        font-weight: bold !important;
+    }
+    
+    .print-legend .team-badge {
+        background: #0d6efd !important;
+        color: white !important;
+    }
+    
+    .print-legend .area-badge {
+        background: #6c757d !important;
+        color: white !important;
+    }
+    
+    .print-legend .status-badge {
+        font-weight: bold !important;
+    }
+    
+    .print-legend .status-badge.completed {
+        background: #198754 !important;
+        color: white !important;
+    }
+    
+    .print-legend .status-badge.in-progress {
+        background: #ffc107 !important;
+        color: #000 !important;
+    }
+    
+    .print-legend .notes {
+        display: block !important;
+        color: #666 !important;
+        font-style: italic !important;
+        margin-top: 3px !important;
+    }
+    
+    .print-legend .elw-item {
+        display: flex !important;
+        background: #fff3cd !important;
+        border: 3px solid #ff0000 !important;
+        border-radius: 8px !important;
+        padding: 15px !important;
+        margin-bottom: 20px !important;
+    }
+    
+    .print-legend .legend-statistics {
+        display: block !important;
+        margin-top: 25px !important;
+        padding: 20px !important;
+        font-size: 11pt !important;
+        background: #e9ecef !important;
+        border-radius: 5px !important;
+        border: 2px solid #333 !important;
+    }
+    
+    .print-legend .legend-statistics hr {
+        display: block !important;
+        margin: 15px 0 !important;
+        border-top: 2px solid #333 !important;
+    }
+    
+    .print-legend .legend-statistics strong {
+        display: inline !important;
+        font-size: 13pt !important;
+    }
+    
+    .print-legend .legend-statistics ul {
+        display: block !important;
+        list-style: none !important;
+        padding-left: 0 !important;
+        margin: 10px 0 0 0 !important;
+    }
+    
+    .print-legend .legend-statistics li {
+        display: block !important;
+        margin: 8px 0 !important;
+        padding-left: 25px !important;
+        position: relative !important;
+        font-size: 11pt !important;
+    }
+    
+    .print-legend .legend-statistics li:before {
+        content: "?" !important;
+        position: absolute !important;
+        left: 0 !important;
+        color: #0d6efd !important;
+    }
+    
+    .print-legend .legend-statistics p {
+        display: block !important;
+    }
+    
+    /* ELW-Marker Stil für Druck */
+    .elw-marker-icon {
+        filter: drop-shadow(0 0 3px rgba(0,0,0,0.5)) !important;
+    }
+}
+
+/* Druck-Elemente (normalerweise versteckt) */
+.print-header,
+.print-legend,
+.print-legend-page {
+    display: none;
+}
+
+/* Bei Druckvorschau: Legende-Seite anzeigen */
+@media print {
+    .print-legend-page {
+        display: block !important;
+        page-break-before: always !important;
+        page-break-inside: avoid !important;
+    }
+}

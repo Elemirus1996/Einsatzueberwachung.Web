@@ -1,0 +1,207 @@
+@* Wiederverwendbare Team-Dialog-Komponente *@
+@using Einsatzueberwachung.Domain.Models
+@using Einsatzueberwachung.Domain.Models.Enums
+
+@if (IsVisible)
+{
+    <div class="modal-backdrop show"></div>
+    <div class="modal show d-block" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">@(IsEdit ? "Team bearbeiten" : "Neues Team")</h5>
+                    <button type="button" class="btn-close" @onclick="OnCancel"></button>
+                </div>
+                <div class="modal-body">
+                    <EditForm Model="@Team" OnValidSubmit="@HandleSave">
+                        <div class="form-group mb-3">
+                            <label class="form-label">Team-Typ</label>
+                            <div class="btn-group w-100" role="group">
+                                <button type="button" 
+                                        class="btn btn-lg @(!Team.IsDroneTeam && !Team.IsSupportTeam ? "btn-primary" : "btn-outline-primary")"
+                                        @onclick="() => { Team.IsDroneTeam = false; Team.IsSupportTeam = false; HandleTeamTypeChanged(); }">
+                                    <i class="bi bi-heart-fill"></i> Hunde-Team
+                                </button>
+                                <button type="button" 
+                                        class="btn btn-lg @(Team.IsDroneTeam ? "btn-info" : "btn-outline-info")"
+                                        @onclick="() => { Team.IsDroneTeam = true; Team.IsSupportTeam = false; HandleTeamTypeChanged(); }">
+                                    <i class="bi bi-triangle-fill"></i> Drohnen-Team
+                                </button>
+                                <button type="button" 
+                                        class="btn btn-lg @(Team.IsSupportTeam ? "btn-secondary" : "btn-outline-secondary")"
+                                        @onclick="() => { Team.IsDroneTeam = false; Team.IsSupportTeam = true; HandleTeamTypeChanged(); }">
+                                    <i class="bi bi-tools"></i> Support-Team
+                                </button>
+                            </div>
+                        </div>
+
+                        @if (!Team.IsDroneTeam && !Team.IsSupportTeam)
+                        {
+                            <div class="form-group mb-3">
+                                <label class="form-label">Hund</label>
+                                <select @bind="Team.DogId" @bind:after="HandleDogChanged" class="form-select form-select-lg">
+                                    <option value="">-- Bitte wählen --</option>
+                                    @foreach (var dog in DogList.Where(d => d.IsActive))
+                                    {
+                                        <option value="@dog.Id">@dog.Name (@dog.SpecializationsShortDisplay)</option>
+                                    }
+                                </select>
+                            </div>
+                        }
+                        else if (Team.IsDroneTeam)
+                        {
+                            <div class="form-group mb-3">
+                                <label class="form-label">Drohne</label>
+                                <select @bind="Team.DroneId" @bind:after="HandleDroneChanged" class="form-select form-select-lg">
+                                    <option value="">-- Bitte wählen --</option>
+                                    @foreach (var drone in DroneList.Where(d => d.IsActive))
+                                    {
+                                        <option value="@drone.Id">@drone.DisplayName (@drone.FullDescription)</option>
+                                    }
+                                </select>
+                            </div>
+                        }
+
+                        <div class="form-group mb-3">
+                            <label class="form-label">@(Team.IsDroneTeam ? "Drohnenpilot" : "Hundeführer / Teamleiter")</label>
+                            <select @bind="Team.HundefuehrerId" @bind:after="HandleHundefuehrerChanged" class="form-select form-select-lg">
+                                <option value="">-- Bitte wählen --</option>
+                                @foreach (var person in GetAvailablePersonal())
+                                {
+                                    <option value="@person.Id">@person.FullName (@person.SkillsShortDisplay)</option>
+                                }
+                            </select>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label class="form-label">Helfer</label>
+                            <select @bind="Team.HelferId" @bind:after="HandleHelferChanged" class="form-select form-select-lg">
+                                <option value="">-- Bitte wählen --</option>
+                                @foreach (var person in PersonalList.Where(p => p.IsActive && p.Skills.HasFlag(PersonalSkills.Helfer)))
+                                {
+                                    <option value="@person.Id">@person.FullName</option>
+                                }
+                            </select>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label class="form-label">Team-Name (wird automatisch generiert)</label>
+                            <InputText @bind-Value="Team.TeamName" class="form-control form-control-lg" readonly />
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label class="form-label">Notizen (optional)</label>
+                            <InputTextArea @bind-Value="Team.Notes" class="form-control" rows="3" />
+                        </div>
+
+                        @if (!Team.IsDroneTeam && !Team.IsSupportTeam)
+                        {
+                            <hr />
+                            <h5 class="mb-3"><i class="bi bi-alarm-fill"></i> Timer-Warnschwellen (Hunde-Team)</h5>
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">1. Warnung (Minuten)</label>
+                                    <InputNumber @bind-Value="Team.FirstWarningMinutes" class="form-control form-control-lg" min="1" />
+                                    <small class="text-muted">Standard: 45 Minuten</small>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">2. Warnung (Minuten)</label>
+                                    <InputNumber @bind-Value="Team.SecondWarningMinutes" class="form-control form-control-lg" min="1" />
+                                    <small class="text-muted">Standard: 60 Minuten</small>
+                                </div>
+                            </div>
+                        }
+
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" @onclick="OnCancel">Abbrechen</button>
+                            <button type="submit" class="btn btn-success">
+                                <i class="bi bi-save-fill"></i> Speichern
+                            </button>
+                        </div>
+                    </EditForm>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public bool IsVisible { get; set; }
+    
+    [Parameter]
+    public bool IsEdit { get; set; }
+    
+    [Parameter]
+    public Team Team { get; set; } = new();
+    
+    [Parameter]
+    public List<PersonalEntry> PersonalList { get; set; } = new();
+    
+    [Parameter]
+    public List<DogEntry> DogList { get; set; } = new();
+    
+    [Parameter]
+    public List<DroneEntry> DroneList { get; set; } = new();
+    
+    [Parameter]
+    public EventCallback OnSave { get; set; }
+    
+    [Parameter]
+    public EventCallback OnCancel { get; set; }
+    
+    [Parameter]
+    public EventCallback OnDogChanged { get; set; }
+    
+    [Parameter]
+    public EventCallback OnDroneChanged { get; set; }
+    
+    [Parameter]
+    public EventCallback OnHundefuehrerChanged { get; set; }
+    
+    [Parameter]
+    public EventCallback OnHelferChanged { get; set; }
+    
+    [Parameter]
+    public EventCallback OnTeamTypeChanged { get; set; }
+
+    private IEnumerable<PersonalEntry> GetAvailablePersonal()
+    {
+        if (Team.IsDroneTeam)
+        {
+            return PersonalList.Where(p => p.IsActive && p.Skills.HasFlag(PersonalSkills.Drohnenpilot));
+        }
+        return PersonalList.Where(p => p.IsActive && p.Skills.HasFlag(PersonalSkills.Hundefuehrer));
+    }
+
+    private async Task HandleSave()
+    {
+        await OnSave.InvokeAsync();
+    }
+
+    private async Task HandleDogChanged()
+    {
+        await OnDogChanged.InvokeAsync();
+    }
+
+    private async Task HandleDroneChanged()
+    {
+        await OnDroneChanged.InvokeAsync();
+    }
+
+    private async Task HandleHundefuehrerChanged()
+    {
+        await OnHundefuehrerChanged.InvokeAsync();
+    }
+
+    private async Task HandleHelferChanged()
+    {
+        await OnHelferChanged.InvokeAsync();
+    }
+
+    private async Task HandleTeamTypeChanged()
+    {
+        await OnTeamTypeChanged.InvokeAsync();
+    }
+}

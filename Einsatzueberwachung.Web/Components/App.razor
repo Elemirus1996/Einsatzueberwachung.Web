@@ -1,0 +1,77 @@
+﻿<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <base href="/" />
+    <!-- Bootstrap 5.3+ für Dark Mode Support -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" 
+          integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" 
+          crossorigin="anonymous">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.2/font/bootstrap-icons.min.css">
+    <!-- Dark Mode Base Styles -->
+    <link rel="stylesheet" href="dark-mode-base.css" />
+    <link rel="stylesheet" href="app.css" />
+    <link rel="stylesheet" href="notes-enhanced.css" />
+    <link rel="stylesheet" href="print-map.css?v=2.2.0" />
+    <link rel="stylesheet" href="Einsatzueberwachung.Web.styles.css" />
+    <link rel="icon" type="image/png" href="favicon.png" />
+    
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" 
+          integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" 
+          crossorigin="" />
+    
+    <!-- Leaflet Draw CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css" />
+    
+    <!-- Leaflet Custom CSS -->
+    <link rel="stylesheet" href="leaflet-custom.css" />
+    
+    <HeadOutlet />
+    
+    <!-- Theme Loader Script - Lädt VOR Blazor -->
+    <script>
+        (function() {
+            try {
+                // Lade Theme aus localStorage
+                var savedTheme = localStorage.getItem('theme');
+                if (savedTheme) {
+                    document.documentElement.setAttribute('data-bs-theme', savedTheme);
+                    console.log('Theme geladen:', savedTheme);
+                } else {
+                    console.log('Kein gespeichertes Theme gefunden, verwende light');
+                }
+            } catch (e) {
+                console.error('Fehler beim Laden des Themes:', e);
+            }
+        })();
+    </script>
+</head>
+
+<body>
+    <Routes />
+    
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" 
+            integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" 
+            crossorigin=""></script>
+    
+    <!-- Leaflet Draw JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
+    
+    <!-- Custom Leaflet Interop -->
+    <script src="leaflet-interop.js?v=2.0.1"></script>
+    
+    <!-- Audio Alerts System -->
+    <script src="audio-alerts.js"></script>
+    
+    <!-- Theme Sync System -->
+    <script src="theme-sync.js"></script>
+    
+    <script src="_framework/blazor.web.js"></script>
+</body>
+
+</html>

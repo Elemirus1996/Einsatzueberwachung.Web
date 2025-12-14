@@ -1,0 +1,286 @@
+@page "/einsatz/bericht"
+@using Einsatzueberwachung.Domain.Interfaces
+@using Einsatzueberwachung.Domain.Models
+@using Einsatzueberwachung.Domain.Services
+@inject IEinsatzService EinsatzService
+@inject IPdfExportService PdfExportService
+@inject NavigationManager Navigation
+@inject ToastService ToastService
+@rendermode InteractiveServer
+
+<PageTitle>Einsatzbericht</PageTitle>
+
+<div class="report-container">
+    <div class="page-header">
+        <div>
+            <h1><i class="bi bi-file-text-fill"></i> Einsatzbericht</h1>
+            <p class="text-muted">Zusammenfassung und Export</p>
+        </div>
+        <div>
+            <button class="btn btn-success btn-lg" @onclick="ExportToPdf" disabled="@_isExporting">
+                @if (_isExporting)
+                {
+                    <span class="spinner-border spinner-border-sm me-2"></span>
+                }
+                <i class="bi bi-file-pdf-fill"></i> Als PDF exportieren
+            </button>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+            <div class="card-header">
+                <h4><i class="bi bi-info-circle-fill"></i> Grunddaten</h4>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <p><strong>Einsatznummer:</strong> @_einsatz.EinsatzNummer</p>
+                    <p><strong>Typ:</strong> @_einsatz.EinsatzTyp</p>
+                    <p><strong>Datum:</strong> @_einsatz.EinsatzDatum.ToString("dd.MM.yyyy HH:mm")</p>
+                    @if (_einsatz.AlarmierungsZeit.HasValue)
+                    {
+                        <p><strong>Alarmierung:</strong> @_einsatz.AlarmierungsZeit.Value.ToString("dd.MM.yyyy HH:mm")</p>
+                    }
+                </div>
+                <div class="col-md-6">
+                    <p><strong>Einsatzort:</strong> @_einsatz.Einsatzort</p>
+                    <p><strong>Alarmiert durch:</strong> @_einsatz.Alarmiert</p>
+                    <p><strong>Einsatzleiter:</strong> @_einsatz.Einsatzleiter</p>
+                    <p><strong>Führungsassistent:</strong> @_einsatz.Fuehrungsassistent</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+            <div class="card-header">
+                <h4><i class="bi bi-people-fill"></i> Teams (@_teams.Count)</h4>
+        </div>
+        <div class="card-body">
+            @if (_teams.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Team</th>
+                                <th>Hund</th>
+                                <th>Hundeführer</th>
+                                <th>Helfer</th>
+                                <th>Suchgebiet</th>
+                                <th>Einsatzzeit</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var team in _teams)
+                            {
+                                <tr>
+                                    <td>
+                                        <strong>@team.TeamName</strong>
+                                        @if (team.IsDroneTeam)
+                                        {
+                                        <br/><span class="badge bg-info"><i class="bi bi-triangle-fill"></i> Drohne</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (!string.IsNullOrEmpty(team.DogName))
+                                        {
+                                            @team.DogName
+                                            <br/><small class="text-muted">@team.DogSpecialization.GetShortName()</small>
+                                        }
+                                        else if (team.IsDroneTeam && !string.IsNullOrEmpty(team.DroneType))
+                                        {
+                                            @team.DroneType
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">-</span>
+                                        }
+                                    </td>
+                                    <td>@team.HundefuehrerName</td>
+                                    <td>@(string.IsNullOrEmpty(team.HelferName) ? "-" : team.HelferName)</td>
+                                    <td>@(string.IsNullOrEmpty(team.SearchAreaName) ? "-" : team.SearchAreaName)</td>
+                                    <td>@FormatTimeSpan(team.ElapsedTime)</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <p class="text-muted">Keine Teams vorhanden.</p>
+            }
+        </div>
+    </div>
+
+    <div class="card mb-4">
+            <div class="card-header">
+                <h4><i class="bi bi-geo-alt-fill"></i> Suchgebiete (@_searchAreas.Count)</h4>
+        </div>
+        <div class="card-body">
+            @if (_searchAreas.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Zugewiesenes Team</th>
+                                <th>Status</th>
+                                <th>Notizen</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var area in _searchAreas)
+                            {
+                                <tr>
+                                    <td>
+                                        <span style="display: inline-block; width: 20px; height: 20px; background-color: @area.Color; border-radius: 3px; margin-right: 8px;"></span>
+                                        @area.Name
+                                    </td>
+                                    <td>@(string.IsNullOrEmpty(area.AssignedTeamName) ? "-" : area.AssignedTeamName)</td>
+                                    <td>
+                                        @if (area.IsCompleted)
+                                        {
+                                            <span class="badge bg-success"><i class="bi bi-check-circle-fill"></i> Abgeschlossen</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-warning">In Bearbeitung</span>
+                                        }
+                                    </td>
+                                    <td>@area.Notes</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <p class="text-muted">Keine Suchgebiete definiert.</p>
+            }
+        </div>
+    </div>
+
+    <div class="card mb-4">
+            <div class="card-header">
+                <h4><i class="bi bi-journal-text"></i> Notizen & Funksprüche (@_notes.Count)</h4>
+        </div>
+        <div class="card-body">
+            @if (_notes.Any())
+            {
+                <div class="notes-report-list">
+                    @foreach (var note in _notes.OrderBy(n => n.Timestamp))
+                    {
+                        <div class="note-report-entry">
+                            <div class="note-time">@note.Timestamp.ToString("dd.MM.yyyy HH:mm:ss")</div>
+                            <div class="note-content">
+                                <strong>[@note.Type.ToString()]</strong>
+                                @if (!string.IsNullOrEmpty(note.TeamName))
+                                {
+                                    <span class="badge bg-primary">@note.TeamName</span>
+                                }
+                                @note.Text
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <p class="text-muted">Keine Einträge vorhanden.</p>
+            }
+        </div>
+    </div>
+
+    @if (!string.IsNullOrEmpty(_exportMessage))
+    {
+        <div class="alert @(_exportSuccess ? "alert-success" : "alert-danger")">
+            @_exportMessage
+        </div>
+    }
+
+    <div class="action-buttons">
+        <button class="btn btn-secondary btn-lg" @onclick="GoBack">
+            <i class="bi bi-arrow-left"></i> Zurück zum Monitor
+        </button>
+        <button class="btn btn-danger btn-lg" @onclick="EndEinsatz">
+            <i class="bi bi-stop-circle-fill"></i> Einsatz beenden
+        </button>
+    </div>
+</div>
+
+@code {
+    private EinsatzData _einsatz = new();
+    private List<Team> _teams = new();
+    private List<SearchArea> _searchAreas = new();
+    private List<GlobalNotesEntry> _notes = new();
+    private bool _isExporting = false;
+    private string _exportMessage = "";
+    private bool _exportSuccess = false;
+
+    protected override void OnInitialized()
+    {
+        _einsatz = EinsatzService.CurrentEinsatz;
+        _teams = EinsatzService.Teams;
+        _searchAreas = _einsatz.SearchAreas;
+        _notes = EinsatzService.GlobalNotes;
+    }
+
+    private async Task ExportToPdf()
+    {
+        _isExporting = true;
+        _exportMessage = "";
+        StateHasChanged();
+
+        try
+        {
+            await Task.Delay(500); // Simulate export
+            
+            var result = await PdfExportService.ExportEinsatzToPdfAsync(_einsatz, _teams, _notes);
+            
+            if (result.Success)
+            {
+                _exportMessage = $"<i class='bi bi-check-circle-fill'></i> PDF erfolgreich erstellt: {result.FilePath}";
+                _exportSuccess = true;
+                ToastService.ShowSuccess($"PDF wurde erfolgreich exportiert: {result.FilePath}");
+            }
+            else
+            {
+                _exportMessage = $"<i class='bi bi-x-circle-fill'></i> Fehler beim Export: {result.ErrorMessage}";
+                _exportSuccess = false;
+                ToastService.ShowError($"Fehler beim PDF-Export: {result.ErrorMessage}");
+            }
+        }
+        catch (Exception ex)
+        {
+            _exportMessage = $"<i class='bi bi-x-circle-fill'></i> Fehler beim Export: {ex.Message}";
+            _exportSuccess = false;
+            ToastService.ShowError($"Fehler beim PDF-Export: {ex.Message}");
+        }
+        finally
+        {
+            _isExporting = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task EndEinsatz()
+    {
+        await EinsatzService.EndEinsatzAsync();
+        ToastService.ShowInfo("Einsatz wurde beendet");
+        Navigation.NavigateTo("/");
+    }
+
+    private void GoBack()
+    {
+        Navigation.NavigateTo("/einsatz/monitor");
+    }
+
+    private string FormatTimeSpan(TimeSpan ts)
+    {
+        return $"{(int)ts.TotalHours:D2}:{ts.Minutes:D2}:{ts.Seconds:D2}";
+    }
+}

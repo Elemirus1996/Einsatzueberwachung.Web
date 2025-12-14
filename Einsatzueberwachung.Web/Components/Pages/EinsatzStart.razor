@@ -1,0 +1,168 @@
+@page "/einsatz/start"
+@using Einsatzueberwachung.Domain.Interfaces
+@using Einsatzueberwachung.Domain.Models
+@using Einsatzueberwachung.Domain.Services
+@inject IEinsatzService EinsatzService
+@inject IMasterDataService MasterDataService
+@inject NavigationManager Navigation
+@inject ToastService ToastService
+@rendermode InteractiveServer
+
+<PageTitle>Einsatz starten</PageTitle>
+
+<LoadingSpinner IsLoading="@_isLoading" Message="Lade Personalverzeichnis..." />
+
+@if (!_isLoading)
+{
+    <div class="einsatz-start-container">
+    <div class="page-header">
+        <h1><i class="bi bi-alarm-fill text-danger"></i> Neuen Einsatz starten</h1>
+        <p class="text-muted">Bitte alle wichtigen Einsatzinformationen eingeben</p>
+    </div>
+
+    <EditForm Model="@_einsatzData" OnValidSubmit="@HandleStartEinsatz" class="einsatz-form">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h4><i class="bi bi-info-circle-fill"></i> Grunddaten</h4>
+            </div>
+            <div class="card-body">
+                <div class="form-group mb-3">
+                    <label class="form-label">Einsatznummer</label>
+                    <InputText @bind-Value="_einsatzData.EinsatzNummer" class="form-control form-control-lg" placeholder="z.B. 2024-001" />
+                </div>
+
+                <div class="form-group mb-3">
+                    <label class="form-label">Einsatztyp</label>
+                    <div class="btn-group w-100" role="group">
+                        <button type="button" 
+                                class="btn btn-lg @(_einsatzData.IstEinsatz ? "btn-danger" : "btn-outline-danger")"
+                                @onclick="() => _einsatzData.IstEinsatz = true">
+                            <i class="bi bi-alarm-fill"></i> Einsatz
+                        </button>
+                        <button type="button" 
+                                class="btn btn-lg @(!_einsatzData.IstEinsatz ? "btn-warning" : "btn-outline-warning")"
+                                @onclick="() => _einsatzData.IstEinsatz = false">
+                            <i class="bi bi-book-fill"></i> Übung
+                        </button>
+                    </div>
+                </div>
+
+                <div class="form-group mb-3">
+                    <label class="form-label">Datum und Uhrzeit</label>
+                    <InputDate @bind-Value="_einsatzData.EinsatzDatum" class="form-control form-control-lg" />
+                </div>
+
+                <div class="form-group mb-3">
+                    <label class="form-label">Alarmierungszeit (optional)</label>
+                    <input type="datetime-local" 
+                           @bind="_alarmZeit" 
+                           class="form-control form-control-lg" />
+                </div>
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header">
+                <h4><i class="bi bi-people-fill"></i> Personal</h4>
+            </div>
+            <div class="card-body">
+                <div class="form-group mb-3">
+                    <label class="form-label">Führungsassistent (FüAss)</label>
+                    <select @bind="_einsatzData.Fuehrungsassistent" class="form-select form-select-lg">
+                        <option value="">-- Bitte wählen --</option>
+                        @foreach (var person in _personalList.Where(p => p.Skills.HasFlag(Domain.Models.Enums.PersonalSkills.Fuehrungsassistent)))
+                        {
+                            <option value="@person.FullName">@person.FullName (@person.SkillsShortDisplay)</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="form-group mb-3">
+                    <label class="form-label">Einsatzleiter</label>
+                    <select @bind="_einsatzData.Einsatzleiter" class="form-select form-select-lg">
+                        <option value="">-- Bitte wählen --</option>
+                        @foreach (var person in _personalList.Where(p => p.Skills.HasFlag(Domain.Models.Enums.PersonalSkills.Einsatzleiter) || 
+                                                                          p.Skills.HasFlag(Domain.Models.Enums.PersonalSkills.Gruppenfuehrer)))
+                        {
+                            <option value="@person.FullName">@person.FullName (@person.SkillsShortDisplay)</option>
+                        }
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header">
+                <h4><i class="bi bi-geo-alt-fill"></i> Einsatzort</h4>
+            </div>
+            <div class="card-body">
+                <div class="form-group mb-3">
+                    <label class="form-label">Einsatzort</label>
+                    <InputText @bind-Value="_einsatzData.Einsatzort" class="form-control form-control-lg" placeholder="z.B. Waldgebiet Römerberg" />
+                </div>
+
+                <div class="form-group mb-3">
+                    <label class="form-label">Adresse für Karte (optional)</label>
+                    <InputText @bind-Value="_einsatzData.MapAddress" class="form-control form-control-lg" placeholder="Adresse oder Koordinaten" />
+                </div>
+
+                <div class="form-group mb-3">
+                    <label class="form-label">Alarmiert durch / Organisation</label>
+                    <InputText @bind-Value="_einsatzData.Alarmiert" class="form-control form-control-lg" placeholder="z.B. Polizei Speyer, PSNV-Team" />
+                </div>
+            </div>
+        </div>
+
+        <div class="action-buttons">
+            <button type="button" class="btn btn-secondary btn-lg" @onclick="Cancel">
+                <i class="bi bi-x-circle"></i> Abbrechen
+            </button>
+            <button type="submit" class="btn btn-success btn-lg">
+                <i class="bi bi-play-circle-fill"></i> Einsatz starten
+            </button>
+        </div>
+    </EditForm>
+</div>
+}
+
+@code {
+    private EinsatzData _einsatzData = new();
+    private List<PersonalEntry> _personalList = new();
+    private DateTime? _alarmZeit;
+    private bool _isLoading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _isLoading = true;
+        _personalList = await MasterDataService.GetPersonalListAsync();
+        
+        var sessionData = await MasterDataService.LoadSessionDataAsync();
+        _einsatzData.StaffelName = sessionData.StaffelSettings.StaffelName;
+        _einsatzData.StaffelLogoPfad = sessionData.StaffelSettings.StaffelLogoPfad;
+        _isLoading = false;
+    }
+
+    private async Task HandleStartEinsatz()
+    {
+        try
+        {
+            if (_alarmZeit.HasValue)
+            {
+                _einsatzData.AlarmierungsZeit = _alarmZeit;
+            }
+
+            await EinsatzService.StartEinsatzAsync(_einsatzData);
+            ToastService.ShowSuccess($"Einsatz '{_einsatzData.EinsatzNummer}' wurde gestartet");
+            Navigation.NavigateTo("/einsatz/monitor");
+        }
+        catch (Exception ex)
+        {
+            ToastService.ShowError($"Fehler beim Starten des Einsatzes: {ex.Message}");
+        }
+    }
+
+    private void Cancel()
+    {
+        Navigation.NavigateTo("/");
+    }
+}

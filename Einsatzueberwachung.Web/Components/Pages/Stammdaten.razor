@@ -1,0 +1,644 @@
+@page "/stammdaten"
+@page "/stammdaten/{activeTab}"
+@using Einsatzueberwachung.Domain.Interfaces
+@using Einsatzueberwachung.Domain.Models
+@using Einsatzueberwachung.Domain.Models.Enums
+@inject IMasterDataService MasterDataService
+@rendermode InteractiveServer
+
+<PageTitle>Stammdaten</PageTitle>
+
+<div class="stammdaten-container">
+    <div class="page-header">
+        <h1>Stammdaten-Verwaltung</h1>
+        <p class="text-muted">Personal, Hunde und Drohnen verwalten</p>
+    </div>
+
+    <ul class="nav nav-tabs nav-tabs-lg mb-4">
+        <li class="nav-item">
+            <button class="nav-link @(ActiveTab == "personal" ? "active" : "")" 
+                    @onclick='() => ActiveTab = "personal"'>
+                Personal
+            </button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link @(ActiveTab == "hunde" ? "active" : "")" 
+                    @onclick='() => ActiveTab = "hunde"'>
+                Hunde
+            </button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link @(ActiveTab == "drohnen" ? "active" : "")" 
+                    @onclick='() => ActiveTab = "drohnen"'>
+                Drohnen
+            </button>
+        </li>
+    </ul>
+
+    @if (ActiveTab == "personal")
+    {
+        <div class="tab-content">
+            <div class="mb-3">
+                <button class="btn btn-success btn-lg" @onclick="ShowAddPersonalDialog">
+                    + Person hinzufügen
+                </button>
+            </div>
+
+            @if (_personalList.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover table-lg">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Qualifikationen</th>
+                                <th>Status</th>
+                                <th>Aktionen</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var person in _personalList.OrderBy(p => p.Nachname))
+                            {
+                                <tr class="@(!person.IsActive ? "table-secondary" : "")">
+                                    <td>
+                                        <strong>@person.FullName</strong>
+                                    </td>
+                                    <td>
+                                        @person.SkillsDisplay
+                                    </td>
+                                    <td>
+                                        @if (person.IsActive)
+                                        {
+                                            <span class="badge bg-success">Aktiv</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-secondary">Inaktiv</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-sm btn-primary" @onclick="() => EditPersonal(person)">
+                                            Bearbeiten
+                                        </button>
+                                        <button class="btn btn-sm btn-danger" @onclick="() => DeletePersonal(person)">
+                                            Löschen
+                                        </button>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-info">
+                    Noch keine Personen vorhanden.
+                </div>
+            }
+        </div>
+    }
+    else if (ActiveTab == "hunde")
+    {
+        <div class="tab-content">
+            <div class="mb-3">
+                <button class="btn btn-success btn-lg" @onclick="ShowAddDogDialog">
+                    + Hund hinzufügen
+                </button>
+            </div>
+
+            @if (_dogList.Any())
+            {
+                <div class="dogs-grid">
+                    @foreach (var dog in _dogList.OrderBy(d => d.Name))
+                    {
+                        <div class="dog-card" style="border-left: 5px solid @dog.PrimarySpecializationColor;">
+                            <div class="dog-header">
+                                <h4>@dog.Name</h4>
+                                <span class="badge" style="background-color: @dog.PrimarySpecializationColor;">
+                                    @dog.SpecializationsShortDisplay
+                                </span>
+                            </div>
+                            <div class="dog-body">
+                                <p><strong>Rasse:</strong> @dog.Rasse</p>
+                                <p><strong>Alter:</strong> @dog.Alter Jahre</p>
+                                <p><strong>Ausbildungen:</strong> @dog.SpecializationsDisplay</p>
+                                @if (!string.IsNullOrEmpty(dog.HundefuehrerId))
+                                {
+                                    var handler = _personalList.FirstOrDefault(p => p.Id == dog.HundefuehrerId);
+                                    if (handler != null)
+                                    {
+                                        <p><strong>Hundeführer:</strong> @handler.FullName</p>
+                                    }
+                                }
+                                @if (!string.IsNullOrEmpty(dog.Notizen))
+                                {
+                                    <p class="text-muted"><em>@dog.Notizen</em></p>
+                                }
+                            </div>
+                            <div class="dog-footer">
+                                <button class="btn btn-sm btn-primary" @onclick="() => EditDog(dog)">
+                                    Bearbeiten
+                                </button>
+                                <button class="btn btn-sm btn-danger" @onclick="() => DeleteDog(dog)">
+                                    Löschen
+                                </button>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-info">
+                    Noch keine Hunde vorhanden.
+                </div>
+            }
+        </div>
+    }
+    else if (ActiveTab == "drohnen")
+    {
+        <div class="tab-content">
+            <div class="mb-3">
+                <button class="btn btn-success btn-lg" @onclick="ShowAddDroneDialog">
+                    + Drohne hinzufügen
+                </button>
+            </div>
+
+            @if (_droneList.Any())
+            {
+                <div class="dogs-grid">
+                    @foreach (var drone in _droneList.OrderBy(d => d.DisplayName))
+                    {
+                        <div class="dog-card" style="border-left: 5px solid #00BCD4;">
+                            <div class="dog-header">
+                                <h4>@drone.DisplayName</h4>
+                                <span class="badge bg-info">Drohne</span>
+                            </div>
+                            <div class="dog-body">
+                                <p><strong>Hersteller:</strong> @drone.Hersteller</p>
+                                <p><strong>Modell:</strong> @drone.Modell</p>
+                                @if (!string.IsNullOrEmpty(drone.Seriennummer))
+                                {
+                                    <p><strong>Seriennummer:</strong> @drone.Seriennummer</p>
+                                }
+                                @if (!string.IsNullOrEmpty(drone.DrohnenpilotId))
+                                {
+                                    var pilot = _personalList.FirstOrDefault(p => p.Id == drone.DrohnenpilotId);
+                                    if (pilot != null)
+                                    {
+                                        <p><strong>Drohnenpilot:</strong> @pilot.FullName</p>
+                                    }
+                                }
+                                @if (!string.IsNullOrEmpty(drone.Notizen))
+                                {
+                                    <p class="text-muted"><em>@drone.Notizen</em></p>
+                                }
+                            </div>
+                            <div class="dog-footer">
+                                <button class="btn btn-sm btn-primary" @onclick="() => EditDrone(drone)">
+                                    Bearbeiten
+                                </button>
+                                <button class="btn btn-sm btn-danger" @onclick="() => DeleteDrone(drone)">
+                                    Löschen
+                                </button>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-info">
+                    Noch keine Drohnen vorhanden.
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@if (_showPersonalDialog)
+{
+    <div class="modal-backdrop show"></div>
+    <div class="modal show d-block" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">@(_editingPersonal != null ? "Person bearbeiten" : "Neue Person")</h5>
+                    <button type="button" class="btn-close" @onclick="ClosePersonalDialog"></button>
+                </div>
+                <div class="modal-body">
+                    <EditForm Model="@_currentPersonal" OnValidSubmit="@SavePersonal">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Vorname</label>
+                                <InputText @bind-Value="_currentPersonal.Vorname" class="form-control form-control-lg" />
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Nachname</label>
+                                <InputText @bind-Value="_currentPersonal.Nachname" class="form-control form-control-lg" />
+                            </div>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label class="form-label">Qualifikationen (mehrfach wählbar)</label>
+                            <div class="skills-checkboxes">
+                                @foreach (PersonalSkills skill in Enum.GetValues(typeof(PersonalSkills)))
+                                {
+                                    @if (skill != PersonalSkills.None)
+                                    {
+                                        <div class="form-check">
+                                            <input type="checkbox" 
+                                                   class="form-check-input" 
+                                                   id="skill_@skill" 
+                                                   checked="@_currentPersonal.Skills.HasFlag(skill)"
+                                                   @onchange="@(e => ToggleSkill(skill, (bool)e.Value!))" />
+                                            <label class="form-check-label" for="skill_@skill">
+                                                @skill.GetDisplayName()
+                                            </label>
+                                        </div>
+                                    }
+                                }
+                            </div>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label class="form-label">Notizen</label>
+                            <InputTextArea @bind-Value="_currentPersonal.Notizen" class="form-control" rows="3" />
+                        </div>
+
+                        <div class="form-check mb-3">
+                            <InputCheckbox @bind-Value="_currentPersonal.IsActive" class="form-check-input" id="isActive" />
+                            <label class="form-check-label" for="isActive">
+                                Person ist aktiv
+                            </label>
+                        </div>
+
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" @onclick="ClosePersonalDialog">Abbrechen</button>
+                            <button type="submit" class="btn btn-success">Speichern</button>
+                        </div>
+                    </EditForm>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@if (_showDogDialog)
+{
+    <div class="modal-backdrop show"></div>
+    <div class="modal show d-block" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">@(_editingDog != null ? "Hund bearbeiten" : "Neuer Hund")</h5>
+                    <button type="button" class="btn-close" @onclick="CloseDogDialog"></button>
+                </div>
+                <div class="modal-body">
+                    <EditForm Model="@_currentDog" OnValidSubmit="@SaveDog">
+                        <div class="form-group mb-3">
+                            <label class="form-label">Name</label>
+                            <InputText @bind-Value="_currentDog.Name" class="form-control form-control-lg" />
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-8 mb-3">
+                                <label class="form-label">Rasse</label>
+                                <InputText @bind-Value="_currentDog.Rasse" class="form-control form-control-lg" />
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Alter</label>
+                                <InputNumber @bind-Value="_currentDog.Alter" class="form-control form-control-lg" />
+                            </div>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label class="form-label">Ausbildungen (mehrfach wählbar)</label>
+                            <div class="skills-checkboxes">
+                                @foreach (DogSpecialization spec in Enum.GetValues(typeof(DogSpecialization)))
+                                {
+                                    @if (spec != DogSpecialization.None)
+                                    {
+                                        <div class="form-check">
+                                            <input type="checkbox" 
+                                                   class="form-check-input" 
+                                                   id="spec_@spec" 
+                                                   checked="@_currentDog.Specializations.HasFlag(spec)"
+                                                   @onchange="@(e => ToggleSpecialization(spec, (bool)e.Value!))" />
+                                            <label class="form-check-label" for="spec_@spec">
+                                                @spec.GetDisplayName()
+                                            </label>
+                                        </div>
+                                    }
+                                }
+                            </div>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label class="form-label">Hundeführer</label>
+                            <select @bind="_currentDog.HundefuehrerId" class="form-select form-select-lg">
+                                <option value="">-- Bitte wählen --</option>
+                                @foreach (var person in _personalList.Where(p => p.Skills.HasFlag(PersonalSkills.Hundefuehrer)))
+                                {
+                                    <option value="@person.Id">@person.FullName</option>
+                                }
+                            </select>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label class="form-label">Notizen</label>
+                            <InputTextArea @bind-Value="_currentDog.Notizen" class="form-control" rows="3" />
+                        </div>
+
+                        <div class="form-check mb-3">
+                            <InputCheckbox @bind-Value="_currentDog.IsActive" class="form-check-input" id="dogIsActive" />
+                            <label class="form-check-label" for="dogIsActive">
+                                Hund ist aktiv
+                            </label>
+                        </div>
+
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" @onclick="CloseDogDialog">Abbrechen</button>
+                            <button type="submit" class="btn btn-success">Speichern</button>
+                        </div>
+                    </EditForm>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@if (_showDroneDialog)
+{
+    <div class="modal-backdrop show"></div>
+    <div class="modal show d-block" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">@(_editingDrone != null ? "Drohne bearbeiten" : "Neue Drohne")</h5>
+                    <button type="button" class="btn-close" @onclick="CloseDroneDialog"></button>
+                </div>
+                <div class="modal-body">
+                    <EditForm Model="@_currentDrone" OnValidSubmit="@SaveDrone">
+                        <div class="form-group mb-3">
+                            <label class="form-label">Name (optional)</label>
+                            <InputText @bind-Value="_currentDrone.Name" class="form-control form-control-lg" placeholder="z.B. Scout" />
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Hersteller</label>
+                                <InputText @bind-Value="_currentDrone.Hersteller" class="form-control form-control-lg" placeholder="z.B. DJI" />
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Modell</label>
+                                <InputText @bind-Value="_currentDrone.Modell" class="form-control form-control-lg" placeholder="z.B. Mavic 3T" />
+                            </div>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label class="form-label">Seriennummer (optional)</label>
+                            <InputText @bind-Value="_currentDrone.Seriennummer" class="form-control form-control-lg" />
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label class="form-label">Drohnenpilot</label>
+                            <select @bind="_currentDrone.DrohnenpilotId" class="form-select form-select-lg">
+                                <option value="">-- Bitte wählen --</option>
+                                @foreach (var person in _personalList.Where(p => p.Skills.HasFlag(PersonalSkills.Drohnenpilot)))
+                                {
+                                    <option value="@person.Id">@person.FullName</option>
+                                }
+                            </select>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label class="form-label">Notizen</label>
+                            <InputTextArea @bind-Value="_currentDrone.Notizen" class="form-control" rows="3" />
+                        </div>
+
+                        <div class="form-check mb-3">
+                            <InputCheckbox @bind-Value="_currentDrone.IsActive" class="form-check-input" id="droneIsActive" />
+                            <label class="form-check-label" for="droneIsActive">
+                                Drohne ist aktiv
+                            </label>
+                        </div>
+
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" @onclick="CloseDroneDialog">Abbrechen</button>
+                            <button type="submit" class="btn btn-success">Speichern</button>
+                        </div>
+                    </EditForm>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+[Parameter]
+public string? ActiveTab { get; set; } = "personal";
+
+private List<PersonalEntry> _personalList = new();
+private List<DogEntry> _dogList = new();
+private List<DroneEntry> _droneList = new();
+    
+    private bool _showPersonalDialog = false;
+    private PersonalEntry _currentPersonal = new();
+    private PersonalEntry? _editingPersonal = null;
+
+    private bool _showDogDialog = false;
+    private DogEntry _currentDog = new();
+    private DogEntry? _editingDog = null;
+
+    private bool _showDroneDialog = false;
+    private DroneEntry _currentDrone = new();
+    private DroneEntry? _editingDrone = null;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadData();
+    }
+
+    private async Task LoadData()
+    {
+        _personalList = await MasterDataService.GetPersonalListAsync();
+        _dogList = await MasterDataService.GetDogListAsync();
+        _droneList = await MasterDataService.GetDroneListAsync();
+    }
+
+    private void ShowAddPersonalDialog()
+    {
+        _editingPersonal = null;
+        _currentPersonal = new PersonalEntry();
+        _showPersonalDialog = true;
+    }
+
+    private void EditPersonal(PersonalEntry person)
+    {
+        _editingPersonal = person;
+        _currentPersonal = new PersonalEntry
+        {
+            Id = person.Id,
+            Vorname = person.Vorname,
+            Nachname = person.Nachname,
+            Skills = person.Skills,
+            Notizen = person.Notizen,
+            IsActive = person.IsActive
+        };
+        _showPersonalDialog = true;
+    }
+
+    private async Task SavePersonal()
+    {
+        if (_editingPersonal != null)
+        {
+            await MasterDataService.UpdatePersonalAsync(_currentPersonal);
+        }
+        else
+        {
+            await MasterDataService.AddPersonalAsync(_currentPersonal);
+        }
+        await LoadData();
+        ClosePersonalDialog();
+    }
+
+    private async Task DeletePersonal(PersonalEntry person)
+    {
+        await MasterDataService.DeletePersonalAsync(person.Id);
+        await LoadData();
+    }
+
+    private void ClosePersonalDialog()
+    {
+        _showPersonalDialog = false;
+        _editingPersonal = null;
+    }
+
+    private void ToggleSkill(PersonalSkills skill, bool isChecked)
+    {
+        if (isChecked)
+        {
+            _currentPersonal.Skills |= skill;
+        }
+        else
+        {
+            _currentPersonal.Skills &= ~skill;
+        }
+    }
+
+    private void ShowAddDogDialog()
+    {
+        _editingDog = null;
+        _currentDog = new DogEntry();
+        _showDogDialog = true;
+    }
+
+    private void EditDog(DogEntry dog)
+    {
+        _editingDog = dog;
+        _currentDog = new DogEntry
+        {
+            Id = dog.Id,
+            Name = dog.Name,
+            Rasse = dog.Rasse,
+            Alter = dog.Alter,
+            Specializations = dog.Specializations,
+            HundefuehrerId = dog.HundefuehrerId,
+            Notizen = dog.Notizen,
+            IsActive = dog.IsActive
+        };
+        _showDogDialog = true;
+    }
+
+    private async Task SaveDog()
+    {
+        if (_editingDog != null)
+        {
+            await MasterDataService.UpdateDogAsync(_currentDog);
+        }
+        else
+        {
+            await MasterDataService.AddDogAsync(_currentDog);
+        }
+        await LoadData();
+        CloseDogDialog();
+    }
+
+    private async Task DeleteDog(DogEntry dog)
+    {
+        await MasterDataService.DeleteDogAsync(dog.Id);
+        await LoadData();
+    }
+
+    private void CloseDogDialog()
+    {
+        _showDogDialog = false;
+        _editingDog = null;
+    }
+
+    private void ToggleSpecialization(DogSpecialization spec, bool isChecked)
+    {
+        if (isChecked)
+        {
+            _currentDog.Specializations |= spec;
+        }
+        else
+        {
+            _currentDog.Specializations &= ~spec;
+        }
+    }
+
+    // Drohnen-Verwaltung
+    private void ShowAddDroneDialog()
+    {
+        _editingDrone = null;
+        _currentDrone = new DroneEntry();
+        _showDroneDialog = true;
+    }
+
+    private void EditDrone(DroneEntry drone)
+    {
+        _editingDrone = drone;
+        _currentDrone = new DroneEntry
+        {
+            Id = drone.Id,
+            Name = drone.Name,
+            Modell = drone.Modell,
+            Hersteller = drone.Hersteller,
+            Seriennummer = drone.Seriennummer,
+            DrohnenpilotId = drone.DrohnenpilotId,
+            Notizen = drone.Notizen,
+            IsActive = drone.IsActive
+        };
+        _showDroneDialog = true;
+    }
+
+    private async Task SaveDrone()
+    {
+        if (_editingDrone != null)
+        {
+            await MasterDataService.UpdateDroneAsync(_currentDrone);
+        }
+        else
+        {
+            await MasterDataService.AddDroneAsync(_currentDrone);
+        }
+        await LoadData();
+        CloseDroneDialog();
+    }
+
+    private async Task DeleteDrone(DroneEntry drone)
+    {
+        await MasterDataService.DeleteDroneAsync(drone.Id);
+        await LoadData();
+    }
+
+    private void CloseDroneDialog()
+    {
+        _showDroneDialog = false;
+        _editingDrone = null;
+    }
+}
+

@@ -1,0 +1,91 @@
+@* Wiederverwendbare Loading-Spinner Komponente *@
+
+@if (IsLoading)
+{
+    <div class="loading-overlay @(Fullscreen ? "fullscreen" : "")">
+        <div class="loading-spinner-container">
+            <div class="spinner-border @GetSizeClass()" role="status">
+                <span class="visually-hidden">Lädt...</span>
+            </div>
+            @if (!string.IsNullOrEmpty(Message))
+            {
+                <p class="loading-message mt-3">@Message</p>
+            }
+        </div>
+    </div>
+}
+
+<style>
+    .loading-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(255, 255, 255, 0.9);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+        border-radius: 8px;
+    }
+
+    .loading-overlay.fullscreen {
+        position: fixed;
+        border-radius: 0;
+    }
+
+    [data-bs-theme="dark"] .loading-overlay {
+        background: rgba(33, 37, 41, 0.95);
+    }
+
+    .loading-spinner-container {
+        text-align: center;
+    }
+
+    .loading-message {
+        font-size: 1.1rem;
+        font-weight: 500;
+        color: #495057;
+        margin: 0;
+    }
+
+    [data-bs-theme="dark"] .loading-message {
+        color: #E0E0E0;
+    }
+
+    .spinner-border-sm {
+        width: 2rem;
+        height: 2rem;
+    }
+
+    .spinner-border-lg {
+        width: 4rem;
+        height: 4rem;
+        border-width: 0.4em;
+    }
+</style>
+
+@code {
+    [Parameter]
+    public bool IsLoading { get; set; }
+
+    [Parameter]
+    public string? Message { get; set; }
+
+    [Parameter]
+    public bool Fullscreen { get; set; } = false;
+
+    [Parameter]
+    public string Size { get; set; } = "normal"; // small, normal, large
+
+    private string GetSizeClass()
+    {
+        return Size switch
+        {
+            "small" => "spinner-border-sm",
+            "large" => "spinner-border-lg",
+            _ => ""
+        };
+    }
+}

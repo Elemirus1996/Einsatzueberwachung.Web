@@ -1,0 +1,217 @@
+@page "/einstellungen"
+@using Einsatzueberwachung.Domain.Interfaces
+@using Einsatzueberwachung.Domain.Models
+@using Einsatzueberwachung.Domain.Services
+@inject ISettingsService SettingsService
+@inject IMasterDataService MasterDataService
+@inject ThemeService ThemeService
+@inject IJSRuntime JS
+@inject ToastService ToastService
+@rendermode InteractiveServer
+
+<PageTitle>Einstellungen</PageTitle>
+
+<div class="settings-container">
+    <div class="page-header">
+        <h1><i class="bi bi-gear-fill"></i> Einstellungen</h1>
+        <p class="text-muted">Staffel-Daten und App-Konfiguration</p>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h4><i class="bi bi-building"></i> Staffel-Informationen</h4>
+                </div>
+                <div class="card-body">
+                    <EditForm Model="@_staffelSettings" OnValidSubmit="@SaveStaffelSettings">
+                        <div class="form-group mb-3">
+                            <label class="form-label">Staffel-Name</label>
+                            <InputText @bind-Value="_staffelSettings.StaffelName" class="form-control form-control-lg" placeholder="z.B. RHS Speyer" />
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label class="form-label">Adresse</label>
+                            <InputTextArea @bind-Value="_staffelSettings.StaffelAdresse" class="form-control" rows="3" placeholder="Straße, PLZ Ort" />
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label class="form-label">Telefon</label>
+                            <InputText @bind-Value="_staffelSettings.StaffelTelefon" class="form-control form-control-lg" placeholder="+49 123 456789" />
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label class="form-label">E-Mail</label>
+                            <InputText @bind-Value="_staffelSettings.StaffelEmail" class="form-control form-control-lg" placeholder="kontakt@staffel.de" />
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label class="form-label">Logo-Pfad</label>
+                            <InputText @bind-Value="_staffelSettings.StaffelLogoPfad" class="form-control form-control-lg" placeholder="Pfad zum Logo" />
+                            <small class="text-muted">Pfad zu einer Bilddatei für den PDF-Export</small>
+                        </div>
+
+                        <button type="submit" class="btn btn-success btn-lg w-100">
+                            <i class="bi bi-save-fill"></i> Speichern
+                        </button>
+                    </EditForm>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h4><i class="bi bi-palette-fill"></i> Darstellung</h4>
+                </div>
+                <div class="card-body">
+                    <EditForm Model="@_appSettings" OnValidSubmit="@SaveAppSettings">
+                        <div class="form-group mb-3">
+                            <label class="form-label">Design-Modus</label>
+                            <div class="btn-group w-100" role="group">
+                                <button type="button" 
+                                        class="btn btn-lg @(!_appSettings.IsDarkMode ? "btn-light" : "btn-outline-light")"
+                                        @onclick="() => ToggleDarkMode(false)">
+                                    <i class="bi bi-sun-fill"></i> Hell
+                                </button>
+                                <button type="button" 
+                                        class="btn btn-lg @(_appSettings.IsDarkMode ? "btn-dark" : "btn-outline-dark")"
+                                        @onclick="() => ToggleDarkMode(true)">
+                                    <i class="bi bi-moon-fill"></i> Dunkel
+                                </button>
+                            </div>
+                        </div>
+
+                        <hr/>
+
+                        <h5 class="mb-3"><i class="bi bi-alarm-fill"></i> Timer-Warnungen (Standard)</h5>
+
+                        <div class="form-group mb-3">
+                            <label class="form-label">Erste Warnung (Minuten)</label>
+                            <InputNumber @bind-Value="_appSettings.DefaultFirstWarningMinutes" class="form-control form-control-lg" />
+                            <small class="text-muted">Standard: 45 Minuten</small>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label class="form-label">Zweite Warnung (Minuten)</label>
+                            <InputNumber @bind-Value="_appSettings.DefaultSecondWarningMinutes" class="form-control form-control-lg" />
+                            <small class="text-muted">Standard: 60 Minuten</small>
+                        </div>
+
+                        <hr/>
+
+                        <h5 class="mb-3"><i class="bi bi-arrow-repeat"></i> Updates</h5>
+
+                        <div class="form-group mb-3">
+                            <label class="form-label">Update-URL</label>
+                            <InputText @bind-Value="_appSettings.UpdateUrl" class="form-control form-control-lg" placeholder="https://..." />
+                        </div>
+
+                        <div class="form-check mb-3">
+                            <InputCheckbox @bind-Value="_appSettings.AutoCheckUpdates" class="form-check-input" id="autoUpdate" />
+                            <label class="form-check-label" for="autoUpdate">
+                                Automatisch nach Updates suchen
+                            </label>
+                        </div>
+
+                        <button type="submit" class="btn btn-success btn-lg w-100">
+                            <i class="bi bi-save-fill"></i> Speichern
+                        </button>
+                    </EditForm>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h4><i class="bi bi-info-circle-fill"></i> System-Information</h4>
+                </div>
+                <div class="card-body">
+                    <p><strong>Version:</strong> 1.0.0</p>
+                    <p><strong>Framework:</strong> .NET 8 / Blazor Server</p>
+                    <p><strong>Plattform:</strong> Web-basiert</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private StaffelSettings _staffelSettings = new();
+    private AppSettings _appSettings = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var sessionData = await MasterDataService.LoadSessionDataAsync();
+        _staffelSettings = sessionData.StaffelSettings;
+        _appSettings = sessionData.AppSettings;
+
+        // Synchronisiere mit ThemeService
+        await ThemeService.InitializeAsync();
+    }
+
+    private async Task SaveStaffelSettings()
+    {
+        try
+        {
+            var sessionData = await MasterDataService.LoadSessionDataAsync();
+            sessionData.StaffelSettings = _staffelSettings;
+            await MasterDataService.SaveSessionDataAsync(sessionData);
+            ToastService.ShowSuccess("Staffel-Einstellungen wurden gespeichert");
+        }
+        catch (Exception ex)
+        {
+            ToastService.ShowError($"Fehler beim Speichern: {ex.Message}");
+        }
+    }
+
+    private async Task SaveAppSettings()
+    {
+        try
+        {
+            var sessionData = await MasterDataService.LoadSessionDataAsync();
+            sessionData.AppSettings = _appSettings;
+            await MasterDataService.SaveSessionDataAsync(sessionData);
+            
+            await ApplyTheme();
+            ToastService.ShowSuccess("App-Einstellungen wurden gespeichert");
+        }
+        catch (Exception ex)
+        {
+            ToastService.ShowError($"Fehler beim Speichern: {ex.Message}");
+        }
+    }
+
+    private async Task ToggleDarkMode(bool isDark)
+    {
+        _appSettings.IsDarkMode = isDark;
+        _appSettings.Theme = isDark ? "Dark" : "Light";
+        
+        // Speichere in SessionData
+        var sessionData = await MasterDataService.LoadSessionDataAsync();
+        sessionData.AppSettings = _appSettings;
+        await MasterDataService.SaveSessionDataAsync(sessionData);
+        
+        // Update ThemeService (triggert automatisch alle subscribten Komponenten)
+        await ThemeService.SetThemeAsync(isDark);
+        
+        // Broadcast an alle Tabs
+        await JS.InvokeVoidAsync("broadcastThemeChange", isDark ? "dark" : "light");
+        
+        StateHasChanged();
+    }
+
+    private async Task ApplyTheme()
+    {
+        try
+        {
+            var theme = _appSettings.IsDarkMode ? "dark" : "light";
+            
+            // Broadcast Theme-Änderung an alle Tabs/Fenster
+            await JS.InvokeVoidAsync("broadcastThemeChange", theme);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Fehler beim Anwenden des Themes: {ex.Message}");
+        }
+    }
+}

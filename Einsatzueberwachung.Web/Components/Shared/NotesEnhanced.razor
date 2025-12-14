@@ -1,0 +1,357 @@
+@* Erweiterte Notizen/Funksprüche-Komponente mit Bearbeitung, Antworten und Team-Herkunft *@
+@using Einsatzueberwachung.Domain.Models
+@using Einsatzueberwachung.Domain.Models.Enums
+@using Einsatzueberwachung.Domain.Interfaces
+@inject IEinsatzService EinsatzService
+
+<div class="notes-enhanced-container">
+    @if (Notes == null || !Notes.Any())
+    {
+        <div class="alert alert-info">
+            <i class="bi bi-info-circle"></i> Noch keine Notizen vorhanden.
+        </div>
+    }
+    else
+    {
+        @foreach (var note in Notes.OrderByDescending(n => n.Timestamp))
+        {
+            <div class="note-card @GetNoteClass(note)">
+                <!-- Haupt-Notiz -->
+                <div class="note-header">
+                    <div class="note-meta">
+                        <i class="bi bi-@note.TypeIcon text-@note.TypeColor"></i>
+                        <span class="note-time">@note.FormattedDateTime</span>
+                        <span class="note-type badge bg-@note.TypeColor">@note.Type</span>
+                    </div>
+                    
+                    <div class="note-source">
+                        <i class="bi bi-broadcast text-primary"></i>
+                        <strong>@(string.IsNullOrEmpty(note.SourceTeamName) ? "System" : note.SourceTeamName)</strong>
+                        <small class="text-muted">(@(string.IsNullOrEmpty(note.SourceType) ? "Auto" : note.SourceType))</small>
+                    </div>
+                </div>
+
+                <div class="note-body">
+                    @if (_editingNoteId == note.Id)
+                    {
+                        <!-- Bearbeiten-Modus -->
+                        <div class="note-edit-form">
+                            <textarea class="form-control" 
+                                      rows="3" 
+                                      @bind="_editText"></textarea>
+                            <div class="mt-2">
+                                <button class="btn btn-sm btn-success" @onclick="() => SaveNoteEdit(note.Id)">
+                                    <i class="bi bi-check-lg"></i> Speichern
+                                </button>
+                                <button class="btn btn-sm btn-secondary" @onclick="CancelEdit">
+                                    <i class="bi bi-x-lg"></i> Abbrechen
+                                </button>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <!-- Anzeige-Modus -->
+                        <p class="note-text">@note.Text</p>
+                        
+                        @if (note.IsEdited)
+                        {
+                            <small class="text-muted">
+                                <i class="bi bi-pencil-fill"></i> @note.EditedLabel
+                            </small>
+                        }
+                    }
+                </div>
+
+                <div class="note-actions">
+                    @if (_editingNoteId != note.Id)
+                    {
+                        <button class="btn btn-sm btn-outline-primary" @onclick="() => StartReply(note.Id)">
+                            <i class="bi bi-reply-fill"></i> Antworten (@note.ReplyCount)
+                        </button>
+                        
+                        @if (AllowEdit)
+                        {
+                            <button class="btn btn-sm btn-outline-secondary" @onclick="() => StartEditNote(note.Id, note.Text)">
+                                <i class="bi bi-pencil-fill"></i> Bearbeiten
+                            </button>
+                        }
+                        
+                        @if (note.Replies != null && note.Replies.Any())
+                        {
+                            <button class="btn btn-sm btn-outline-info" @onclick="() => ToggleReplies(note.Id)">
+                                <i class="bi bi-@(_expandedNotes.Contains(note.Id) ? "chevron-up" : "chevron-down")"></i>
+                                @(_expandedNotes.Contains(note.Id) ? "Verbergen" : "Anzeigen")
+                            </button>
+                        }
+                    }
+                </div>
+
+                <!-- Antworten/Thread -->
+                @if (_expandedNotes.Contains(note.Id) && note.Replies != null)
+                {
+                    <div class="note-replies">
+                        @foreach (var reply in note.Replies.OrderBy(r => r.Timestamp))
+                        {
+                            <div class="reply-card">
+                                <div class="reply-header">
+                                    <div class="reply-source">
+                                        <i class="bi bi-person-fill"></i>
+                                        <strong>@reply.SourceTeamName</strong>
+                                    </div>
+                                    <span class="reply-time">@reply.FormattedDateTime</span>
+                                </div>
+                                
+                                <div class="reply-body">
+                                    @if (_editingReplyId == reply.Id)
+                                    {
+                                        <!-- Antwort bearbeiten -->
+                                        <textarea class="form-control form-control-sm" 
+                                                  rows="2" 
+                                                  @bind="_editText"></textarea>
+                                        <div class="mt-2">
+                                            <button class="btn btn-sm btn-success" @onclick="() => SaveReplyEdit(reply.Id)">
+                                                <i class="bi bi-check-lg"></i> Speichern
+                                            </button>
+                                            <button class="btn btn-sm btn-secondary" @onclick="CancelEdit">
+                                                <i class="bi bi-x-lg"></i> Abbrechen
+                                            </button>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <p class="reply-text">@reply.Text</p>
+                                        
+                                        @if (reply.IsEdited)
+                                        {
+                                            <small class="text-muted">
+                                                <i class="bi bi-pencil-fill"></i> @reply.EditedLabel
+                                            </small>
+                                        }
+                                        
+                                        @if (AllowEdit)
+                                        {
+                                            <div class="reply-actions">
+                                                <button class="btn btn-xs btn-link" @onclick="() => StartEditReply(reply.Id, reply.Text)">
+                                                    <i class="bi bi-pencil-fill"></i> Bearbeiten
+                                                </button>
+                                                <button class="btn btn-xs btn-link text-danger" @onclick="() => DeleteReply(reply.Id)">
+                                                    <i class="bi bi-trash-fill"></i> Löschen
+                                                </button>
+                                            </div>
+                                        }
+                                    }
+                                </div>
+                            </div>
+                        }
+                        
+                        <!-- Neue Antwort hinzufügen -->
+                        @if (_replyingToNoteId == note.Id)
+                        {
+                            <div class="reply-form">
+                                <div class="mb-2">
+                                    <label class="form-label"><strong>Team/Quelle auswählen:</strong></label>
+                                    <select class="form-select form-select-sm" @bind="_selectedTeamId">
+                                        <option value="">-- Bitte wählen --</option>
+                                        @foreach (var team in AvailableTeams)
+                                        {
+                                            <option value="@team.TeamId">@team.TeamName (@GetTeamType(team))</option>
+                                        }
+                                        <option value="einsatzleitung">Einsatzleitung</option>
+                                    </select>
+                                </div>
+                                <textarea class="form-control form-control-sm" 
+                                          rows="3" 
+                                          @bind="_replyText" 
+                                          placeholder="Antwort verfassen..."></textarea>
+                                <div class="mt-2">
+                                    <button class="btn btn-sm btn-primary" 
+                                            @onclick="() => SaveReply(note.Id)"
+                                            disabled="@(string.IsNullOrEmpty(_selectedTeamId) || string.IsNullOrWhiteSpace(_replyText))">
+                                        <i class="bi bi-send-fill"></i> Antwort senden
+                                    </button>
+                                    <button class="btn btn-sm btn-secondary" @onclick="CancelReply">
+                                        <i class="bi bi-x-lg"></i> Abbrechen
+                                    </button>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+        }
+    }
+</div>
+
+@code {
+    [Parameter]
+    public List<GlobalNotesEntry> Notes { get; set; } = new();
+    
+    [Parameter]
+    public List<Team> AvailableTeams { get; set; } = new();
+    
+    [Parameter]
+    public bool AllowEdit { get; set; } = true;
+    
+    [Parameter]
+    public EventCallback OnNotesChanged { get; set; }
+    
+    private HashSet<string> _expandedNotes = new();
+    private string? _editingNoteId = null;
+    private string? _editingReplyId = null;
+    private string? _replyingToNoteId = null;
+    private string _editText = "";
+    private string _replyText = "";
+    private string _selectedTeamId = "";
+
+    private void ToggleReplies(string noteId)
+    {
+        if (_expandedNotes.Contains(noteId))
+        {
+            _expandedNotes.Remove(noteId);
+        }
+        else
+        {
+            _expandedNotes.Add(noteId);
+        }
+    }
+
+    private void StartEditNote(string noteId, string currentText)
+    {
+        _editingNoteId = noteId;
+        _editText = currentText;
+    }
+
+    private async Task SaveNoteEdit(string noteId)
+    {
+        try
+        {
+            await EinsatzService.UpdateGlobalNoteAsync(noteId, _editText, "User");
+            _editingNoteId = null;
+            _editText = "";
+            await OnNotesChanged.InvokeAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Fehler beim Speichern: {ex.Message}");
+        }
+    }
+
+    private void CancelEdit()
+    {
+        _editingNoteId = null;
+        _editingReplyId = null;
+        _editText = "";
+    }
+
+    private void StartReply(string noteId)
+    {
+        _replyingToNoteId = noteId;
+        _replyText = "";
+        _selectedTeamId = "";
+        
+        // Auto-expand
+        if (!_expandedNotes.Contains(noteId))
+        {
+            _expandedNotes.Add(noteId);
+        }
+    }
+
+    private async Task SaveReply(string noteId)
+    {
+        if (string.IsNullOrWhiteSpace(_replyText) || string.IsNullOrEmpty(_selectedTeamId))
+        {
+            return;
+        }
+        
+        try
+        {
+            string teamName = "Unbekannt";
+            
+            if (_selectedTeamId == "einsatzleitung")
+            {
+                teamName = "Einsatzleitung";
+            }
+            else
+            {
+                var team = AvailableTeams.FirstOrDefault(t => t.TeamId == _selectedTeamId);
+                if (team != null)
+                {
+                    teamName = team.TeamName;
+                }
+            }
+            
+            await EinsatzService.AddReplyToNoteAsync(noteId, _replyText, _selectedTeamId, teamName, "User");
+            
+            _replyingToNoteId = null;
+            _replyText = "";
+            _selectedTeamId = "";
+            
+            await OnNotesChanged.InvokeAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Fehler beim Speichern der Antwort: {ex.Message}");
+        }
+    }
+
+    private void CancelReply()
+    {
+        _replyingToNoteId = null;
+        _replyText = "";
+        _selectedTeamId = "";
+    }
+
+    private void StartEditReply(string replyId, string currentText)
+    {
+        _editingReplyId = replyId;
+        _editText = currentText;
+    }
+
+    private async Task SaveReplyEdit(string replyId)
+    {
+        try
+        {
+            await EinsatzService.UpdateReplyAsync(replyId, _editText, "User");
+            _editingReplyId = null;
+            _editText = "";
+            await OnNotesChanged.InvokeAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Fehler beim Bearbeiten: {ex.Message}");
+        }
+    }
+
+    private async Task DeleteReply(string replyId)
+    {
+        try
+        {
+            await EinsatzService.DeleteReplyAsync(replyId);
+            await OnNotesChanged.InvokeAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Fehler beim Löschen: {ex.Message}");
+        }
+    }
+
+    private string GetNoteClass(GlobalNotesEntry note)
+    {
+        var classes = new List<string> { "note-type-" + note.Type.ToString().ToLower() };
+        
+        if (note.ReplyCount > 0)
+        {
+            classes.Add("has-replies");
+        }
+        
+        return string.Join(" ", classes);
+    }
+
+    private string GetTeamType(Team team)
+    {
+        if (team.IsDroneTeam) return "Drohne";
+        if (team.IsSupportTeam) return "Support";
+        return "Hunde-Team";
+    }
+}

@@ -1,0 +1,56 @@
+@* Base Component für alle Seiten - Stellt Theme automatisch bereit *@
+@using Einsatzueberwachung.Domain.Services
+@inject ThemeService ThemeService
+@inject IJSRuntime JS
+@implements IDisposable
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        // Initialisiere Theme Service
+        await ThemeService.InitializeAsync();
+        
+        // Subscribe to theme changes
+        ThemeService.OnThemeChanged += OnThemeChanged;
+        
+        await base.OnInitializedAsync();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await ApplyCurrentTheme();
+        }
+        
+        await base.OnAfterRenderAsync(firstRender);
+    }
+
+    private async void OnThemeChanged()
+    {
+        await InvokeAsync(async () =>
+        {
+            await ApplyCurrentTheme();
+            StateHasChanged();
+        });
+    }
+
+    private async Task ApplyCurrentTheme()
+    {
+        try
+        {
+            var theme = ThemeService.CurrentTheme;
+            await JS.InvokeVoidAsync("broadcastThemeChange", theme);
+            Console.WriteLine($"PageBase: Theme angewendet - {theme}");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"PageBase: Fehler beim Anwenden des Themes - {ex.Message}");
+        }
+    }
+
+    public void Dispose()
+    {
+        ThemeService.OnThemeChanged -= OnThemeChanged;
+    }
+}

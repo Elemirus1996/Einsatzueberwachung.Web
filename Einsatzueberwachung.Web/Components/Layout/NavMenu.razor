@@ -1,0 +1,115 @@
+﻿@using Einsatzueberwachung.Domain.Interfaces
+@using Einsatzueberwachung.Domain.Services
+@inject ThemeService ThemeService
+@inject IJSRuntime JS
+@implements IDisposable
+
+<div class="top-row ps-3 navbar navbar-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="">
+            <i class="bi bi-alarm-fill text-danger"></i> Einsatzüberwachung
+        </a>
+        <button class="btn btn-sm btn-theme-toggle" @onclick="ToggleTheme" title="@(_isDarkMode ? "Zu hellem Design wechseln" : "Zu dunklem Design wechseln")">
+            <i class="bi bi-@(_isDarkMode ? "sun-fill" : "moon-fill")"></i>
+        </button>
+    </div>
+</div>
+
+<input type="checkbox" title="Navigation menu" class="navbar-toggler" />
+
+<div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
+    <nav class="flex-column">
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+                <span class="nav-icon"><i class="bi bi-house-fill"></i></span> Home
+            </NavLink>
+        </div>
+
+        <div class="nav-section-header">Einsatz</div>
+
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="einsatz/start">
+                <span class="nav-icon"><i class="bi bi-alarm-fill"></i></span> Neuer Einsatz
+            </NavLink>
+        </div>
+
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="einsatz/monitor">
+                <span class="nav-icon"><i class="bi bi-bar-chart-fill"></i></span> Monitor
+            </NavLink>
+        </div>
+
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="einsatz/karte">
+                <span class="nav-icon"><i class="bi bi-map-fill"></i></span> Karte
+            </NavLink>
+        </div>
+
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="einsatz/bericht">
+                <span class="nav-icon"><i class="bi bi-file-text-fill"></i></span> Bericht
+            </NavLink>
+        </div>
+
+        <div class="nav-section-header">Verwaltung</div>
+
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="stammdaten">
+                <span class="nav-icon"><i class="bi bi-clipboard-data"></i></span> Stammdaten
+            </NavLink>
+        </div>
+
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="einstellungen">
+                <span class="nav-icon"><i class="bi bi-gear-fill"></i></span> Einstellungen
+            </NavLink>
+        </div>
+    </nav>
+</div>
+
+@code {
+    private bool _isDarkMode = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await ThemeService.InitializeAsync();
+        _isDarkMode = ThemeService.IsDarkMode;
+        
+        // Subscribe to theme changes
+        ThemeService.OnThemeChanged += OnThemeChangedHandler;
+    }
+
+    private async void OnThemeChangedHandler()
+    {
+        await InvokeAsync(() =>
+        {
+            _isDarkMode = ThemeService.IsDarkMode;
+            StateHasChanged();
+        });
+    }
+
+    private async Task ToggleTheme()
+    {
+        try
+        {
+            await ThemeService.ToggleThemeAsync();
+            _isDarkMode = ThemeService.IsDarkMode;
+            
+            // Broadcast Theme-Änderung an alle Tabs/Fenster
+            var theme = ThemeService.CurrentTheme;
+            await JS.InvokeVoidAsync("broadcastThemeChange", theme);
+            
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Fehler beim Umschalten des Themes: {ex.Message}");
+        }
+    }
+
+    public void Dispose()
+    {
+        ThemeService.OnThemeChanged -= OnThemeChangedHandler;
+    }
+}
+
