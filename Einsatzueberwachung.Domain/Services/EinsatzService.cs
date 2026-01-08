@@ -1,4 +1,4 @@
-// Implementierung des Einsatz-Service f�r laufenden Einsatz
+﻿// Implementierung des Einsatz-Service fü¿½r laufenden Einsatz
 // Quelle: Abgeleitet von WPF ViewModels/MainViewModel.cs
 
 using System;
@@ -145,7 +145,7 @@ namespace Einsatzueberwachung.Domain.Services
             {
                 Text = text,
                 Type = type,
-                TeamId = teamId,
+                SourceTeamId = teamId,
                 Timestamp = DateTime.Now
             };
 
@@ -154,7 +154,7 @@ namespace Einsatzueberwachung.Domain.Services
                 var team = _teams.FirstOrDefault(t => t.TeamId == teamId);
                 if (team != null)
                 {
-                    note.TeamName = team.TeamName;
+                    note.SourceTeamName = team.TeamName;
                 }
             }
 
@@ -172,7 +172,7 @@ namespace Einsatzueberwachung.Domain.Services
             }
 
             var filtered = _globalNotes
-                .Where(n => string.IsNullOrEmpty(n.TeamId) || n.TeamId == teamId)
+                .Where(n => string.IsNullOrEmpty(n.SourceTeamId) || n.SourceTeamId == teamId)
                 .OrderByDescending(n => n.Timestamp)
                 .ToList();
 
@@ -241,7 +241,7 @@ namespace Einsatzueberwachung.Domain.Services
 
         private void Team_TimerReset(Team team)
         {
-            _ = AddGlobalNoteAsync($"Timer zur�ckgesetzt", GlobalNotesEntryType.TeamReset, team.TeamId);
+            _ = AddGlobalNoteAsync($"Timer zurü¿½ckgesetzt", GlobalNotesEntryType.TeamReset, team.TeamId);
         }
 
         private void Team_WarningTriggered(Team team, bool isSecondWarning)
@@ -249,7 +249,7 @@ namespace Einsatzueberwachung.Domain.Services
             var warningType = isSecondWarning ? "Zweite" : "Erste";
             _ = AddGlobalNoteAsync($"{warningType} Warnung erreicht!", GlobalNotesEntryType.TeamWarning, team.TeamId);
             
-            // Event f�r UI (damit Blazor die akustische Warnung abspielen kann)
+            // Event fü¿½r UI (damit Blazor die akustische Warnung abspielen kann)
             TeamWarningTriggered?.Invoke(team, isSecondWarning);
         }
         
@@ -302,8 +302,8 @@ namespace Einsatzueberwachung.Domain.Services
                 ChangedBy = updatedBy
             };
             
-            // Historie w�rde hier in eine separate Liste/DB gespeichert werden
-            // F�r In-Memory k�nnen wir sie auch in SessionData aufnehmen
+            // Historie wü¿½rde hier in eine separate Liste/DB gespeichert werden
+            // Fü¿½r In-Memory kü¿½nnen wir sie auch in SessionData aufnehmen
 
             note.Text = newText;
             note.UpdatedAt = DateTime.Now;
@@ -323,7 +323,7 @@ namespace Einsatzueberwachung.Domain.Services
         public Task<List<GlobalNotesHistory>> GetNoteHistoryAsync(string noteId)
         {
             // TODO: Implementiere Speicherung und Abruf der Historie
-            // Momentan In-Memory, k�nnte erweitert werden
+            // Momentan In-Memory, kü¿½nnte erweitert werden
             return Task.FromResult(new List<GlobalNotesHistory>());
         }
         

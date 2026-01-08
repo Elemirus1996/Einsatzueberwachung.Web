@@ -1,5 +1,5 @@
-// Toast-Notification Service für Benutzer-Feedback
-// Ermöglicht das Anzeigen von Toast-Nachrichten von überall in der Anwendung
+ï»¿// Toast-Notification Service fÃ¼r Benutzer-Feedback
+// ErmÃ¶glicht das Anzeigen von Toast-Nachrichten von Ã¼berall in der Anwendung
 
 using System;
 

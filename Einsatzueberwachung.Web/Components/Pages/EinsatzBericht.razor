@@ -1,4 +1,4 @@
-@page "/einsatz/bericht"
+ï»¿@page "/einsatz/bericht"
 @using Einsatzueberwachung.Domain.Interfaces
 @using Einsatzueberwachung.Domain.Models
 @using Einsatzueberwachung.Domain.Services
@@ -46,7 +46,7 @@
                     <p><strong>Einsatzort:</strong> @_einsatz.Einsatzort</p>
                     <p><strong>Alarmiert durch:</strong> @_einsatz.Alarmiert</p>
                     <p><strong>Einsatzleiter:</strong> @_einsatz.Einsatzleiter</p>
-                    <p><strong>Führungsassistent:</strong> @_einsatz.Fuehrungsassistent</p>
+                    <p><strong>FÃ¼hrungsassistent:</strong> @_einsatz.Fuehrungsassistent</p>
                 </div>
             </div>
         </div>
@@ -65,7 +65,7 @@
                             <tr>
                                 <th>Team</th>
                                 <th>Hund</th>
-                                <th>Hundeführer</th>
+                                <th>HundefÃ¼hrer</th>
                                 <th>Helfer</th>
                                 <th>Suchgebiet</th>
                                 <th>Einsatzzeit</th>
@@ -166,7 +166,7 @@
 
     <div class="card mb-4">
             <div class="card-header">
-                <h4><i class="bi bi-journal-text"></i> Notizen & Funksprüche (@_notes.Count)</h4>
+                <h4><i class="bi bi-journal-text"></i> Notizen & FunksprÃ¼che (@_notes.Count)</h4>
         </div>
         <div class="card-body">
             @if (_notes.Any())
@@ -178,9 +178,9 @@
                             <div class="note-time">@note.Timestamp.ToString("dd.MM.yyyy HH:mm:ss")</div>
                             <div class="note-content">
                                 <strong>[@note.Type.ToString()]</strong>
-                                @if (!string.IsNullOrEmpty(note.TeamName))
+                                @if (!string.IsNullOrEmpty(note.SourceTeamName))
                                 {
-                                    <span class="badge bg-primary">@note.TeamName</span>
+                                    <span class="badge bg-primary">@note.SourceTeamName</span>
                                 }
                                 @note.Text
                             </div>
@@ -190,7 +190,7 @@
             }
             else
             {
-                <p class="text-muted">Keine Einträge vorhanden.</p>
+                <p class="text-muted">Keine EintrÃ¤ge vorhanden.</p>
             }
         </div>
     </div>
@@ -204,7 +204,7 @@
 
     <div class="action-buttons">
         <button class="btn btn-secondary btn-lg" @onclick="GoBack">
-            <i class="bi bi-arrow-left"></i> Zurück zum Monitor
+            <i class="bi bi-arrow-left"></i> ZurÃ¼ck zum Monitor
         </button>
         <button class="btn btn-danger btn-lg" @onclick="EndEinsatz">
             <i class="bi bi-stop-circle-fill"></i> Einsatz beenden

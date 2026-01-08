@@ -1,4 +1,4 @@
-// Service-Interface f�r Einstellungen/Settings-Verwaltung
+﻿// Service-Interface für Einstellungen/Settings-Verwaltung
 // Quelle: Abgeleitet von WPF ViewModels/SettingsViewModel.cs und Services/SettingsService.cs
 
 using System.Threading.Tasks;

@@ -1,5 +1,5 @@
-// REST API Controller für Authentifizierung
-// JWT Token-basierte Authentifizierung für mobilen Zugriff
+ï»¿// REST API Controller fÃ¼r Authentifizierung
+// JWT Token-basierte Authentifizierung fÃ¼r mobilen Zugriff
 
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
@@ -24,9 +24,9 @@ namespace Einsatzueberwachung.Web.Controllers
         }
 
         /// <summary>
-        /// Login-Endpunkt für mobile Clients
-        /// HINWEIS: Vereinfachte Implementierung für Phase 1 (lokales Netzwerk)
-        /// Für Produktionsumgebung sollte eine vollständige User-Datenbank verwendet werden
+        /// Login-Endpunkt fÃ¼r mobile Clients
+        /// HINWEIS: Vereinfachte Implementierung fÃ¼r Phase 1 (lokales Netzwerk)
+        /// FÃ¼r Produktionsumgebung sollte eine vollstÃ¤ndige User-Datenbank verwendet werden
         /// </summary>
         [HttpPost("login")]
         public IActionResult Login([FromBody] LoginRequest request)
@@ -34,14 +34,14 @@ namespace Einsatzueberwachung.Web.Controllers
             try
             {
                 // PHASE 1: Einfache Validierung gegen konfigurierte Credentials
-                // TODO: Für Production - User-Datenbank mit gehashten Passwörtern implementieren
+                // TODO: FÃ¼r Production - User-Datenbank mit gehashten PasswÃ¶rtern implementieren
                 var configuredUsername = _configuration["Auth:Username"] ?? "einsatzleiter";
                 var configuredPassword = _configuration["Auth:Password"] ?? "einsatz2024";
 
                 if (request.Username != configuredUsername || request.Password != configuredPassword)
                 {
                     _logger.LogWarning("Fehlgeschlagener Login-Versuch: {Username}", request.Username);
-                    return Unauthorized(new { Error = "Ungültige Anmeldedaten" });
+                    return Unauthorized(new { Error = "UngÃ¼ltige Anmeldedaten" });
                 }
 
                 // JWT Token erstellen
@@ -84,7 +84,7 @@ namespace Einsatzueberwachung.Web.Controllers
                     ValidIssuer = _configuration["Jwt:Issuer"] ?? "Einsatzueberwachung",
                     ValidateAudience = true,
                     ValidAudience = _configuration["Jwt:Audience"] ?? "EinsatzueberwachungMobile",
-                    ValidateLifetime = false // Erlaube abgelaufene Tokens für Refresh
+                    ValidateLifetime = false // Erlaube abgelaufene Tokens fÃ¼r Refresh
                 };
 
                 var principal = tokenHandler.ValidateToken(request.Token, validationParameters, out var validatedToken);
@@ -92,13 +92,13 @@ namespace Einsatzueberwachung.Web.Controllers
 
                 if (string.IsNullOrEmpty(username))
                 {
-                    return Unauthorized(new { Error = "Ungültiger Token" });
+                    return Unauthorized(new { Error = "UngÃ¼ltiger Token" });
                 }
 
                 // Neuen Token erstellen
                 var newToken = GenerateJwtToken(username);
 
-                _logger.LogInformation("Token erneuert für: {Username}", username);
+                _logger.LogInformation("Token erneuert fÃ¼r: {Username}", username);
 
                 return Ok(new
                 {
@@ -109,7 +109,7 @@ namespace Einsatzueberwachung.Web.Controllers
             }
             catch (SecurityTokenException)
             {
-                return Unauthorized(new { Error = "Ungültiger Token" });
+                return Unauthorized(new { Error = "UngÃ¼ltiger Token" });
             }
             catch (Exception ex)
             {

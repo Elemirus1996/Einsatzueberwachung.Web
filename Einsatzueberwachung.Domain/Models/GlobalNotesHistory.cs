@@ -1,5 +1,5 @@
-// Optional: Historie der Bearbeitungen von Funksprüchen/Notizen
-// Ermöglicht Nachvollziehbarkeit aller Änderungen
+ï»¿// Optional: Historie der Bearbeitungen von FunksprÃ¼chen/Notizen
+// ErmÃ¶glicht Nachvollziehbarkeit aller Ã„nderungen
 
 using System;
 
@@ -13,7 +13,7 @@ namespace Einsatzueberwachung.Domain.Models
         public string NewText { get; set; }
         public DateTime ChangedAt { get; set; }
         public string ChangedBy { get; set; }
-        public string ChangeReason { get; set; } // Optional: Grund der Änderung
+        public string ChangeReason { get; set; } // Optional: Grund der Ã„nderung
 
         public GlobalNotesHistory()
         {

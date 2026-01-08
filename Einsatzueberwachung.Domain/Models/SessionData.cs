@@ -1,5 +1,5 @@
-// Quelle: WPF-Projekt Models/SessionData.cs
-// Session-/Stammdaten f�r die Anwendung (Personal, Hunde, Einstellungen)
+﻿// Quelle: WPF-Projekt Models/SessionData.cs
+// Session-/Stammdaten fü¿½r die Anwendung (Personal, Hunde, Einstellungen)
 
 using System.Collections.Generic;
 
@@ -45,6 +45,9 @@ namespace Einsatzueberwachung.Domain.Models
     {
         public string Theme { get; set; }
         public bool IsDarkMode { get; set; }
+        public string ThemeMode { get; set; } // "Manual", "Auto", "Scheduled"
+        public TimeSpan DarkModeStartTime { get; set; }
+        public TimeSpan DarkModeEndTime { get; set; }
         public int DefaultFirstWarningMinutes { get; set; }
         public int DefaultSecondWarningMinutes { get; set; }
         public string UpdateUrl { get; set; }
@@ -54,6 +57,9 @@ namespace Einsatzueberwachung.Domain.Models
         {
             Theme = "Light";
             IsDarkMode = false;
+            ThemeMode = "Manual";
+            DarkModeStartTime = new TimeSpan(20, 0, 0); // 20:00
+            DarkModeEndTime = new TimeSpan(6, 0, 0);    // 06:00
             DefaultFirstWarningMinutes = 45;
             DefaultSecondWarningMinutes = 60;
             UpdateUrl = string.Empty;

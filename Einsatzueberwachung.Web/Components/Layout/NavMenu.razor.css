@@ -1,4 +1,4 @@
-.navbar-toggler {
+﻿.navbar-toggler {
     appearance: none;
     cursor: pointer;
     width: 3.5rem;
@@ -18,10 +18,39 @@
 .top-row {
     height: 3.5rem;
     background-color: rgba(0,0,0,0.4);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 1rem;
 }
 
 .navbar-brand {
     font-size: 1.1rem;
+}
+
+.btn-theme-toggle {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: white;
+    padding: 0.5rem 0.75rem;
+    border-radius: 6px;
+    transition: all 0.3s ease;
+    font-size: 1.1rem;
+}
+
+.btn-theme-toggle:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: scale(1.1);
+}
+
+/* Dark Mode */
+[data-bs-theme="dark"] .btn-theme-toggle {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+[data-bs-theme="dark"] .btn-theme-toggle:hover {
+    background: rgba(255, 255, 255, 0.25);
 }
 
 .bi {

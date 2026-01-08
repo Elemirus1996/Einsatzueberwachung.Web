@@ -1,0 +1,43 @@
+{
+  "name": "Einsatzüberwachung",
+  "short_name": "Einsatz",
+  "description": "Tablet-optimierte Rettungshunde Einsatzüberwachung",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#2196F3",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["productivity", "utilities"],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "Neuer Einsatz",
+      "short_name": "Einsatz",
+      "description": "Neuen Einsatz starten",
+      "url": "/einsatz/start",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Monitor",
+      "short_name": "Monitor",
+      "description": "Einsatz überwachen",
+      "url": "/einsatz/monitor",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    }
+  ],
+  "prefer_related_applications": false
+}

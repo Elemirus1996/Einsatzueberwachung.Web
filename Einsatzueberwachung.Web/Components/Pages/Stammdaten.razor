@@ -40,7 +40,7 @@
         <div class="tab-content">
             <div class="mb-3">
                 <button class="btn btn-success btn-lg" @onclick="ShowAddPersonalDialog">
-                    + Person hinzufügen
+                    + Person hinzufÃ¼gen
                 </button>
             </div>
 
@@ -81,7 +81,7 @@
                                             Bearbeiten
                                         </button>
                                         <button class="btn btn-sm btn-danger" @onclick="() => DeletePersonal(person)">
-                                            Löschen
+                                            Lï¿½schen
                                         </button>
                                     </td>
                                 </tr>
@@ -103,7 +103,7 @@
         <div class="tab-content">
             <div class="mb-3">
                 <button class="btn btn-success btn-lg" @onclick="ShowAddDogDialog">
-                    + Hund hinzufügen
+                    + Hund hinzufÃ¼gen
                 </button>
             </div>
 
@@ -128,7 +128,7 @@
                                     var handler = _personalList.FirstOrDefault(p => p.Id == dog.HundefuehrerId);
                                     if (handler != null)
                                     {
-                                        <p><strong>Hundeführer:</strong> @handler.FullName</p>
+                                        <p><strong>Hundefï¿½hrer:</strong> @handler.FullName</p>
                                     }
                                 }
                                 @if (!string.IsNullOrEmpty(dog.Notizen))
@@ -141,7 +141,7 @@
                                     Bearbeiten
                                 </button>
                                 <button class="btn btn-sm btn-danger" @onclick="() => DeleteDog(dog)">
-                                    Löschen
+                                    Lï¿½schen
                                 </button>
                             </div>
                         </div>
@@ -161,7 +161,7 @@
         <div class="tab-content">
             <div class="mb-3">
                 <button class="btn btn-success btn-lg" @onclick="ShowAddDroneDialog">
-                    + Drohne hinzufügen
+                    + Drohne hinzufÃ¼gen
                 </button>
             </div>
 
@@ -200,7 +200,7 @@
                                     Bearbeiten
                                 </button>
                                 <button class="btn btn-sm btn-danger" @onclick="() => DeleteDrone(drone)">
-                                    Löschen
+                                    Lï¿½schen
                                 </button>
                             </div>
                         </div>
@@ -241,7 +241,7 @@
                         </div>
 
                         <div class="form-group mb-3">
-                            <label class="form-label">Qualifikationen (mehrfach wählbar)</label>
+                            <label class="form-label">Qualifikationen (mehrfach wï¿½hlbar)</label>
                             <div class="skills-checkboxes">
                                 @foreach (PersonalSkills skill in Enum.GetValues(typeof(PersonalSkills)))
                                 {
@@ -314,7 +314,7 @@
                         </div>
 
                         <div class="form-group mb-3">
-                            <label class="form-label">Ausbildungen (mehrfach wählbar)</label>
+                            <label class="form-label">Ausbildungen (mehrfach wï¿½hlbar)</label>
                             <div class="skills-checkboxes">
                                 @foreach (DogSpecialization spec in Enum.GetValues(typeof(DogSpecialization)))
                                 {
@@ -336,9 +336,9 @@
                         </div>
 
                         <div class="form-group mb-3">
-                            <label class="form-label">Hundeführer</label>
+                            <label class="form-label">Hundefï¿½hrer</label>
                             <select @bind="_currentDog.HundefuehrerId" class="form-select form-select-lg">
-                                <option value="">-- Bitte wählen --</option>
+                                <option value="">-- Bitte wï¿½hlen --</option>
                                 @foreach (var person in _personalList.Where(p => p.Skills.HasFlag(PersonalSkills.Hundefuehrer)))
                                 {
                                     <option value="@person.Id">@person.FullName</option>
@@ -405,7 +405,7 @@
                         <div class="form-group mb-3">
                             <label class="form-label">Drohnenpilot</label>
                             <select @bind="_currentDrone.DrohnenpilotId" class="form-select form-select-lg">
-                                <option value="">-- Bitte wählen --</option>
+                                <option value="">-- Bitte wï¿½hlen --</option>
                                 @foreach (var person in _personalList.Where(p => p.Skills.HasFlag(PersonalSkills.Drohnenpilot)))
                                 {
                                     <option value="@person.Id">@person.FullName</option>

@@ -6,11 +6,14 @@
 
 <div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
-        <a class="navbar-brand" href="">
-            <i class="bi bi-alarm-fill text-danger"></i> Einsatzüberwachung
+        <a class="navbar-brand" href="" aria-label="Zur Startseite">
+            <i class="bi bi-alarm-fill text-danger" aria-hidden="true"></i> Einsatzüberwachung
         </a>
-        <button class="btn btn-sm btn-theme-toggle" @onclick="ToggleTheme" title="@(_isDarkMode ? "Zu hellem Design wechseln" : "Zu dunklem Design wechseln")">
-            <i class="bi bi-@(_isDarkMode ? "sun-fill" : "moon-fill")"></i>
+        <button class="btn btn-sm btn-theme-toggle" 
+                @onclick="ToggleTheme" 
+                title="@(_isDarkMode ? "Zu hellem Design wechseln" : "Zu dunklem Design wechseln")"
+                aria-label="@(_isDarkMode ? "Zu hellem Design wechseln" : "Zu dunklem Design wechseln")">
+            <i class="bi bi-@(_isDarkMode ? "sun-fill" : "moon-fill")" aria-hidden="true"></i>
         </button>
     </div>
 </div>
@@ -18,62 +21,56 @@
 <input type="checkbox" title="Navigation menu" class="navbar-toggler" />
 
 <div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
-    <nav class="flex-column">
+    <nav class="flex-column" aria-label="Hauptnavigation">
         <div class="nav-item px-3">
-            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="nav-icon"><i class="bi bi-house-fill"></i></span> Home
+            <NavLink class="nav-link" href="" Match="NavLinkMatch.All" aria-label="Zur Startseite">
+                <span class="nav-icon"><i class="bi bi-house-fill" aria-hidden="true"></i></span> Home
             </NavLink>
         </div>
 
-        <div class="nav-section-header">Einsatz</div>
+        <div class="nav-section-header" role="heading" aria-level="2">Einsatz</div>
 
         <div class="nav-item px-3">
-            <NavLink class="nav-link" href="einsatz/start">
-                <span class="nav-icon"><i class="bi bi-alarm-fill"></i></span> Neuer Einsatz
-            </NavLink>
-        </div>
-
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="einsatz/monitor">
-                <span class="nav-icon"><i class="bi bi-bar-chart-fill"></i></span> Monitor
+            <NavLink class="nav-link" href="einsatz/start" aria-label="Neuen Einsatz starten">
+                <span class="nav-icon"><i class="bi bi-alarm-fill" aria-hidden="true"></i></span> Neuer Einsatz
             </NavLink>
         </div>
 
         <div class="nav-item px-3">
-            <NavLink class="nav-link" href="einsatz/karte">
-                <span class="nav-icon"><i class="bi bi-map-fill"></i></span> Karte
+            <NavLink class="nav-link" href="einsatz/monitor" aria-label="Einsatz überwachen">
+                <span class="nav-icon"><i class="bi bi-bar-chart-fill" aria-hidden="true"></i></span> Monitor
             </NavLink>
         </div>
 
         <div class="nav-item px-3">
-            <NavLink class="nav-link" href="einsatz/bericht">
-                <span class="nav-icon"><i class="bi bi-file-text-fill"></i></span> Bericht
+            <NavLink class="nav-link" href="einsatz/karte" aria-label="Einsatzkarte anzeigen">
+                <span class="nav-icon"><i class="bi bi-map-fill" aria-hidden="true"></i></span> Karte
             </NavLink>
         </div>
 
         <div class="nav-item px-3">
-            <NavLink class="nav-link" href="mobile/connect">
-                <span class="nav-icon"><i class="bi bi-qr-code"></i></span> Mobile Verbindung (QR)
+            <NavLink class="nav-link" href="einsatz/bericht" aria-label="Einsatzbericht erstellen">
+                <span class="nav-icon"><i class="bi bi-file-text-fill" aria-hidden="true"></i></span> Bericht
             </NavLink>
         </div>
 
         <div class="nav-item px-3">
-            <NavLink class="nav-link" href="mobile">
-                <span class="nav-icon"><i class="bi bi-phone-fill"></i></span> Mobile Dashboard
+            <NavLink class="nav-link" href="mobile/connect" aria-label="Mobile App verbinden">
+                <span class="nav-icon"><i class="bi bi-qr-code" aria-hidden="true"></i></span> Mobile QR-Code
             </NavLink>
         </div>
 
-        <div class="nav-section-header">Verwaltung</div>
+        <div class="nav-section-header" role="heading" aria-level="2">Verwaltung</div>
 
         <div class="nav-item px-3">
-            <NavLink class="nav-link" href="stammdaten">
-                <span class="nav-icon"><i class="bi bi-clipboard-data"></i></span> Stammdaten
+            <NavLink class="nav-link" href="stammdaten" aria-label="Stammdaten verwalten">
+                <span class="nav-icon"><i class="bi bi-clipboard-data" aria-hidden="true"></i></span> Stammdaten
             </NavLink>
         </div>
 
         <div class="nav-item px-3">
-            <NavLink class="nav-link" href="einstellungen">
-                <span class="nav-icon"><i class="bi bi-gear-fill"></i></span> Einstellungen
+            <NavLink class="nav-link" href="einstellungen" aria-label="Einstellungen öffnen">
+                <span class="nav-icon"><i class="bi bi-gear-fill" aria-hidden="true"></i></span> Einstellungen
             </NavLink>
         </div>
     </nav>
@@ -81,14 +78,25 @@
 
 @code {
     private bool _isDarkMode = false;
+    private bool _isInitialized = false;
 
     protected override async Task OnInitializedAsync()
     {
-        await ThemeService.InitializeAsync();
-        _isDarkMode = ThemeService.IsDarkMode;
-        
-        // Subscribe to theme changes
-        ThemeService.OnThemeChanged += OnThemeChangedHandler;
+        try
+        {
+            await ThemeService.InitializeAsync();
+            _isDarkMode = ThemeService.IsDarkMode;
+            _isInitialized = true;
+            
+            // Subscribe to theme changes
+            ThemeService.OnThemeChanged += OnThemeChangedHandler;
+            
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Fehler bei Theme-Initialisierung: {ex.Message}");
+        }
     }
 
     private async void OnThemeChangedHandler()
@@ -102,6 +110,12 @@
 
     private async Task ToggleTheme()
     {
+        if (!_isInitialized)
+        {
+            Console.WriteLine("Theme-Service noch nicht initialisiert");
+            return;
+        }
+
         try
         {
             await ThemeService.ToggleThemeAsync();

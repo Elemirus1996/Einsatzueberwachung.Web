@@ -1,5 +1,5 @@
-// Quelle: WPF-Projekt Models/EinsatzData.cs
-// Zentrale Einsatzdaten (Einsatzleiter, Ort, Teams, Funksprüche, Suchgebiete)
+ï»¿// Quelle: WPF-Projekt Models/EinsatzData.cs
+// Zentrale Einsatzdaten (Einsatzleiter, Ort, Teams, FunksprÃ¼che, Suchgebiete)
 
 using System;
 using System.Collections.Generic;
@@ -50,6 +50,6 @@ namespace Einsatzueberwachung.Domain.Models
             ElwPosition = null;
         }
 
-        public string EinsatzTyp => IstEinsatz ? "Einsatz" : "Übung";
+        public string EinsatzTyp => IstEinsatz ? "Einsatz" : "Ãœbung";
     }
 }

@@ -1,4 +1,4 @@
-// REST API Controller für mobilen Zugriff auf Einsatz-Daten
+ï»¿// REST API Controller fÃ¼r mobilen Zugriff auf Einsatz-Daten
 // Bereitstellung von Team-Status, Zeiten und Einsatzinformationen
 
 using Microsoft.AspNetCore.Mvc;
@@ -22,7 +22,7 @@ namespace Einsatzueberwachung.Web.Controllers
         }
 
         /// <summary>
-        /// Gibt den aktuellen Einsatz-Status zurück
+        /// Gibt den aktuellen Einsatz-Status zurÃ¼ck
         /// </summary>
         [HttpGet("status")]
         public IActionResult GetEinsatzStatus()
@@ -47,7 +47,7 @@ namespace Einsatzueberwachung.Web.Controllers
         }
 
         /// <summary>
-        /// Gibt alle Teams mit deren Status zurück
+        /// Gibt alle Teams mit deren Status zurÃ¼ck
         /// </summary>
         [HttpGet("teams")]
         public IActionResult GetAllTeams()
@@ -86,7 +86,7 @@ namespace Einsatzueberwachung.Web.Controllers
         }
 
         /// <summary>
-        /// Gibt ein einzelnes Team zurück
+        /// Gibt ein einzelnes Team zurÃ¼ck
         /// </summary>
         [HttpGet("teams/{teamId}")]
         public async Task<IActionResult> GetTeam(string teamId)
@@ -141,12 +141,12 @@ namespace Einsatzueberwachung.Web.Controllers
             try
             {
                 await _einsatzService.StartTeamTimerAsync(teamId);
-                _logger.LogInformation("Timer gestartet für Team {TeamId} via API", teamId);
+                _logger.LogInformation("Timer gestartet fÃ¼r Team {TeamId} via API", teamId);
                 return Ok(new { Message = "Timer gestartet" });
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Fehler beim Starten des Timers für Team {TeamId}", teamId);
+                _logger.LogError(ex, "Fehler beim Starten des Timers fÃ¼r Team {TeamId}", teamId);
                 return StatusCode(500, new { Error = "Interner Serverfehler" });
             }
         }
@@ -160,18 +160,18 @@ namespace Einsatzueberwachung.Web.Controllers
             try
             {
                 await _einsatzService.StopTeamTimerAsync(teamId);
-                _logger.LogInformation("Timer gestoppt für Team {TeamId} via API", teamId);
+                _logger.LogInformation("Timer gestoppt fÃ¼r Team {TeamId} via API", teamId);
                 return Ok(new { Message = "Timer gestoppt" });
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Fehler beim Stoppen des Timers für Team {TeamId}", teamId);
+                _logger.LogError(ex, "Fehler beim Stoppen des Timers fÃ¼r Team {TeamId}", teamId);
                 return StatusCode(500, new { Error = "Interner Serverfehler" });
             }
         }
 
         /// <summary>
-        /// Setzt den Timer eines Teams zurück
+        /// Setzt den Timer eines Teams zurÃ¼ck
         /// </summary>
         [HttpPost("teams/{teamId}/reset")]
         public async Task<IActionResult> ResetTeamTimer(string teamId)
@@ -179,18 +179,18 @@ namespace Einsatzueberwachung.Web.Controllers
             try
             {
                 await _einsatzService.ResetTeamTimerAsync(teamId);
-                _logger.LogInformation("Timer zurückgesetzt für Team {TeamId} via API", teamId);
-                return Ok(new { Message = "Timer zurückgesetzt" });
+                _logger.LogInformation("Timer zurÃ¼ckgesetzt fÃ¼r Team {TeamId} via API", teamId);
+                return Ok(new { Message = "Timer zurÃ¼ckgesetzt" });
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Fehler beim Zurücksetzen des Timers für Team {TeamId}", teamId);
+                _logger.LogError(ex, "Fehler beim ZurÃ¼cksetzen des Timers fÃ¼r Team {TeamId}", teamId);
                 return StatusCode(500, new { Error = "Interner Serverfehler" });
             }
         }
 
         /// <summary>
-        /// Gibt Suchgebiete zurück
+        /// Gibt Suchgebiete zurÃ¼ck
         /// </summary>
         [HttpGet("searchAreas")]
         public IActionResult GetSearchAreas()

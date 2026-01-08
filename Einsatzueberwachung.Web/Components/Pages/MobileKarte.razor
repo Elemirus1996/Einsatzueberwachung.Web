@@ -1,0 +1,254 @@
+@page "/mobile/karte"
+@inject IEinsatzService EinsatzService
+@inject NavigationManager Navigation
+@inject IJSRuntime JSRuntime
+@rendermode InteractiveServer
+
+<PageTitle>Mobile Karte - Suchgebiete</PageTitle>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<div class="mobile-map-page">
+    <!-- Header -->
+    <div class="mobile-map-header">
+        <button class="btn btn-light btn-sm" @onclick="@(() => Navigation.NavigateTo("/mobile"))">
+            <i class="bi bi-arrow-left"></i> Zurück
+        </button>
+        <h1><i class="bi bi-map-fill"></i> Suchgebiete</h1>
+    </div>
+
+    <!-- Map Container -->
+    <div class="mobile-map-container">
+        <div id="mobileMap" style="width: 100%; height: 100%;"></div>
+    </div>
+
+    <!-- Legend -->
+    <div class="mobile-map-legend">
+        <h5><i class="bi bi-info-circle-fill"></i> Legende</h5>
+        <div class="legend-items">
+            @if (_searchAreas.Any())
+            {
+                @foreach (var area in _searchAreas)
+                {
+                    <div class="legend-item">
+                        <div class="legend-color" style="background-color: @area.Color;"></div>
+                        <span>@area.Name</span>
+                        @if (!string.IsNullOrEmpty(area.AssignedTeamName))
+                        {
+                            <small class="text-muted">(@area.AssignedTeamName)</small>
+                        }
+                    </div>
+                }
+            }
+            else
+            {
+                <p class="text-muted mb-0">Keine Suchgebiete definiert</p>
+            }
+        </div>
+    </div>
+</div>
+
+<style>
+    .mobile-map-page {
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+        background-color: #f8f9fa;
+        overflow: hidden;
+    }
+
+    .mobile-map-header {
+        background: linear-gradient(135deg, #1e88e5 0%, #1565c0 100%);
+        color: white;
+        padding: 1rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        z-index: 1000;
+    }
+
+    .mobile-map-header h1 {
+        font-size: 1.5rem;
+        margin: 0;
+        font-weight: 600;
+    }
+
+    .mobile-map-header .btn {
+        flex-shrink: 0;
+    }
+
+    .mobile-map-container {
+        flex: 1;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .mobile-map-legend {
+        background: white;
+        padding: 1rem;
+        border-top: 1px solid #dee2e6;
+        max-height: 30vh;
+        overflow-y: auto;
+    }
+
+    .mobile-map-legend h5 {
+        font-size: 1rem;
+        margin-bottom: 0.75rem;
+        font-weight: 600;
+        color: #1e88e5;
+    }
+
+    .legend-items {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem;
+        background: #f8f9fa;
+        border-radius: 0.25rem;
+    }
+
+    .legend-color {
+        width: 24px;
+        height: 24px;
+        border-radius: 4px;
+        border: 2px solid white;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+        flex-shrink: 0;
+    }
+
+    .legend-item span {
+        flex: 1;
+        font-weight: 500;
+    }
+
+    .legend-item small {
+        font-size: 0.8rem;
+    }
+</style>
+
+@code {
+    private List<SearchArea> _searchAreas = new();
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            _searchAreas = EinsatzService.CurrentEinsatz.SearchAreas.ToList();
+            await Task.Delay(100); // Warte kurz bis Leaflet geladen ist
+            await InitializeMap();
+        }
+    }
+
+    private async Task InitializeMap()
+    {
+        try
+        {
+            // Standardposition (Deutschland Mitte)
+            var lat = 51.1657;
+            var lng = 10.4515;
+            var zoom = 6;
+
+            // Wenn Einsatz Koordinaten hat, diese verwenden
+            if (EinsatzService.CurrentEinsatz != null)
+            {
+                // Nutze Standardkoordinaten, später können Einsatz-Koordinaten hinzugefügt werden
+                lat = 51.1657;
+                lng = 10.4515;
+                zoom = 6;
+            }
+
+            var latStr = lat.ToString(System.Globalization.CultureInfo.InvariantCulture);
+            var lngStr = lng.ToString(System.Globalization.CultureInfo.InvariantCulture);
+
+            // Initialisiere Karte
+            await JSRuntime.InvokeVoidAsync("eval", $@"
+                (function() {{
+                    if (typeof L === 'undefined') {{
+                        console.error('Leaflet not loaded');
+                        return;
+                    }}
+
+                    // Alte Karte entfernen falls vorhanden
+                    if (window.mobileMapInstance) {{
+                        window.mobileMapInstance.remove();
+                    }}
+
+                    // Neue Karte erstellen
+                    var map = L.map('mobileMap').setView([{latStr}, {lngStr}], {zoom});
+                    window.mobileMapInstance = map;
+
+                    // Tile Layer hinzufügen
+                    L.tileLayer('https://{{s}}.tile.openstreetmap.org/{{z}}/{{x}}/{{y}}.png', {{
+                        attribution: '© OpenStreetMap',
+                        maxZoom: 19
+                    }}).addTo(map);
+
+                    // Layer-Gruppe für Suchgebiete sammeln
+                    var searchAreaGroup = L.featureGroup().addTo(map);
+
+                    {GetSearchAreasJavaScript()}
+
+                    // Karte an alle Suchgebiete anpassen
+                    setTimeout(function() {{
+                        if (searchAreaGroup.getLayers().length > 0) {{
+                            map.fitBounds(searchAreaGroup.getBounds(), {{ padding: [50, 50] }});
+                        }}
+                    }}, 100);
+                }})();
+            ");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Fehler beim Initialisieren der Karte: {ex.Message}");
+        }
+    }
+
+    private string GetSearchAreasJavaScript()
+    {
+        if (!_searchAreas.Any())
+            return string.Empty;
+
+        var sb = new System.Text.StringBuilder();
+
+        foreach (var area in _searchAreas.Where(a => !string.IsNullOrEmpty(a.GeoJsonData)))
+        {
+            var safeId = area.Id.Replace("-", "");
+            var safeName = area.Name.Replace("'", "\\'").Replace("\"", "\\\"");
+            var safeTeam = string.IsNullOrEmpty(area.AssignedTeamName) ? "Nicht zugewiesen" : area.AssignedTeamName.Replace("'", "\\'").Replace("\"", "\\\"");
+            
+            sb.AppendLine($@"
+                try {{
+                    var area{safeId} = {area.GeoJsonData};
+                    var areaLayer{safeId} = L.geoJSON(area{safeId}, {{
+                        style: {{
+                            color: '{area.Color}',
+                            weight: 3,
+                            opacity: 0.8,
+                            fillColor: '{area.Color}',
+                            fillOpacity: 0.3
+                        }}
+                    }}).bindPopup('<b>{safeName}</b><br>{safeTeam}');
+
+                    areaLayer{safeId}.addTo(searchAreaGroup);
+                }} catch(e) {{
+                    console.error('Fehler beim Laden von {safeName}:', e);
+                }}
+            ");
+        }
+
+        return sb.ToString();
+    }
+
+    public void Dispose()
+    {
+        // Cleanup der Karte
+    }
+}

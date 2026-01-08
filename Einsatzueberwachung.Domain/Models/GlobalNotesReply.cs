@@ -1,5 +1,5 @@
-// Repräsentiert eine Antwort/Kommentar zu einem Funkspruch/Notiz-Eintrag
-// Teil des Thread-Systems für erweiterte Kommunikation
+ï»¿// ReprÃ¤sentiert eine Antwort/Kommentar zu einem Funkspruch/Notiz-Eintrag
+// Teil des Thread-Systems fÃ¼r erweiterte Kommunikation
 
 using System;
 

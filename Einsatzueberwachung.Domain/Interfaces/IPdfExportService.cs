@@ -1,4 +1,4 @@
-// Service-Interface f�r PDF-Export von Einsatzberichten
+﻿// Service-Interface für PDF-Export von Einsatzberichten
 // Quelle: Abgeleitet von WPF Services/PdfExportService.cs und ViewModels/PdfExportViewModel.cs
 
 using System.Collections.Generic;

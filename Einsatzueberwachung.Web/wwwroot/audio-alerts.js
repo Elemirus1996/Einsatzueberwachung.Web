@@ -1,4 +1,4 @@
-// Audio-Warnungs-System für Timer-Alerts
+ï»¿// Audio-Warnungs-System fÃ¼r Timer-Alerts
 // Spielt akustische Warnungen bei kritischen Team-Timern ab
 
 window.AudioAlerts = {
@@ -19,7 +19,7 @@ window.AudioAlerts = {
         }
     },
     
-    // Spielt einen Warn-Ton ab (Frequenz-basiert, keine Datei nötig)
+    // Spielt einen Warn-Ton ab (Frequenz-basiert, keine Datei nÃ¶tig)
     playWarningBeep: function(duration = 300, frequency = 800) {
         try {
             if (!this.audioContext) {
@@ -58,7 +58,7 @@ window.AudioAlerts = {
         return true;
     },
     
-    // Spielt eine kritische Warnung ab (drei kurze Töne)
+    // Spielt eine kritische Warnung ab (drei kurze TÃ¶ne)
     playSecondWarning: function() {
         this.playWarningBeep(200, 1200);
         setTimeout(() => this.playWarningBeep(200, 1200), 300);
@@ -66,7 +66,7 @@ window.AudioAlerts = {
         return true;
     },
     
-    // Test-Funktion für Debug-Zwecke
+    // Test-Funktion fÃ¼r Debug-Zwecke
     test: function() {
         console.log('Test: Spiele Warn-Ton ab');
         this.playWarningBeep(500, 880);

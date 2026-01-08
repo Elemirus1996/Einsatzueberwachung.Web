@@ -1,4 +1,4 @@
-// Service-Interface f�r Stammdaten-Verwaltung (Personal, Hunde, Drohnen)
+﻿// Service-Interface für Stammdaten-Verwaltung (Personal, Hunde, Drohnen)
 // Quelle: Abgeleitet von WPF Services/DataService.cs und ViewModels/MasterDataViewModel.cs
 
 using System.Collections.Generic;

@@ -1,27 +1,33 @@
-/* ========================================
+﻿/* ========================================
    THEME SYNC SYSTEM
-   Synchronisiert Theme-�nderungen �ber alle Tabs/Fenster
+   Synchronisiert Theme-ï¿½nderungen ï¿½ber alle Tabs/Fenster
    ======================================== */
 
 (function () {
     'use strict';
 
-    console.log('Theme Sync System geladen');
+    // Debug-Flag - setze auf false fÃ¼r Production
+    const DEBUG = false;
+    const log = DEBUG ? console.log.bind(console) : () => {};
+    const warn = DEBUG ? console.warn.bind(console) : () => {};
+    const error = console.error.bind(console); // Errors immer loggen
+
+    log('Theme Sync System geladen');
 
     // Funktion zum Laden und Anwenden des Themes
     function loadAndApplyTheme() {
         try {
             const savedTheme = localStorage.getItem('theme');
             if (savedTheme) {
-                console.log('Theme aus localStorage geladen:', savedTheme);
+                log('Theme aus localStorage geladen:', savedTheme);
                 applyTheme(savedTheme);
             } else {
-                // Versuche aus SessionData zu lesen (f�r Initial-Load)
-                console.log('Kein Theme in localStorage, verwende light als Standard');
+                // Versuche aus SessionData zu lesen (fÃ¼r Initial-Load)
+                log('Kein Theme in localStorage, verwende light als Standard');
                 applyTheme('light');
             }
         } catch (e) {
-            console.error('Fehler beim Laden des Themes:', e);
+            error('Fehler beim Laden des Themes:', e);
             applyTheme('light');
         }
     }
@@ -36,47 +42,47 @@
                 const currentTheme = document.documentElement.getAttribute('data-bs-theme');
                 const savedTheme = localStorage.getItem('theme');
                 
-                // Wenn Theme nicht mit gespeichertem �bereinstimmt, korrigiere es
+                // Wenn Theme nicht mit gespeichertem ï¿½bereinstimmt, korrigiere es
                 if (savedTheme && currentTheme !== savedTheme) {
-                    console.log('Theme-Drift erkannt, korrigiere:', savedTheme);
+                    log('Theme-Drift erkannt, korrigiere:', savedTheme);
                     document.documentElement.setAttribute('data-bs-theme', savedTheme);
                 }
             }
         });
     });
 
-    // Beobachte das HTML-Element f�r �nderungen
+    // Beobachte das HTML-Element fï¿½r ï¿½nderungen
     observer.observe(document.documentElement, {
         attributes: true,
         attributeFilter: ['data-bs-theme']
     });
 
-    // LocalStorage Event Listener f�r Theme-�nderungen
-    // Wird ausgel�st wenn ANDERE Tabs den Theme �ndern
+    // LocalStorage Event Listener fï¿½r Theme-ï¿½nderungen
+    // Wird ausgelï¿½st wenn ANDERE Tabs den Theme ï¿½ndern
     window.addEventListener('storage', function (e) {
         if (e.key === 'theme' && e.newValue !== null) {
-            console.log('Theme-�nderung erkannt von anderem Tab:', e.newValue);
+            log('Theme-Ã„nderung erkannt von anderem Tab:', e.newValue);
             applyTheme(e.newValue);
         }
     });
 
-    // Broadcast Channel API f�r moderne Browser
-    // Erm�glicht direkte Kommunikation zwischen Tabs
+    // Broadcast Channel API fï¿½r moderne Browser
+    // Ermï¿½glicht direkte Kommunikation zwischen Tabs
     let themeChannel = null;
     
     if ('BroadcastChannel' in window) {
         try {
             themeChannel = new BroadcastChannel('theme-updates');
-            console.log('BroadcastChannel f�r Theme-Updates erstellt');
+            log('BroadcastChannel fÃ¼r Theme-Updates erstellt');
 
             themeChannel.onmessage = function (event) {
                 if (event.data && event.data.type === 'theme-changed') {
-                    console.log('Theme-Update via BroadcastChannel empfangen:', event.data.theme);
+                    log('Theme-Update via BroadcastChannel empfangen:', event.data.theme);
                     applyTheme(event.data.theme);
                 }
             };
         } catch (e) {
-            console.warn('BroadcastChannel konnte nicht erstellt werden:', e);
+            warn('BroadcastChannel konnte nicht erstellt werden:', e);
         }
     }
 
@@ -86,10 +92,10 @@
             const currentTheme = document.documentElement.getAttribute('data-bs-theme');
             
             if (currentTheme !== theme) {
-                console.log('Wende Theme an:', theme);
+                log('Wende Theme an:', theme);
                 document.documentElement.setAttribute('data-bs-theme', theme);
                 
-                // Trigger custom event f�r Blazor-Komponenten
+                // Trigger custom event fï¿½r Blazor-Komponenten
                 window.dispatchEvent(new CustomEvent('theme-changed', {
                     detail: { theme: theme }
                 }));
@@ -100,14 +106,14 @@
         }
     }
 
-    // Funktion zum Broadcasten von Theme-�nderungen
+    // Funktion zum Broadcasten von Theme-ï¿½nderungen
     window.broadcastThemeChange = function (theme) {
-        console.log('Broadcasting Theme-�nderung:', theme);
+        log('Broadcasting Theme-Ã„nderung:', theme);
         
         // Speichere in LocalStorage (triggert storage event in anderen Tabs)
         localStorage.setItem('theme', theme);
         
-        // Broadcast via BroadcastChannel falls verf�gbar
+        // Broadcast via BroadcastChannel falls verfÃ¼gbar
         if (themeChannel) {
             try {
                 themeChannel.postMessage({
@@ -115,9 +121,9 @@
                     theme: theme,
                     timestamp: Date.now()
                 });
-                console.log('Theme-Update via BroadcastChannel gesendet');
+                log('Theme-Update via BroadcastChannel gesendet');
             } catch (e) {
-                console.warn('Fehler beim BroadcastChannel-Versand:', e);
+                warn('Fehler beim BroadcastChannel-Versand:', e);
             }
         }
         
@@ -125,18 +131,18 @@
         applyTheme(theme);
     };
 
-    // Forciere Theme-Anwendung (f�r Blazor-Navigation)
+    // Forciere Theme-Anwendung (fï¿½r Blazor-Navigation)
     window.forceApplyTheme = function() {
         const savedTheme = localStorage.getItem('theme');
         if (savedTheme) {
-            console.log('Force-Apply Theme:', savedTheme);
+            log('Force-Apply Theme:', savedTheme);
             applyTheme(savedTheme);
         }
     };
 
-    // Visuelles Feedback f�r Theme-Wechsel
+    // Visuelles Feedback fï¿½r Theme-Wechsel
     function showThemeChangeNotification(theme) {
-        // Pr�fe ob bereits eine Notification existiert
+        // Prï¿½fe ob bereits eine Notification existiert
         const existingNotif = document.getElementById('theme-change-notification');
         if (existingNotif) {
             existingNotif.remove();
@@ -180,7 +186,7 @@
         }, 2000);
     }
 
-    // CSS Animationen hinzuf�gen
+    // CSS Animationen hinzufï¿½gen
     const style = document.createElement('style');
     style.textContent = `
         @keyframes slideInRight {
@@ -206,7 +212,7 @@
     `;
     document.head.appendChild(style);
 
-    // Cleanup beim Schlie�en des Tabs
+    // Cleanup beim Schlieï¿½en des Tabs
     window.addEventListener('beforeunload', function () {
         if (themeChannel) {
             themeChannel.close();
@@ -216,7 +222,7 @@
     // Bei Blazor-Navigationen (Enhanced Navigation)
     if ('Blazor' in window) {
         window.addEventListener('enhancednavigation', function() {
-            console.log('Blazor Enhanced Navigation erkannt, force-apply theme');
+            log('Blazor Enhanced Navigation erkannt, force-apply theme');
             window.forceApplyTheme();
         });
     }
@@ -227,10 +233,10 @@
         const savedTheme = localStorage.getItem('theme');
         
         if (savedTheme && currentTheme !== savedTheme) {
-            console.log('Periodic check: Theme-Drift korrigiert', savedTheme);
+            log('Periodic check: Theme-Drift korrigiert', savedTheme);
             document.documentElement.setAttribute('data-bs-theme', savedTheme);
         }
-    }, 1000); // Jede Sekunde pr�fen
+    }, 1000); // Jede Sekunde prï¿½fen
 
-    console.log('Theme Sync System bereit');
+    log('Theme Sync System bereit');
 })();

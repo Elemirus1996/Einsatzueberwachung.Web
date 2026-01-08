@@ -1,4 +1,4 @@
-/* ========================================
+ï»¿/* ========================================
    PRINT STYLES - Karten-Druck
    ======================================== */
 
@@ -69,7 +69,7 @@
         opacity: 1 !important;
     }
     
-    /* Info-Box für Druck */
+    /* Info-Box fÃ¼r Druck */
     @page {
         size: landscape;
         margin: 1cm;
@@ -321,7 +321,7 @@
         display: block !important;
     }
     
-    /* ELW-Marker Stil für Druck */
+    /* ELW-Marker Stil fÃ¼r Druck */
     .elw-marker-icon {
         filter: drop-shadow(0 0 3px rgba(0,0,0,0.5)) !important;
     }

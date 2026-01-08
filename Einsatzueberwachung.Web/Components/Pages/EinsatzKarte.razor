@@ -1,4 +1,4 @@
-@page "/einsatz/karte"
+﻿@page "/einsatz/karte"
 @using Einsatzueberwachung.Domain.Interfaces
 @using Einsatzueberwachung.Domain.Models
 @inject IEinsatzService EinsatzService
@@ -22,9 +22,10 @@
                        class="form-control" 
                        @bind="_addressSearch" 
                        @bind:event="oninput"
-                       placeholder="Adresse oder Ort suchen..." />
-                <button class="btn btn-primary" @onclick="SearchAddress">
-                    <i class="bi bi-search"></i> Suchen
+                       placeholder="Adresse oder Ort suchen..." 
+                       aria-label="Adresse oder Ort suchen" />
+                <button class="btn btn-primary" @onclick="SearchAddress" aria-label="Adresse suchen">
+                    <i class="bi bi-search" aria-hidden="true"></i> Suchen
                 </button>
             </div>
             @if (!string.IsNullOrEmpty(_searchMessage))
@@ -33,17 +34,17 @@
             }
         </div>
         <div class="col-md-6 text-end">
-            <button class="btn btn-success" @onclick="ShowAddAreaDialog">
-                <i class="bi bi-plus-circle-fill"></i> Suchgebiet hinzuf�gen
+            <button class="btn btn-success" @onclick="ShowAddAreaDialog" aria-label="Suchgebiet hinzufügen">
+                <i class="bi bi-plus-circle-fill" aria-hidden="true"></i> Suchgebiet Hinzufügen
             </button>
-            <button class="btn btn-info" @onclick="SetElwPosition">
-                <i class="bi bi-geo-fill"></i> @(_hasElwPosition ? "ELW verschieben" : "ELW-Position setzen")
+            <button class="btn btn-info" @onclick="SetElwPosition" aria-label="@(_hasElwPosition ? "ELW verschieben" : "ELW-Position setzen")">
+                <i class="bi bi-geo-fill" aria-hidden="true"></i> @(_hasElwPosition ? "ELW verschieben" : "ELW-Position setzen")
             </button>
-            <button class="btn btn-warning" @onclick="PrintMap">
-                <i class="bi bi-printer-fill"></i> Karte drucken
+            <button class="btn btn-warning" @onclick="PrintMap" aria-label="Karte drucken">
+                <i class="bi bi-printer-fill" aria-hidden="true"></i> Karte drucken
             </button>
-            <button class="btn btn-secondary" @onclick="GoBack">
-                <i class="bi bi-arrow-left"></i> Zur�ck
+            <button class="btn btn-secondary" @onclick="GoBack" aria-label="Zurück zur vorherigen Seite">
+                <i class="bi bi-arrow-left" aria-hidden="true"></i> Zurück
             </button>
         </div>
     </div>
@@ -51,25 +52,37 @@
     <!-- Kartenansicht-Umschalter -->
     <div class="row mb-3">
         <div class="col-12">
-            <div class="btn-group" role="group" aria-label="Kartenansicht">
-                <button type="button" class="btn btn-outline-primary @(_currentMapLayer == "streets" ? "active" : "")" @onclick="@(() => ChangeMapLayer("streets"))">
-                    <i class="bi bi-map"></i> Stra�enkarte
+            <div class="btn-group" role="group" aria-label="Kartenansicht auswählen">
+                <button type="button" 
+                        class="btn btn-outline-primary @(_currentMapLayer == "streets" ? "active" : "")" 
+                        @onclick="@(() => ChangeMapLayer("streets"))"
+                        aria-label="Straßenkarte" 
+                        aria-pressed="@(_currentMapLayer == "streets")">
+                    <i class="bi bi-map" aria-hidden="true"></i> Straßenkarte
                 </button>
-                <button type="button" class="btn btn-outline-primary @(_currentMapLayer == "satellite" ? "active" : "")" @onclick="@(() => ChangeMapLayer("satellite"))">
-                    <i class="bi bi-globe"></i> Satellit
+                <button type="button" 
+                        class="btn btn-outline-primary @(_currentMapLayer == "satellite" ? "active" : "")" 
+                        @onclick="@(() => ChangeMapLayer("satellite"))"
+                        aria-label="Satellitenansicht" 
+                        aria-pressed="@(_currentMapLayer == "satellite")">
+                    <i class="bi bi-globe" aria-hidden="true"></i> Satellit
                 </button>
-                <button type="button" class="btn btn-outline-primary @(_currentMapLayer == "hybrid" ? "active" : "")" @onclick="@(() => ChangeMapLayer("hybrid"))">
-                    <i class="bi bi-layers"></i> Hybrid
+                <button type="button" 
+                        class="btn btn-outline-primary @(_currentMapLayer == "hybrid" ? "active" : "")" 
+                        @onclick="@(() => ChangeMapLayer("hybrid"))"
+                        aria-label="Hybrid-Ansicht" 
+                        aria-pressed="@(_currentMapLayer == "hybrid")">
+                    <i class="bi bi-layers" aria-hidden="true"></i> Hybrid
                 </button>
             </div>
             @if (_hasElwPosition)
             {
-                <span class="badge bg-success ms-3">
-                    <i class="bi bi-geo-fill"></i> ELW-Position gesetzt
+                <span class="badge bg-success ms-3" role="status">
+                    <i class="bi bi-geo-fill" aria-hidden="true"></i> ELW-Position gesetzt
                 </span>
             }
-            <button type="button" class="btn btn-sm btn-outline-info ms-2" @onclick="ShowHelp">
-                <i class="bi bi-question-circle"></i> Hilfe
+            <button type="button" class="btn btn-sm btn-outline-info ms-2" @onclick="ShowHelp" aria-label="Hilfe anzeigen">
+                <i class="bi bi-question-circle" aria-hidden="true"></i> Hilfe
             </button>
         </div>
     </div>
@@ -158,7 +171,7 @@
                         <li>Gebiete gesamt: <strong>@_searchAreas.Count</strong></li>
                         <li>Abgeschlossen: <strong>@_searchAreas.Count(a => a.IsCompleted)</strong></li>
                         <li>In Bearbeitung: <strong>@_searchAreas.Count(a => !a.IsCompleted)</strong></li>
-                        <li>Gesamtfl�che: <strong>@GetTotalArea()</strong></li>
+                        <li>Gesamtfläche: <strong>@GetTotalArea()</strong></li>
                     </ul>
                 </div>
             }
@@ -186,7 +199,7 @@
                                 <th>Name</th>
                                 <th>Zugewiesenes Team</th>
                                 <th>Status</th>
-                                <th>Fl�che</th>
+                                <th>Fläche</th>
                                 <th>Aktionen</th>
                             </tr>
                         </thead>
@@ -248,7 +261,7 @@
                         <li><strong>Rechteck:</strong> Zeichnen Sie ein Rechteck</li>
                         <li><strong>Marker:</strong> Setzen Sie einen Marker</li>
                     </ul>
-                    <p class="mb-0">Klicken Sie nach dem Zeichnen auf "Suchgebiet hinzuf�gen", um Details einzugeben.</p>
+                    <p class="mb-0">Klicken Sie nach dem Zeichnen auf "Suchgebiet HinzuFügen", um Details einzugeben.</p>
                 </div>
             }
         </div>
@@ -275,7 +288,7 @@
                         @if (_currentArea.Coordinates != null && _currentArea.Coordinates.Count >= 3)
                         {
                             <div class="alert alert-info mb-3">
-                                <strong><i class="bi bi-rulers"></i> Berechnete Fl�che:</strong> 
+                                <strong><i class="bi bi-rulers"></i> Berechnete Fläche:</strong> 
                                 @_currentArea.FormattedArea
                                 <br/>
                                 <small class="text-muted">
@@ -344,12 +357,12 @@
     private bool _hasElwPosition = false;
     private string _currentMapLayer = "streets";
 
-    protected override async Task OnInitializedAsync()
+    protected override void OnInitialized()
     {
         _searchAreas = EinsatzService.CurrentEinsatz.SearchAreas.ToList();
         _teams = EinsatzService.Teams;
         
-        // DotNetObjectReference f�r Callbacks erstellen
+        // DotNetObjectReference fü¿½r Callbacks erstellen
         _dotNetReference = DotNetObjectReference.Create(this);
         
         // Wenn Einsatzort-Adresse vorhanden, versuche zu geocoden
@@ -358,9 +371,9 @@
             _addressSearch = EinsatzService.CurrentEinsatz.MapAddress;
         }
         
-        // Pr�fe ob ELW-Position vorhanden
+        // Prü¿½fe ob ELW-Position vorhanden
         _hasElwPosition = EinsatzService.CurrentEinsatz.ElwPosition.HasValue;
-        if (_hasElwPosition)
+        if (_hasElwPosition && EinsatzService.CurrentEinsatz.ElwPosition.HasValue)
         {
             var elw = EinsatzService.CurrentEinsatz.ElwPosition.Value;
             _mapCenterLat = elw.Latitude;
@@ -378,7 +391,7 @@
                 await JSRuntime.InvokeVoidAsync("LeafletMap.initialize", 
                     "einsatzMap", _mapCenterLat, _mapCenterLng, _mapZoom, _dotNetReference);
                 
-                // Bestehende Suchgebiete zur Karte hinzuf�gen
+                // Bestehende Suchgebiete zur Karte HinzuFügen
                 foreach (var area in _searchAreas.Where(a => !string.IsNullOrEmpty(a.GeoJsonData)))
                 {
                     await JSRuntime.InvokeVoidAsync("LeafletMap.addSearchArea",
@@ -598,7 +611,7 @@
         {
             // Kurzer Info-Dialog
             var result = await JSRuntime.InvokeAsync<bool>("confirm", 
-                "Karte drucken?\n\nTipp: Im Druckdialog k�nnen Sie 'Als PDF speichern' w�hlen, um die Karte als PDF-Datei zu exportieren.");
+                "Karte drucken?\n\nTipp: Im Druckdialog können Sie 'Als PDF speichern' wählen, um die Karte als PDF-Datei zu exportieren.");
             
             if (result)
             {
@@ -631,31 +644,31 @@
             @"?? Karten-Funktionen:
 
 ??? KARTENANSICHTEN:
-� Stra�enkarte: Klassische Stra�enkarte mit Details
-� Satellit: Satellitenbild der Gegend
-� Hybrid: Kombination aus Satellitenbild und Stra�ennamen
+ü¿½ Straßenkarte: Klassische Straßenkarte mit Details
+ü¿½ Satellit: Satellitenbild der Gegend
+ü¿½ Hybrid: Kombination aus Satellitenbild und Straßennamen
 
 ?? SUCHGEBIETE EINZEICHNEN:
-� Verwenden Sie die Zeichenwerkzeuge am linken Rand der Karte
-� Polygon: Zeichnen Sie beliebige Formen (Klicken f�r jeden Punkt, Doppelklick zum Beenden)
-� Rechteck: Ziehen Sie ein Rechteck auf
-� Marker: Setzen Sie einzelne Marker
+ü¿½ Verwenden Sie die Zeichenwerkzeuge am linken Rand der Karte
+ü¿½ Polygon: Zeichnen Sie beliebige Formen (Klicken für jeden Punkt, Doppelklick zum Beenden)
+ü¿½ Rechteck: Ziehen Sie ein Rechteck auf
+ü¿½ Marker: Setzen Sie einzelne Marker
 
 ?? ELW-POSITION:
-� Zoomen/Verschieben Sie die Karte zur gew�nschten Position
-� Klicken Sie auf 'ELW-Position setzen'
-� Der rote ELW-Marker wird in der Kartenmitte platziert
-� Sie k�nnen den ELW-Marker mit der Maus verschieben
+ü¿½ Zoomen/Verschieben Sie die Karte zur gewünschten Position
+ü¿½ Klicken Sie auf 'ELW-Position setzen'
+ü¿½ Der rote ELW-Marker wird in der Kartenmitte platziert
+ü¿½ Sie können den ELW-Marker mit der Maus verschieben
 
 ??? KARTE DRUCKEN:
-� Klicken Sie auf 'Karte drucken'
-� W�hlen Sie 'Als PDF speichern', um eine PDF-Datei zu erstellen
-� Die Legende mit allen Suchgebieten wird automatisch eingef�gt
+ü¿½ Klicken Sie auf 'Karte drucken'
+ü¿½ Wählen Sie 'Als PDF speichern', um eine PDF-Datei zu erstellen
+ü¿½ Die Legende mit allen Suchgebieten wird automatisch eingefügt
 
 ?? TIPPS:
-� Alle �nderungen werden automatisch gespeichert
-� Suchgebiete k�nnen Teams zugewiesen werden
-� Die Fl�che wird automatisch berechnet");
+ü¿½ Alle Änderungen werden automatisch gespeichert
+ü¿½ Suchgebiete können Teams zugewiesen werden
+ü¿½ Die Fläche wird automatisch berechnet");
     }
 
     private string GetRandomColor()
@@ -667,18 +680,18 @@
     
     private string GetTotalArea()
     {
-        if (!_searchAreas.Any()) return "0 m�";
+        if (!_searchAreas.Any()) return "0 mü¿½";
         
         var totalSquareMeters = _searchAreas.Sum(a => a.AreaInSquareMeters);
         
         if (totalSquareMeters < 1)
-            return "< 1 m�";
+            return "< 1 mü¿½";
         else if (totalSquareMeters < 50000)
-            return $"{totalSquareMeters:N0} m�";
+            return $"{totalSquareMeters:N0} mü¿½";
         else if (totalSquareMeters < 1000000)
             return $"{(totalSquareMeters / 10000.0):N2} ha";
         else
-            return $"{(totalSquareMeters / 1000000.0):N2} km�";
+            return $"{(totalSquareMeters / 1000000.0):N2} kmü¿½";
     }
     
     private void ExtractCoordinatesFromGeoJson(SearchArea area)
@@ -719,7 +732,7 @@
         Console.WriteLine($"Shape created: {geoJson}");
         _lastDrawnGeoJson = geoJson;
         
-        // Dialog automatisch �ffnen
+        // Dialog automatisch ü¿½ffnen
         await InvokeAsync(() =>
         {
             ShowAddAreaDialog();
@@ -756,7 +769,7 @@
     {
         Console.WriteLine($"Shape deleted: {geoJson}");
         
-        // L�sche das entsprechende Suchgebiet
+        // Lü¿½sche das entsprechende Suchgebiet
         // TODO: Implementiere Mapping zwischen Layer und SearchArea
         await Task.CompletedTask;
     }
@@ -774,7 +787,7 @@
         }
     }
     
-    // Helper-Klasse f�r Geocoding-Result
+    // Helper-Klasse fü¿½r Geocoding-Result
     private class GeocodeResult
     {
         public bool Success { get; set; }
@@ -784,7 +797,7 @@
         public string Message { get; set; } = "";
     }
     
-    // Helper-Klasse f�r Map-Center
+    // Helper-Klasse fü¿½r Map-Center
     private class MapCenter
     {
         public double Lat { get; set; }

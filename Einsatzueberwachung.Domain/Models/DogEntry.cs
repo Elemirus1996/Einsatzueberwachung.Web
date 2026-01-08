@@ -1,5 +1,5 @@
-// Quelle: WPF-Projekt Models/DogEntry.cs
-// Repräsentiert einen Hund mit Name, Rasse, Ausbildungen und zugeordnetem Hundeführer
+ï»¿// Quelle: WPF-Projekt Models/DogEntry.cs
+// ReprÃ¤sentiert einen Hund mit Name, Rasse, Ausbildungen und zugeordnetem HundefÃ¼hrer
 
 using System;
 using System.Collections.Generic;

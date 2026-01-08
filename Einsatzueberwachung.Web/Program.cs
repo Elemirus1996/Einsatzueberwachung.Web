@@ -1,10 +1,14 @@
-using Einsatzueberwachung.Web.Client.Pages;
+﻿using Einsatzueberwachung.Web.Client.Pages;
 using Einsatzueberwachung.Web.Components;
 using Einsatzueberwachung.Domain.Interfaces;
 using Einsatzueberwachung.Domain.Services;
+using Einsatzueberwachung.Web.Middleware;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using Microsoft.AspNetCore.ResponseCompression;
+using System.IO.Compression;
+using FluentValidation;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,33 +17,89 @@ builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents()
     .AddInteractiveWebAssemblyComponents();
 
-// Cookie-Policy f�r HTTPS
+// Response Compression fä¼r bessere Performance
+builder.Services.AddResponseCompression(options =>
+{
+    options.EnableForHttps = true;
+    options.Providers.Add<BrotliCompressionProvider>();
+    options.Providers.Add<GzipCompressionProvider>();
+    options.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(
+        new[] { "application/json", "text/css", "text/javascript", "image/svg+xml" });
+});
+
+builder.Services.Configure<BrotliCompressionProviderOptions>(options =>
+{
+    options.Level = CompressionLevel.Fastest;
+});
+
+builder.Services.Configure<GzipCompressionProviderOptions>(options =>
+{
+    options.Level = CompressionLevel.Optimal;
+});
+
+// Response Caching
+builder.Services.AddResponseCaching();
+
+// Cookie-Policy fü¿½r HTTPS
 builder.Services.Configure<CookiePolicyOptions>(options =>
 {
     options.MinimumSameSitePolicy = SameSiteMode.Strict;
     options.Secure = CookieSecurePolicy.Always;
 });
 
-// API Controllers f�r Mobile Support
+// API Controllers fü¿½r Mobile Support
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// SignalR f�r Echtzeit-Updates
-builder.Services.AddSignalR();
+// HttpClient fü¿½r interne API-Calls
+builder.Services.AddHttpClient();
 
-// CORS f�r mobile Clients (lokales Netzwerk)
+// SignalR fä¼r Echtzeit-Updates mit optimierter Konfiguration
+builder.Services.AddSignalR(options =>
+{
+    options.EnableDetailedErrors = builder.Environment.IsDevelopment();
+    options.KeepAliveInterval = TimeSpan.FromSeconds(15);
+    options.ClientTimeoutInterval = TimeSpan.FromSeconds(30);
+    options.HandshakeTimeout = TimeSpan.FromSeconds(15);
+    options.MaximumReceiveMessageSize = 32 * 1024; // 32 KB
+    options.StreamBufferCapacity = 10;
+});
+
+// CORS fü¿½r mobile Clients (lokales Netzwerk)
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("MobilePolicy", policy =>
     {
-        policy.AllowAnyOrigin() // F�r Entwicklung - sp�ter einschr�nken
+        // Nur lokales Netzwerk erlauben (192.168.x.x, 10.x.x.x, 172.16-31.x.x, localhost)
+        policy.WithOrigins(
+                  "http://localhost:*",
+                  "https://localhost:*",
+                  "http://192.168.*.*",
+                  "http://10.*.*.*",
+                  "http://172.16.*.*",
+                  "http://172.17.*.*",
+                  "http://172.18.*.*",
+                  "http://172.19.*.*",
+                  "http://172.20.*.*",
+                  "http://172.21.*.*",
+                  "http://172.22.*.*",
+                  "http://172.23.*.*",
+                  "http://172.24.*.*",
+                  "http://172.25.*.*",
+                  "http://172.26.*.*",
+                  "http://172.27.*.*",
+                  "http://172.28.*.*",
+                  "http://172.29.*.*",
+                  "http://172.30.*.*",
+                  "http://172.31.*.*")
+              .SetIsOriginAllowedToAllowWildcardSubdomains()
               .AllowAnyMethod()
               .AllowAnyHeader();
     });
 });
 
-// JWT Authentication f�r zuk�nftigen externen Zugriff
+// JWT Authentication fü¿½r zukü¿½nftigen externen Zugriff
 var jwtKey = builder.Configuration["Jwt:Key"] ?? "EinsatzueberwachungSecretKey2024!";
 var jwtIssuer = builder.Configuration["Jwt:Issuer"] ?? "Einsatzueberwachung";
 var jwtAudience = builder.Configuration["Jwt:Audience"] ?? "EinsatzueberwachungMobile";
@@ -76,7 +136,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 builder.Services.AddAuthorization();
 
-// Registriere Domain-Services als Singletons (f�r den laufenden Einsatz)
+// Registriere Domain-Services als Singletons (für den laufenden Einsatz)
 builder.Services.AddSingleton<IMasterDataService, MasterDataService>();
 builder.Services.AddSingleton<IEinsatzService, EinsatzService>();
 builder.Services.AddSingleton<ISettingsService, SettingsService>();
@@ -84,10 +144,22 @@ builder.Services.AddSingleton<IPdfExportService, PdfExportService>();
 builder.Services.AddSingleton<ToastService>();
 builder.Services.AddSingleton<ThemeService>();
 
-// SignalR Broadcast Service f�r mobile Updates
+// FluentValidation Validators registrieren
+builder.Services.AddValidatorsFromAssembly(typeof(Einsatzueberwachung.Domain.Models.PersonalEntry).Assembly);
+
+// Global Exception Handler
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+builder.Services.AddProblemDetails();
+
+// Health Checks
+builder.Services.AddHealthChecks();
+// SignalR Broadcast Service fü¿½r mobile Updates
 builder.Services.AddHostedService<Einsatzueberwachung.Web.Services.SignalRBroadcastService>();
 
 var app = builder.Build();
+
+// Response Compression aktivieren
+app.UseResponseCompression();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -98,12 +170,16 @@ if (app.Environment.IsDevelopment())
 }
 else
 {
-    app.UseExceptionHandler("/Error", createScopeForErrors: true);
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 
+// Global Exception Handler (für alle Umgebungen)
+app.UseExceptionHandler();
+
 app.UseHttpsRedirection();
+
+// Response Caching
+app.UseResponseCaching();
 
 app.UseStaticFiles();
 app.UseCookiePolicy();
@@ -118,6 +194,9 @@ app.UseAntiforgery();
 
 // API Controllers
 app.MapControllers();
+
+// Health Check Endpoint
+app.MapHealthChecks("/health");
 
 // SignalR Hub
 app.MapHub<Einsatzueberwachung.Web.Hubs.EinsatzHub>("/hubs/einsatz");

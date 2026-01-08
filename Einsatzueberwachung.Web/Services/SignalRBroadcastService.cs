@@ -1,5 +1,5 @@
-// Service zur Weiterleitung von Einsatz-Events an SignalR Hub
-// Verknüpft Domain-Events mit SignalR für Echtzeit-Updates an mobile Clients
+ï»¿// Service zur Weiterleitung von Einsatz-Events an SignalR Hub
+// VerknÃ¼pft Domain-Events mit SignalR fÃ¼r Echtzeit-Updates an mobile Clients
 
 using Microsoft.AspNetCore.SignalR;
 using Einsatzueberwachung.Domain.Interfaces;

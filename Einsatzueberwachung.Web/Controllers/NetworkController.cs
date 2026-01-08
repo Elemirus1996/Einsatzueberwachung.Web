@@ -1,5 +1,5 @@
-// Controller für QR-Code-Generierung und Netzwerk-Info
-// Ermöglicht einfachen Zugriff auf Mobile Dashboard via QR-Code
+ï»¿// Controller fÃ¼r QR-Code-Generierung und Netzwerk-Info
+// ErmÃ¶glicht einfachen Zugriff auf Mobile Dashboard via QR-Code
 
 using Microsoft.AspNetCore.Mvc;
 using QRCoder;
@@ -23,7 +23,7 @@ namespace Einsatzueberwachung.Web.Controllers
         }
 
         /// <summary>
-        /// Gibt die aktuelle Server-IP-Adresse und URLs zurück
+        /// Gibt die aktuelle Server-IP-Adresse und URLs zurÃ¼ck
         /// </summary>
         [HttpGet("info")]
         public IActionResult GetNetworkInfo()
@@ -61,14 +61,14 @@ namespace Einsatzueberwachung.Web.Controllers
         }
 
         /// <summary>
-        /// Generiert einen QR-Code für den Zugriff auf das Mobile Dashboard
+        /// Generiert einen QR-Code fÃ¼r den Zugriff auf das Mobile Dashboard
         /// </summary>
         [HttpGet("qrcode")]
         public IActionResult GetQRCode([FromQuery] string? url = null, [FromQuery] int size = 300)
         {
             try
             {
-                // Wenn keine URL angegeben, verwende erste verfügbare IP
+                // Wenn keine URL angegeben, verwende erste verfÃ¼gbare IP
                 if (string.IsNullOrEmpty(url))
                 {
                     var ipAddresses = GetLocalIPAddresses();
@@ -88,7 +88,7 @@ namespace Einsatzueberwachung.Web.Controllers
                 var qrCode = new PngByteQRCode(qrCodeData);
                 var qrCodeBytes = qrCode.GetGraphic(20);
 
-                _logger.LogInformation("QR-Code generiert für URL: {Url}", url);
+                _logger.LogInformation("QR-Code generiert fÃ¼r URL: {Url}", url);
 
                 return File(qrCodeBytes, "image/png");
             }
@@ -100,7 +100,7 @@ namespace Einsatzueberwachung.Web.Controllers
         }
 
         /// <summary>
-        /// Gibt alle verfügbaren QR-Codes für verschiedene IPs zurück (als Base64)
+        /// Gibt alle verfÃ¼gbaren QR-Codes fÃ¼r verschiedene IPs zurÃ¼ck (als Base64)
         /// </summary>
         [HttpGet("qrcodes")]
         public IActionResult GetAllQRCodes([FromQuery] int size = 300)

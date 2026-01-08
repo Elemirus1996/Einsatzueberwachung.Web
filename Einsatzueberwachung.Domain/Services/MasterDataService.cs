@@ -1,4 +1,4 @@
-// Implementierung des Master-Data-Service mit JSON-basierter Persistierung
+﻿// Implementierung des Master-Data-Service mit JSON-basierter Persistierung
 // Quelle: Abgeleitet von WPF Services/DataService.cs
 
 using System;

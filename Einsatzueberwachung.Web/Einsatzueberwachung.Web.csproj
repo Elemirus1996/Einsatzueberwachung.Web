@@ -4,14 +4,15 @@
   <TargetFramework>net8.0</TargetFramework>
   <Nullable>enable</Nullable>
   <ImplicitUsings>enable</ImplicitUsings>
-  <Version>2.5.0</Version>
-  <AssemblyVersion>2.5.0.0</AssemblyVersion>
-  <FileVersion>2.5.0.0</FileVersion>
-  <Product>Einsatzüberwachung Web - Mobile Dashboard mit Dark Mode</Product>
-  <Description>Moderne Web-Anwendung für Rettungshunde-Einsätze mit mobilem Dashboard, Dark Mode und erweiterten Funktionen</Description>
+  <Version>3.0.0</Version>
+  <AssemblyVersion>3.0.0.0</AssemblyVersion>
+  <FileVersion>3.0.0.0</FileVersion>
+  <Product>Einsatzï¿½berwachung Web - Mobile Dashboard mit Dark Mode</Product>
+  <Description>Moderne Web-Anwendung fï¿½r Rettungshunde-Einsï¿½tze mit mobilem Dashboard, Dark Mode und erweiterten Funktionen</Description>
 </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.1" />
     <ProjectReference Include="..\Einsatzueberwachung.Domain\Einsatzueberwachung.Domain.csproj" />
     <ProjectReference Include="..\Einsatzueberwachung.Web.Client\Einsatzueberwachung.Web.Client.csproj" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="8.0.22" />

@@ -3,4 +3,16 @@
         <RouteView RouteData="routeData" DefaultLayout="typeof(Layout.MainLayout)" />
         <FocusOnNavigate RouteData="routeData" Selector="h1" />
     </Found>
+    <NotFound>
+        <PageTitle>Nicht gefunden</PageTitle>
+        <LayoutView Layout="typeof(Layout.MainLayout)">
+            <div class="container mt-5">
+                <div class="alert alert-warning">
+                    <h4><i class="bi bi-exclamation-triangle"></i> Seite nicht gefunden</h4>
+                    <p>Die angeforderte Seite existiert nicht.</p>
+                    <a href="/" class="btn btn-primary">Zur Startseite</a>
+                </div>
+            </div>
+        </LayoutView>
+    </NotFound>
 </Router>

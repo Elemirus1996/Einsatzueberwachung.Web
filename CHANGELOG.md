@@ -1,11 +1,77 @@
-# ?? CHANGELOG
+# ğŸ“‹ CHANGELOG
+
+## Version 3.0.0 - "Enhanced User Experience & Performance" (Januar 2026)
+
+### ğŸ¯ Hauptverbesserungen
+
+#### **UI/UX Enhancements**
+- ğŸ¨ **Optimiertes Dashboard Design**
+  - Verbesserte BenutzeroberflÃ¤che mit modernem Layout
+  - Schnellere Navigation zwischen Seiten
+  - Bessere mobile Responsive-Optimierung
+  
+- âš¡ **Performance-Verbesserungen**
+  - Optimierte JavaScript-Ladezeiten
+  - Besseres Caching von Komponenten
+  - Reduzierte Netzwerk-Anfragen
+  
+- ğŸ”„ **Erweiterte SignalR-Kommunikation**
+  - Stabilere Echtzeit-Synchronisation
+  - Besseres Error-Handling fÃ¼r Verbindungsfehler
+  - Automatisches Reconnect-System
+
+#### **Map & Karten-Enhancements**
+- ğŸ—ºï¸ **Erweiterte Leaflet.js Funktionen**
+  - Bessere Performance bei vielen Gebieten
+  - Optimierte Gebiets-Rendering
+  - Verbesserte Druck-QualitÃ¤t von Karten
+  
+- ğŸ“ **Team-Lokalisierung**
+  - Teams auf Karten besser visualisieren
+  - Echtzeit-Position Updates
+  - Verbesserte Gebiet-Zuordnung
+
+#### **Mobiles & Dark Mode**
+- ğŸ“± **Verbesserte Mobile Experience**
+  - Touch-Optimierungen fÃ¼r kleinere Bildschirme
+  - Bessere QR-Code-Lesbarkeit
+  - Schnellere Mobile-Navigation
+  
+- ğŸŒ™ **Dark Mode Verbesserungen**
+  - Konsistentere Farbschemas
+  - Optimierte Kontraste fÃ¼r Lesbarkeit
+  - Schnellere Theme-Umschaltung
+
+#### **System & StabilitÃ¤t**
+- ğŸ›¡ï¸ **Sicherheit & StabilitÃ¤t**
+  - Besseres JWT-Token-Handling
+  - Verbesserte Error-Recovery
+  - Stabilere WebSocket-Verbindungen
+  
+- ğŸ“Š **Logging & Diagnostik**
+  - Bessere Fehlerprotokollierung
+  - Detailliertere System-Logs
+  - Besseres Debugging fÃ¼r Entwickler
+
+#### **Dokumentation & Hilfe**
+- ğŸ“– **Verbesserte Dokumentation**
+  - Aktualisierte HILFE.md
+  - Bessere Fehlermeldungen
+  - Hilfreiche Tooltips in der UI
+
+### ğŸ”„ KompatibilitÃ¤t
+- âœ… VollstÃ¤ndig kompatibel mit Version 2.5.0 Datenbanken
+- âœ… Automatische Migrations bei Bedarf
+- âœ… Keine Benutzer-Datenverluste
+
+---
 
 ## Version 2.5.0 - "Dark Mode & Enhanced Features" (Januar 2025)
 
-### ?? Hauptfeatures
+### ğŸŒ“ Hauptfeatures
 
 #### **Dark Mode System**
-- ? **Vollständiger Dark Mode Support**
+- ? **Vollstï¿½ndiger Dark Mode Support**
   - Alle Komponenten im Dark Mode optimiert
   - Theme Toggle in Navigation (??/?? Icon)
   - Bootstrap 5.3+ Integration mit data-bs-theme
@@ -17,13 +83,13 @@
   - Kein Flackern durch Inline-Script
   
 - ?? **Cross-Tab Synchronisation**
-  - Theme-Änderung synchronisiert alle offenen Tabs
-  - BroadcastChannel API für Echtzeit-Sync
-  - JavaScript theme-sync.js für Tab-Kommunikation
+  - Theme-ï¿½nderung synchronisiert alle offenen Tabs
+  - BroadcastChannel API fï¿½r Echtzeit-Sync
+  - JavaScript theme-sync.js fï¿½r Tab-Kommunikation
   
 - ?? **ThemeService**
   - Zentrale Theme-Verwaltung in C#
-  - Event-System für Theme-Änderungen
+  - Event-System fï¿½r Theme-ï¿½nderungen
   - Integration in alle Komponenten
 
 #### **Erweiterte Karten-Funktionen**
@@ -33,28 +99,28 @@
   - Responsive Map-Container
   
 - ?? **Zeichnen-Tools**
-  - Polygone für Suchgebiete zeichnen
+  - Polygone fï¿½r Suchgebiete zeichnen
   - Marker setzen und beschriften
   - Leaflet.Draw Integration
   
 - ?? **Gebiets-Management**
-  - Farben für Suchgebiete zuweisen
-  - Beschreibungen hinzufügen
+  - Farben fï¿½r Suchgebiete zuweisen
+  - Beschreibungen hinzufï¿½gen
   - Teams zu Gebieten zuordnen
   - Gebiet-Status verwalten
   
 - ??? **Druck-Funktion**
   - Karten drucken mit Legende
-  - print-map.css für optimalen Druck
+  - print-map.css fï¿½r optimalen Druck
   - Gebiets-Liste im Druck
   
-- ?? **Dark Mode für Karten**
-  - Optimierte Leaflet-Styles für Dark Mode
+- ?? **Dark Mode fï¿½r Karten**
+  - Optimierte Leaflet-Styles fï¿½r Dark Mode
   - Angepasste Farben und Kontraste
 
 #### **Enhanced Notes System**
 - ?? **Erweiterte Notizen**
-  - Globale Notizen mit vollständiger Historie
+  - Globale Notizen mit vollstï¿½ndiger Historie
   - Team-spezifische Notizen
   - Verschiedene Notiz-Typen:
     - Manual (Benutzer-Eingabe)
@@ -64,42 +130,42 @@
     - EinsatzUpdate
   
 - ?? **Threads und Antworten**
-  - Antworten auf Notizen möglich
+  - Antworten auf Notizen mï¿½glich
   - Verschachtelte Thread-Ansicht
-  - Zeitstempel für jede Antwort
+  - Zeitstempel fï¿½r jede Antwort
   
 - ?? **Notiz-Historie**
-  - Vollständige Historie aller Änderungen
+  - Vollstï¿½ndige Historie aller ï¿½nderungen
   - GlobalNotesHistory Model
-  - GlobalNotesReply für Antworten
+  - GlobalNotesReply fï¿½r Antworten
   
 - ?? **Dark Mode optimiert**
-  - notes-enhanced.css für beide Themes
+  - notes-enhanced.css fï¿½r beide Themes
   - Angepasste Farben und Kontraste
 
 #### **PDF-Export mit QuestPDF**
 - ?? **Professionelle PDFs**
   - QuestPDF 2025.7.4 Integration
-  - Vollständiges Layout mit Styling
+  - Vollstï¿½ndiges Layout mit Styling
   - Einsatzberichte strukturiert
   
 - ?? **Design**
   - Logo und Staffel-Informationen
-  - Tabellen für Teams und Daten
+  - Tabellen fï¿½r Teams und Daten
   - Farbige Abschnitte
   - Professionelles Layout
   
 - ?? **Inhalte**
   - Einsatz-Basisdaten
   - Alle Teams mit Details
-  - Alle Notizen und Funksprüche
+  - Alle Notizen und Funksprï¿½che
   - Suchgebiete
   - Zeitstempel und Metadaten
   
 - ??? **Export**
   - Sofort druckbar
   - PDF-Standardkonform
-  - Optimierte Dateigröße
+  - Optimierte Dateigrï¿½ï¿½e
 
 #### **Mobile Dashboard Verbesserungen**
 - ?? **Dark Mode Support**
@@ -131,18 +197,18 @@
 - ?? `audio-alerts.js` - Audio-Benachrichtigungen
 
 #### **Design-Verbesserungen**
-- ?? Konsistente Farbschemata für Dark/Light Mode
-- ?? Smooth Transitions für Theme-Wechsel
-- ?? Verbesserte Kontraste für Barrierefreiheit
+- ?? Konsistente Farbschemata fï¿½r Dark/Light Mode
+- ?? Smooth Transitions fï¿½r Theme-Wechsel
+- ?? Verbesserte Kontraste fï¿½r Barrierefreiheit
 - ?? Optimierte Mobile-Layouts
 
-### ?? Technische Änderungen
+### ?? Technische ï¿½nderungen
 
 #### **Neue Services**
 - ?? `ThemeService.cs` - Theme-Verwaltung
 - ?? `PdfExportService.cs` - PDF-Export mit QuestPDF
 - ?? `ToastService.cs` - Toast-Benachrichtigungen
-- ?? `SignalRBroadcastService.cs` - Erweitert für neue Features
+- ?? `SignalRBroadcastService.cs` - Erweitert fï¿½r neue Features
 
 #### **Neue Komponenten**
 - ?? `PageBase.razor` - Base-Component mit Theme-Support
@@ -205,16 +271,16 @@
 
 ### ?? Bug-Fixes
 
-- ? Theme-Persistenz über Page-Reloads funktioniert
-- ? Cross-Tab Theme-Sync ohne Verzögerung
-- ? SignalR Verbindungs-Stabilität verbessert
+- ? Theme-Persistenz ï¿½ber Page-Reloads funktioniert
+- ? Cross-Tab Theme-Sync ohne Verzï¿½gerung
+- ? SignalR Verbindungs-Stabilitï¿½t verbessert
 - ? Mobile Dashboard Responsive-Issues behoben
-- ? Karten-Druck-Probleme gelöst
+- ? Karten-Druck-Probleme gelï¿½st
 - ? PDF-Export mit allen Daten
 - ? Notes-Threading funktioniert korrekt
 - ? Icon-System konsistent
 
-### ?? API-Änderungen
+### ?? API-ï¿½nderungen
 
 #### **Neue Endpunkte**
 - `POST /api/threads/reply` - Antwort auf Notiz
@@ -235,9 +301,9 @@
 ### ?? Sicherheit
 
 - ? JWT-Token mit erweiterter Validierung
-- ? XSS-Protection für Notes-System
-- ? CSRF-Protection für API-Endpunkte
-- ? Input-Validierung für alle Formulare
+- ? XSS-Protection fï¿½r Notes-System
+- ? CSRF-Protection fï¿½r API-Endpunkte
+- ? Input-Validierung fï¿½r alle Formulare
 
 ---
 
@@ -245,68 +311,68 @@
 
 ### ?? Neue Features
 
-#### **Mobiles Dashboard für Einsatzkräfte**
-- ?? **Mobile-First Dashboard** für Smartphones und Tablets
-  - Responsive Design optimiert für mobile Geräte
-  - Schneller Überblick über laufenden Einsatz
+#### **Mobiles Dashboard fï¿½r Einsatzkrï¿½fte**
+- ?? **Mobile-First Dashboard** fï¿½r Smartphones und Tablets
+  - Responsive Design optimiert fï¿½r mobile Gerï¿½te
+  - Schneller ï¿½berblick ï¿½ber laufenden Einsatz
   - Touch-optimierte Bedienung
   
 - ?? **Echtzeit-Updates via SignalR**
   - Live-Aktualisierung aller Team-Daten
   - Automatische Timer-Updates
-  - Push-Benachrichtigungen für wichtige Änderungen
+  - Push-Benachrichtigungen fï¿½r wichtige ï¿½nderungen
   
-- ?? **Team-Übersicht**
+- ?? **Team-ï¿½bersicht**
   - Alle aktiven Teams auf einen Blick
   - Status-Visualisierung (Aktiv/Warnung/Kritisch)
   - Timer mit Farbcodierung
-  - Team-Mitglieder und Ausrüstung
+  - Team-Mitglieder und Ausrï¿½stung
   
-- ?? **Notizen und Funksprüche**
+- ?? **Notizen und Funksprï¿½che**
   - Chronologische Liste aller Notizen
   - Farbcodierung nach Typ (Funkspruch/Notiz/Wichtig)
-  - Zeitstempel für alle Einträge
+  - Zeitstempel fï¿½r alle Eintrï¿½ge
   
 - ?? **Sichere Verbindung**
   - PIN-basierte Authentifizierung
-  - JWT-Token für sichere API-Zugriffe
-  - QR-Code für schnelle Verbindung
+  - JWT-Token fï¿½r sichere API-Zugriffe
+  - QR-Code fï¿½r schnelle Verbindung
   - Auto-Reconnect bei Verbindungsabbruch
 
 ### ?? Netzwerk-Features
 
 #### **Netzwerk-Server**
-- ?? **Zugriff über lokales Netzwerk**
-  - Server läuft auf allen Netzwerk-Interfaces
+- ?? **Zugriff ï¿½ber lokales Netzwerk**
+  - Server lï¿½uft auf allen Netzwerk-Interfaces
   - QR-Code mit automatischer IP-Erkennung
   - Firewall-Konfiguration automatisiert
   
 - ?? **Sicherheit**
-  - PIN-geschützter Zugang (Standard: 1234)
+  - PIN-geschï¿½tzter Zugang (Standard: 1234)
   - Token-basierte Authentifizierung
-  - Nur lesender Zugriff für mobile Geräte
+  - Nur lesender Zugriff fï¿½r mobile Gerï¿½te
   
 - ?? **Verbindungsseite**
   - `/mobile/connect` - QR-Code und Verbindungsinfos
   - Automatische IP-Adress-Erkennung
-  - Anleitung für mobile Verbindung
+  - Anleitung fï¿½r mobile Verbindung
 
 ### ?? Design-Verbesserungen
 
 #### **Mobile Dashboard CSS**
 - ?? Mobile-optimiertes Layout
 - ?? Moderne Karten-Designs mit Schatten
-- ?????? Status-Farben für Team-Timer
-- ?? Smooth Animationen und Übergänge
+- ?????? Status-Farben fï¿½r Team-Timer
+- ?? Smooth Animationen und ï¿½bergï¿½nge
 - ?? Dark-Mode Support
 
-### ?? Technische Änderungen
+### ?? Technische ï¿½nderungen
 
 #### **Neue Komponenten**
-- ?? `MobileDashboard.razor` - Hauptansicht für mobile Geräte
+- ?? `MobileDashboard.razor` - Hauptansicht fï¿½r mobile Gerï¿½te
 - ?? `MobileConnect.razor` - Verbindungsseite mit QR-Code
 - ?? `SignalRBroadcastService.cs` - Echtzeit-Updates
-- ?? `EinsatzHub.cs` - SignalR Hub für Live-Daten
+- ?? `EinsatzHub.cs` - SignalR Hub fï¿½r Live-Daten
 
 #### **Neue Controller**
 - ?? `AuthController.cs` - PIN-Authentifizierung
@@ -325,11 +391,11 @@
 
 ### ?? Dokumentation
 
-- ?? `MOBILE_README.md` - Vollständige mobile Dokumentation
+- ?? `MOBILE_README.md` - Vollstï¿½ndige mobile Dokumentation
 - ?? `MOBILE_QUICK_START.md` - Schnellstart-Anleitung
 - ?? `MOBILE_DEPLOYMENT_CHECKLIST.md` - Deployment-Checkliste
 - ?? `MOBILE_VISUAL_GUIDE.md` - Visueller Guide
-- ?? `MOBILE_SUMMARY.md` - Feature-Übersicht
+- ?? `MOBILE_SUMMARY.md` - Feature-ï¿½bersicht
 - ?? `MOBILE_IMPLEMENTATION.md` - Technische Details
 - ?? `MOBILE_NETWORK_ACCESS.md` - Netzwerk-Setup
 - ?? `MOBILE_QR_VISUAL_GUIDE.md` - QR-Code Guide
@@ -338,7 +404,7 @@
 
 - ? SignalR-Verbindung bleibt stabil bei Netzwerk-Wechsel
 - ? Timer-Updates werden korrekt synchronisiert
-- ? Mobile Layout funktioniert auf allen Bildschirmgrößen
+- ? Mobile Layout funktioniert auf allen Bildschirmgrï¿½ï¿½en
 - ? QR-Code wird korrekt mit aktueller IP generiert
 
 ### ?? API-Endpunkte
@@ -357,14 +423,14 @@
 
 #### **Vereinfachter Workflow**
 - ? **Team-Verwaltung direkt im Monitor integriert**
-  - Keine separate `/einsatz/teams` Seite mehr nötig
-  - Teams können direkt aus dem Monitor-View erstellt werden
+  - Keine separate `/einsatz/teams` Seite mehr nï¿½tig
+  - Teams kï¿½nnen direkt aus dem Monitor-View erstellt werden
   - Schnellerer Workflow: Start ? Monitor ? Teams erstellen ? Fertig!
 
 #### **Moderner Einsatzmonitor**
 - ? **Einsatz-Info-Header** mit Badge-System
-  - ?? Rot für Einsätze
-  - ?? Orange für Übungen
+  - ?? Rot fï¿½r Einsï¿½tze
+  - ?? Orange fï¿½r ï¿½bungen
   - Gradient-Background mit Pulsieren
   
 - ? **Verbesserte Team-Cards**
@@ -374,14 +440,14 @@
   - Inline-Bearbeitung mit Icon-Buttons (??/???)
 
 - ? **Optimierter Timer**
-  - Größere Anzeige (3rem)
+  - Grï¿½ï¿½ere Anzeige (3rem)
   - Blink-Animation bei kritischem Status
-  - Farbcodierung: Grün ? Orange ? Rot
-  - Pulse-Animation für kritische Warnungen
+  - Farbcodierung: Grï¿½n ? Orange ? Rot
+  - Pulse-Animation fï¿½r kritische Warnungen
 
-- ? **Chip-Design für Team-Mitglieder**
+- ? **Chip-Design fï¿½r Team-Mitglieder**
   - Moderne Pill-Form
-  - Icons für schnelle Erkennung
+  - Icons fï¿½r schnelle Erkennung
   - Besondere Hervorhebung von Suchgebieten
 
 #### **Moderne Modal-Dialoge**
@@ -392,14 +458,14 @@
   - Runder Close-Button mit Hover-Effect
 
 - ? **Verbessertes Formular-Design**
-  - Große Touch-Inputs (min. 48px)
-  - Button-Group für Team-Typen
+  - Groï¿½e Touch-Inputs (min. 48px)
+  - Button-Group fï¿½r Team-Typen
   - Focus-States mit Glow-Effect
   - Bessere Validierung
 
 ### ?? Design-Verbesserungen
 
-#### **CSS-Überarbeitung** (2000+ Zeilen)
+#### **CSS-ï¿½berarbeitung** (2000+ Zeilen)
 - ? **Monitor-spezifische Styles**
   - `.monitor-container` - Optimiertes Layout
   - `.monitor-header` - Gradient-Background
@@ -421,38 +487,38 @@
   - `.member-chip` - Team-Mitglieder Chips
   - `.warning-badge` - Timer-Warnungen
   - `.btn-icon` - Icon-only Buttons
-  - `.empty-state` - Leerzustände
+  - `.empty-state` - Leerzustï¿½nde
   - `.modal-modern` - Neue Modal-Styles
 
 #### **Responsive Verbesserungen**
-- ? Grid-Layout für große Screens (2-Column)
-- ? Stack-Layout für Tablets (1-Column)
-- ? Optimierte Touch-Targets für Mobile
-- ? Flexible Typography für alle Screens
+- ? Grid-Layout fï¿½r groï¿½e Screens (2-Column)
+- ? Stack-Layout fï¿½r Tablets (1-Column)
+- ? Optimierte Touch-Targets fï¿½r Mobile
+- ? Flexible Typography fï¿½r alle Screens
 
-### ?? Technische Änderungen
+### ?? Technische ï¿½nderungen
 
 #### **Komponenten**
 - ? `EinsatzMonitor.razor` - Komplett neu geschrieben
   - Team-CRUD direkt integriert
   - Bessere State-Management
   - Optimierte Event-Handling
-  - IJSRuntime für confirm-Dialoge
+  - IJSRuntime fï¿½r confirm-Dialoge
 
-- ? `Home.razor` - RenderMode hinzugefügt
-  - `@rendermode InteractiveServer` für reaktive Navigation
+- ? `Home.razor` - RenderMode hinzugefï¿½gt
+  - `@rendermode InteractiveServer` fï¿½r reaktive Navigation
 
 - ? `NavMenu.razor` - Vereinfacht
   - `/einsatz/teams` Link entfernt
   - Direkter Zugang zum Monitor
 
-#### **Gelöschte Dateien**
-- ? `EinsatzTeams.razor` - Nicht mehr benötigt (in Monitor integriert)
+#### **Gelï¿½schte Dateien**
+- ? `EinsatzTeams.razor` - Nicht mehr benï¿½tigt (in Monitor integriert)
 
 ### ?? Bug-Fixes
 - ? Navigation-Buttons auf Home-Page funktionieren jetzt
 - ? RenderMode-Konflikte behoben
-- ? Team-Bearbeitung direkt aus Monitor möglich
+- ? Team-Bearbeitung direkt aus Monitor mï¿½glich
 - ? Timer-Updates werden korrekt angezeigt
 
 ### ?? Dokumentation
@@ -467,7 +533,7 @@
 ### ? Initiales Release
 
 #### **Domain-Layer**
-- ? Alle Modelle aus WPF übertragen
+- ? Alle Modelle aus WPF ï¿½bertragen
 - ? Services implementiert (MasterData, Einsatz, Settings, PDF)
 - ? Enums mit Extension-Methods
 
@@ -478,10 +544,10 @@
 - ? Responsive Layout
 
 #### **Features**
-- ? Vollständiger Einsatz-Workflow
+- ? Vollstï¿½ndiger Einsatz-Workflow
 - ? Personal & Hunde-Verwaltung
 - ? Team-Timer mit Warnungen
-- ? Notizen & Funksprüche
+- ? Notizen & Funksprï¿½che
 - ? PDF-Export (TXT)
 - ? Hell-/Dunkelmodus
 
@@ -493,7 +559,7 @@
 - [ ] Leaflet.js Karten-Integration
 - [ ] Verbesserter PDF-Export mit QuestPDF
 - [ ] Suchgebiete auf Karte zeichnen
-- [ ] GPS-Integration für ELW-Position
+- [ ] GPS-Integration fï¿½r ELW-Position
 
 ### Version 3.0 (Q3 2024)
 - [ ] Entity Framework Core + SQLite
@@ -502,7 +568,7 @@
 - [ ] Multi-User Support
 
 ### Version 4.0 (Q4 2024)
-- [ ] SignalR für Echtzeit-Sync
+- [ ] SignalR fï¿½r Echtzeit-Sync
 - [ ] PWA-Support
 - [ ] Offline-Modus
 - [ ] Mobile-Apps (MAUI)
@@ -513,24 +579,24 @@
 
 ### v2.0.0
 - ?? **Route entfernt**: `/einsatz/teams` existiert nicht mehr
-  - Migration: Nutze `/einsatz/monitor` für Team-Verwaltung
+  - Migration: Nutze `/einsatz/monitor` fï¿½r Team-Verwaltung
   
 - ?? **CSS-Klassen umbenannt**
   - `.teams-monitor-list` ? `.teams-monitor-grid`
   - `.monitor-team-card` ? `.team-card-monitor`
-  - Alte Klassen werden nicht mehr unterstützt
+  - Alte Klassen werden nicht mehr unterstï¿½tzt
 
 ---
 
 ## Migrationsanleitung v1 ? v2
 
-### Für Benutzer
-1. Keine Aktion nötig - Workflow automatisch vereinfacht
+### Fï¿½r Benutzer
+1. Keine Aktion nï¿½tig - Workflow automatisch vereinfacht
 2. Teams jetzt im Monitor statt separater Seite erstellen
 3. Navigation aktualisiert - ein Link weniger
 
-### Für Entwickler
-1. `EinsatzTeams.razor` wurde gelöscht
+### Fï¿½r Entwickler
+1. `EinsatzTeams.razor` wurde gelï¿½scht
 2. Team-CRUD in `EinsatzMonitor.razor` integriert
 3. Neue CSS-Klassen in `app.css` verwenden
 4. Navigation in `NavMenu.razor` angepasst

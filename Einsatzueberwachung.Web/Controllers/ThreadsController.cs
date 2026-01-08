@@ -1,5 +1,5 @@
-// REST API Controller für Thread-System (Global Notes)
-// Ermöglicht mobilen Zugriff auf Funksprüche, Notizen und Thread-Kommunikation
+ï»¿// REST API Controller fÃ¼r Thread-System (Global Notes)
+// ErmÃ¶glicht mobilen Zugriff auf FunksprÃ¼che, Notizen und Thread-Kommunikation
 
 using Microsoft.AspNetCore.Mvc;
 using Einsatzueberwachung.Domain.Interfaces;
@@ -23,7 +23,7 @@ namespace Einsatzueberwachung.Web.Controllers
         }
 
         /// <summary>
-        /// Gibt alle Global Notes (Threads) zurück
+        /// Gibt alle Global Notes (Threads) zurÃ¼ck
         /// </summary>
         [HttpGet]
         public IActionResult GetAllNotes([FromQuery] string? teamId = null)
@@ -69,7 +69,7 @@ namespace Einsatzueberwachung.Web.Controllers
         }
 
         /// <summary>
-        /// Gibt eine einzelne Note mit allen Antworten zurück
+        /// Gibt eine einzelne Note mit allen Antworten zurÃ¼ck
         /// </summary>
         [HttpGet("{noteId}")]
         public async Task<IActionResult> GetNote(string noteId)
@@ -170,7 +170,7 @@ namespace Einsatzueberwachung.Web.Controllers
         }
 
         /// <summary>
-        /// Fügt eine Antwort zu einer Note hinzu
+        /// FÃ¼gt eine Antwort zu einer Note hinzu
         /// </summary>
         [HttpPost("{noteId}/replies")]
         public async Task<IActionResult> AddReply(string noteId, [FromBody] AddReplyRequest request)
@@ -190,7 +190,7 @@ namespace Einsatzueberwachung.Web.Controllers
                     request.CreatedBy ?? "Einsatzleiter Mobile"
                 );
 
-                _logger.LogInformation("Neue Antwort hinzugefügt via API: NoteId={NoteId}, ReplyId={ReplyId}", noteId, reply.Id);
+                _logger.LogInformation("Neue Antwort hinzugefÃ¼gt via API: NoteId={NoteId}, ReplyId={ReplyId}", noteId, reply.Id);
 
                 return Ok(new
                 {
@@ -210,13 +210,13 @@ namespace Einsatzueberwachung.Web.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Fehler beim Hinzufügen der Antwort");
+                _logger.LogError(ex, "Fehler beim HinzufÃ¼gen der Antwort");
                 return StatusCode(500, new { Error = "Interner Serverfehler" });
             }
         }
 
         /// <summary>
-        /// Gibt alle Antworten einer Note zurück
+        /// Gibt alle Antworten einer Note zurÃ¼ck
         /// </summary>
         [HttpGet("{noteId}/replies")]
         public async Task<IActionResult> GetReplies(string noteId)
@@ -244,7 +244,7 @@ namespace Einsatzueberwachung.Web.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Fehler beim Abrufen der Antworten für Note {NoteId}", noteId);
+                _logger.LogError(ex, "Fehler beim Abrufen der Antworten fÃ¼r Note {NoteId}", noteId);
                 return StatusCode(500, new { Error = "Interner Serverfehler" });
             }
         }
@@ -334,7 +334,7 @@ namespace Einsatzueberwachung.Web.Controllers
         }
 
         /// <summary>
-        /// Löscht eine Antwort
+        /// LÃ¶scht eine Antwort
         /// </summary>
         [HttpDelete("replies/{replyId}")]
         public async Task<IActionResult> DeleteReply(string replyId)
@@ -342,18 +342,18 @@ namespace Einsatzueberwachung.Web.Controllers
             try
             {
                 await _einsatzService.DeleteReplyAsync(replyId);
-                _logger.LogInformation("Antwort gelöscht via API: {ReplyId}", replyId);
+                _logger.LogInformation("Antwort gelÃ¶scht via API: {ReplyId}", replyId);
                 return NoContent();
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Fehler beim Löschen der Antwort {ReplyId}", replyId);
+                _logger.LogError(ex, "Fehler beim LÃ¶schen der Antwort {ReplyId}", replyId);
                 return StatusCode(500, new { Error = "Interner Serverfehler" });
             }
         }
     }
 
-    // DTOs für Request Bodies
+    // DTOs fÃ¼r Request Bodies
     public class CreateNoteRequest
     {
         public required string Text { get; set; }

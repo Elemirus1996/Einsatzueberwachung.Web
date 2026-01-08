@@ -1,4 +1,4 @@
-@page "/einstellungen"
+﻿@page "/einstellungen"
 @using Einsatzueberwachung.Domain.Interfaces
 @using Einsatzueberwachung.Domain.Models
 @using Einsatzueberwachung.Domain.Services
@@ -32,7 +32,7 @@
 
                         <div class="form-group mb-3">
                             <label class="form-label">Adresse</label>
-                            <InputTextArea @bind-Value="_staffelSettings.StaffelAdresse" class="form-control" rows="3" placeholder="Stra�e, PLZ Ort" />
+                            <InputTextArea @bind-Value="_staffelSettings.StaffelAdresse" class="form-control" rows="3" placeholder="Straü¿½e, PLZ Ort" />
                         </div>
 
                         <div class="form-group mb-3">
@@ -48,7 +48,7 @@
                         <div class="form-group mb-3">
                             <label class="form-label">Logo-Pfad</label>
                             <InputText @bind-Value="_staffelSettings.StaffelLogoPfad" class="form-control form-control-lg" placeholder="Pfad zum Logo" />
-                            <small class="text-muted">Pfad zu einer Bilddatei f�r den PDF-Export</small>
+                            <small class="text-muted">Pfad zu einer Bilddatei fü¿½r den PDF-Export</small>
                         </div>
 
                         <button type="submit" class="btn btn-success btn-lg w-100">
@@ -67,20 +67,65 @@
                 <div class="card-body">
                     <EditForm Model="@_appSettings" OnValidSubmit="@SaveAppSettings">
                         <div class="form-group mb-3">
-                            <label class="form-label">Design-Modus</label>
-                            <div class="btn-group w-100" role="group">
-                                <button type="button" 
-                                        class="btn btn-lg @(!_appSettings.IsDarkMode ? "btn-light" : "btn-outline-light")"
-                                        @onclick="() => ToggleDarkMode(false)">
-                                    <i class="bi bi-sun-fill"></i> Hell
-                                </button>
-                                <button type="button" 
-                                        class="btn btn-lg @(_appSettings.IsDarkMode ? "btn-dark" : "btn-outline-dark")"
-                                        @onclick="() => ToggleDarkMode(true)">
-                                    <i class="bi bi-moon-fill"></i> Dunkel
-                                </button>
-                            </div>
+                            <label class="form-label">Theme-Modus</label>
+                            <select class="form-select form-select-lg mb-3" @bind="_appSettings.ThemeMode" @bind:after="OnThemeModeChanged">
+                                <option value="Manual">Manuell (per Button umschalten)</option>
+                                <option value="Auto">Automatisch (folgt System)</option>
+                                <option value="Scheduled">Zeitgesteuert</option>
+                            </select>
                         </div>
+
+                        @if (_appSettings.ThemeMode == "Manual")
+                        {
+                            <div class="form-group mb-3">
+                                <label class="form-label">Design-Modus</label>
+                                <div class="btn-group w-100" role="group">
+                                    <button type="button" 
+                                            class="btn btn-lg @(!_appSettings.IsDarkMode ? "btn-light" : "btn-outline-light")"
+                                            @onclick="() => ToggleDarkMode(false)">
+                                        <i class="bi bi-sun-fill"></i> Hell
+                                    </button>
+                                    <button type="button" 
+                                            class="btn btn-lg @(_appSettings.IsDarkMode ? "btn-dark" : "btn-outline-dark")"
+                                            @onclick="() => ToggleDarkMode(true)">
+                                        <i class="bi bi-moon-fill"></i> Dunkel
+                                    </button>
+                                </div>
+                            </div>
+                        }
+
+                        @if (_appSettings.ThemeMode == "Scheduled")
+                        {
+                            <div class="alert alert-info mb-3">
+                                <i class="bi bi-info-circle-fill"></i> Dark Mode wird automatisch zur eingestellten Zeit aktiviert.
+                            </div>
+
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Dark Mode Start</label>
+                                    <input type="time" 
+                                           class="form-control form-control-lg" 
+                                           value="@FormatTimeSpan(_appSettings.DarkModeStartTime)"
+                                           @onchange="e => _appSettings.DarkModeStartTime = ParseTimeSpan(e.Value?.ToString())" />
+                                    <small class="text-muted">Wechsel zu Dark Mode</small>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Dark Mode Ende</label>
+                                    <input type="time" 
+                                           class="form-control form-control-lg" 
+                                           value="@FormatTimeSpan(_appSettings.DarkModeEndTime)"
+                                           @onchange="e => _appSettings.DarkModeEndTime = ParseTimeSpan(e.Value?.ToString())" />
+                                    <small class="text-muted">Wechsel zu Light Mode</small>
+                                </div>
+                            </div>
+                        }
+
+                        @if (_appSettings.ThemeMode == "Auto")
+                        {
+                            <div class="alert alert-info mb-3">
+                                <i class="bi bi-info-circle-fill"></i> Dark Mode folgt automatisch den System-Einstellungen Ihres Betriebssystems.
+                            </div>
+                        }
 
                         <hr/>
 
@@ -126,7 +171,7 @@
                     <h4><i class="bi bi-info-circle-fill"></i> System-Information</h4>
                 </div>
                 <div class="card-body">
-                    <p><strong>Version:</strong> 1.0.0</p>
+                    <p><strong>Version:</strong> 3.0.0</p>
                     <p><strong>Framework:</strong> .NET 8 / Blazor Server</p>
                     <p><strong>Plattform:</strong> Web-basiert</p>
                 </div>
@@ -206,12 +251,56 @@
         {
             var theme = _appSettings.IsDarkMode ? "dark" : "light";
             
-            // Broadcast Theme-�nderung an alle Tabs/Fenster
+            // Broadcast Theme-änderung an alle Tabs/Fenster
             await JS.InvokeVoidAsync("broadcastThemeChange", theme);
         }
         catch (Exception ex)
         {
             Console.WriteLine($"Fehler beim Anwenden des Themes: {ex.Message}");
         }
+    }
+
+    private void OnThemeModeChanged()
+    {
+        // Bei Wechsel zu Auto oder Scheduled, Theme sofort anwenden
+        if (_appSettings.ThemeMode == "Auto")
+        {
+            // System-Theme ermitteln (vereinfacht - verwendet aktuelle Zeit)
+            var hour = DateTime.Now.Hour;
+            _appSettings.IsDarkMode = hour < 6 || hour >= 20;
+        }
+        else if (_appSettings.ThemeMode == "Scheduled")
+        {
+            // Prüfe ob wir aktuell in Dark Mode Zeit sind
+            var now = DateTime.Now.TimeOfDay;
+            var start = _appSettings.DarkModeStartTime;
+            var end = _appSettings.DarkModeEndTime;
+
+            if (start < end)
+            {
+                _appSettings.IsDarkMode = now >= start && now < end;
+            }
+            else
+            {
+                _appSettings.IsDarkMode = now >= start || now < end;
+            }
+        }
+        StateHasChanged();
+    }
+
+    private string FormatTimeSpan(TimeSpan time)
+    {
+        return $"{time.Hours:D2}:{time.Minutes:D2}";
+    }
+
+    private TimeSpan ParseTimeSpan(string? timeString)
+    {
+        if (string.IsNullOrEmpty(timeString))
+            return TimeSpan.Zero;
+
+        if (TimeSpan.TryParse(timeString, out var result))
+            return result;
+
+        return TimeSpan.Zero;
     }
 }

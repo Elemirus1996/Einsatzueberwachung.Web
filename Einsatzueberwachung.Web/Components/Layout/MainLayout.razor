@@ -1,18 +1,26 @@
 ﻿@inherits LayoutComponentBase
 @using Einsatzueberwachung.Domain.Interfaces
 @using Einsatzueberwachung.Domain.Services
+@using Microsoft.Extensions.Logging
 @inject ThemeService ThemeService
 @inject IJSRuntime JS
+@inject ILogger<MainLayout> Logger
 @implements IDisposable
+
+<a href="#main-content" class="skip-link">Zum Hauptinhalt springen</a>
 
 <div class="page">
     <div class="sidebar">
         <NavMenu />
     </div>
 
-    <main>
-        <div class="top-row px-4">
-            <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
+    <main id="main-content" role="main">
+        <div class="top-row px-4 header-with-clock">
+            <div class="live-datetime" id="live-datetime">
+                <span class="live-time" id="live-time">--:--:--</span>
+                <span class="live-date" id="live-date">--.--.----</span>
+            </div>
+            <a href="https://learn.microsoft.com/aspnet/core/" target="_blank" style="margin-left: auto;">About</a>
         </div>
 
         <article class="content px-4">
@@ -60,11 +68,11 @@
         {
             var theme = ThemeService.CurrentTheme;
             await JS.InvokeVoidAsync("eval", $"document.documentElement.setAttribute('data-bs-theme', '{theme}');");
-            Console.WriteLine($"MainLayout: Theme angewendet - {theme}");
+            Logger.LogDebug("Theme in MainLayout angewendet: {Theme}", theme);
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"MainLayout: Fehler beim Anwenden des Themes - {ex.Message}");
+            Logger.LogError(ex, "Fehler beim Anwenden des Themes in MainLayout");
         }
     }
 

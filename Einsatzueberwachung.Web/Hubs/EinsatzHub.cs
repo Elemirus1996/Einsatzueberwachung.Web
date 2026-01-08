@@ -1,5 +1,5 @@
-// SignalR Hub für Echtzeit-Kommunikation mit mobilen Clients
-// Ermöglicht Push-Updates für Team-Status, Timer und Thread-Nachrichten
+ï»¿// SignalR Hub fÃ¼r Echtzeit-Kommunikation mit mobilen Clients
+// ErmÃ¶glicht Push-Updates fÃ¼r Team-Status, Timer und Thread-Nachrichten
 
 using Microsoft.AspNetCore.SignalR;
 using Einsatzueberwachung.Domain.Interfaces;
@@ -39,7 +39,7 @@ namespace Einsatzueberwachung.Web.Hubs
             await base.OnDisconnectedAsync(exception);
         }
 
-        // Client kann sich für bestimmte Team-Updates registrieren
+        // Client kann sich fÃ¼r bestimmte Team-Updates registrieren
         public async Task JoinTeamGroup(string teamId)
         {
             await Groups.AddToGroupAsync(Context.ConnectionId, $"Team_{teamId}");
@@ -71,11 +71,11 @@ namespace Einsatzueberwachung.Web.Hubs
                     Reply = reply
                 });
 
-                _logger.LogInformation("Thread-Antwort hinzugefügt: NoteId={NoteId}, ReplyId={ReplyId}", noteId, reply.Id);
+                _logger.LogInformation("Thread-Antwort hinzugefÃ¼gt: NoteId={NoteId}, ReplyId={ReplyId}", noteId, reply.Id);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Fehler beim Hinzufügen der Thread-Antwort");
+                _logger.LogError(ex, "Fehler beim HinzufÃ¼gen der Thread-Antwort");
                 await Clients.Caller.SendAsync("Error", new { Message = "Fehler beim Senden der Nachricht" });
             }
         }
@@ -106,7 +106,7 @@ namespace Einsatzueberwachung.Web.Hubs
             }
         }
 
-        // Ping für Connection-Health-Check
+        // Ping fÃ¼r Connection-Health-Check
         public Task Ping()
         {
             return Task.CompletedTask;

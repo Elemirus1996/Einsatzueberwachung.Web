@@ -401,3 +401,12 @@ FodyWeavers.xsd
 
 # Publish folder
 publish/
+
+# Sensitive configuration files (Sicherheit)
+**/appsettings.json
+**/appsettings.Development.json
+**/appsettings.Production.json
+!**/appsettings.Example.json
+
+# User data directory
+**/EinsatzueberwachungData/

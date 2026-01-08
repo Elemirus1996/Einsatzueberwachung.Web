@@ -1,5 +1,5 @@
-// Quelle: WPF-Projekt Models/DogSpecialization.cs
-// Beschreibt die Ausbildungen/Spezialisierungen der Hunde (Fläche, Trümmer, Mantrailer, etc.)
+ï»¿// Quelle: WPF-Projekt Models/DogSpecialization.cs
+// Beschreibt die Ausbildungen/Spezialisierungen der Hunde (FlÃ¤che, TrÃ¼mmer, Mantrailer, etc.)
 
 using System;
 
@@ -25,13 +25,13 @@ namespace Einsatzueberwachung.Domain.Models.Enums
         {
             return spec switch
             {
-                DogSpecialization.Flaechensuche => "Flächensuchhund",
-                DogSpecialization.Truemmersuche => "Trümmersuchhund",
+                DogSpecialization.Flaechensuche => "FlÃ¤chensuchhund",
+                DogSpecialization.Truemmersuche => "TrÃ¼mmersuchhund",
                 DogSpecialization.Mantrailing => "Mantrailer",
                 DogSpecialization.Wasserortung => "Wasserortung",
                 DogSpecialization.Lawinensuche => "Lawinensuchhund",
-                DogSpecialization.Gelaendesuche => "Geländesuchhund",
-                DogSpecialization.Leichensuche => "Leichenspürhund",
+                DogSpecialization.Gelaendesuche => "GelÃ¤ndesuchhund",
+                DogSpecialization.Leichensuche => "LeichenspÃ¼rhund",
                 DogSpecialization.InAusbildung => "In Ausbildung",
                 _ => spec.ToString()
             };

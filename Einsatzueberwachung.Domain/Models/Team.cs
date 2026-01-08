@@ -1,6 +1,6 @@
-// Quelle: WPF-Projekt Models/Team.cs
-// Repräsentiert ein Team (Hund+Hundeführer+Helfer oder Drohnenteam) mit Timer und Warnungen
-// Hinweis: Timer-Logik wurde für Blazor angepasst (System.Threading.Timer statt DispatcherTimer)
+ï»¿// Quelle: WPF-Projekt Models/Team.cs
+// ReprÃ¤sentiert ein Team (Hund+HundefÃ¼hrer+Helfer oder Drohnenteam) mit Timer und Warnungen
+// Hinweis: Timer-Logik wurde fÃ¼r Blazor angepasst (System.Threading.Timer statt DispatcherTimer)
 
 using System;
 using System.Threading;

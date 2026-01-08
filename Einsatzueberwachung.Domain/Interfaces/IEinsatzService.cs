@@ -1,4 +1,4 @@
-// Service-Interface für Einsatz-Verwaltung (Teams, Timer, Funksprüche)
+ï»¿// Service-Interface fÃ¼r Einsatz-Verwaltung (Teams, Timer, FunksprÃ¼che)
 // Quelle: Abgeleitet von WPF ViewModels/MainViewModel.cs und Models/Team.cs
 
 using System;

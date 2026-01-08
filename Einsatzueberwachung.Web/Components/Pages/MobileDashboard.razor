@@ -1,4 +1,4 @@
-@page "/mobile"
+﻿@page "/mobile"
 @inject IEinsatzService EinsatzService
 @inject NavigationManager Navigation
 @rendermode InteractiveServer
@@ -17,7 +17,7 @@
                 }
                 else
                 {
-                    <span class="badge bg-warning">�BUNG</span>
+                    <span class="badge bg-warning">ü¿½BUNG</span>
                 }
                 @EinsatzService.CurrentEinsatz.Einsatzort
             </p>
@@ -60,9 +60,6 @@
     <div class="mobile-section">
         <div class="section-header-mobile">
             <h2><i class="bi bi-people-fill"></i> Teams</h2>
-            <button class="btn btn-sm btn-primary" @onclick='() => Navigation.NavigateTo("/einsatz/monitor")'>
-                <i class="bi bi-arrow-right-circle"></i> Zum Monitor
-            </button>
         </div>
 
         @if (_teams.Any())
@@ -127,18 +124,18 @@
                             }
                         </div>
 
-                        <div class="team-mobile-controls">
+                        <div class="team-mobile-status">
                             @if (team.IsRunning)
                             {
-                                <button class="btn btn-sm btn-warning w-100" @onclick="() => StopTeamTimer(team.TeamId)">
-                                    <i class="bi bi-pause-fill"></i> Stoppen
-                                </button>
+                                <span class="badge bg-success w-100 py-2">
+                                    <i class="bi bi-play-fill"></i> Team läuft
+                                </span>
                             }
                             else
                             {
-                                <button class="btn btn-sm btn-success w-100" @onclick="() => StartTeamTimer(team.TeamId)">
-                                    <i class="bi bi-play-fill"></i> Starten
-                                </button>
+                                <span class="badge bg-secondary w-100 py-2">
+                                    <i class="bi bi-pause-fill"></i> Team bereit
+                                </span>
                             }
                         </div>
                     </div>
@@ -201,11 +198,8 @@
 
     <!-- Quick Actions -->
     <div class="mobile-quick-actions">
-        <button class="btn btn-lg btn-primary w-100 mb-2" @onclick='() => Navigation.NavigateTo("/einsatz/karte")'>
-            <i class="bi bi-map-fill"></i> Karte anzeigen
-        </button>
-        <button class="btn btn-lg btn-outline-primary w-100" @onclick='() => Navigation.NavigateTo("/")'>
-            <i class="bi bi-house-fill"></i> Zur Startseite
+        <button class="btn btn-lg btn-primary w-100" @onclick='() => Navigation.NavigateTo("/mobile/karte")'>
+            <i class="bi bi-map-fill"></i> Suchgebiete auf Karte anzeigen
         </button>
     </div>
 </div>
@@ -215,7 +209,7 @@
     private List<GlobalNotesEntry> _notes = new();
     private System.Threading.Timer? _refreshTimer;
 
-    protected override async Task OnInitializedAsync()
+    protected override Task OnInitializedAsync()
     {
         _teams = EinsatzService.Teams;
         _notes = EinsatzService.GlobalNotes;
@@ -226,8 +220,10 @@
         EinsatzService.TeamUpdated += OnDataChanged;
         EinsatzService.NoteAdded += OnDataChanged;
 
-        // Timer f�r UI-Refresh (1 Sekunde)
+        // Timer fü¿½r UI-Refresh (1 Sekunde)
         _refreshTimer = new System.Threading.Timer(_ => InvokeAsync(StateHasChanged), null, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(1));
+        
+        return Task.CompletedTask;
     }
 
     private void OnDataChanged(object? obj = null)
@@ -240,15 +236,7 @@
         });
     }
 
-    private async Task StartTeamTimer(string teamId)
-    {
-        await EinsatzService.StartTeamTimerAsync(teamId);
-    }
 
-    private async Task StopTeamTimer(string teamId)
-    {
-        await EinsatzService.StopTeamTimerAsync(teamId);
-    }
 
     private string GetTeamCssClass(Team team)
     {

@@ -4,7 +4,16 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Tablet-optimierte Rettungshunde Einsatzüberwachung" />
+    <meta name="theme-color" content="#2196F3" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="Einsatzüberwachung" />
     <base href="/" />
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json" />
+    
     <!-- Bootstrap 5.3+ für Dark Mode Support -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" 
           integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" 
@@ -72,7 +81,40 @@
     <!-- Theme Sync System -->
     <script src="theme-sync.js"></script>
     
+    <!-- QR Code Loader System -->
+    <script src="load-qrcodes.js"></script>
+    
+    <!-- Live Clock System -->
+    <script src="js/clock.js"></script>
+    
+    <!-- Service Worker Manager -->
+    <script src="service-worker-manager.js"></script>
+    
+    <!-- Swipe Handler -->
+    <script src="swipe-handler.js"></script>
+    
     <script src="_framework/blazor.web.js"></script>
+    
+    <!-- Initialize Clock nach Blazor -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeClock();
+        });
+        
+        // Fallback - auch sofort aufrufen falls bereits geladen
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', function() {
+                initializeClock();
+            });
+        } else {
+            // DOM ist bereits geladen
+            setTimeout(function() {
+                if (window.initializeClock) {
+                    initializeClock();
+                }
+            }, 100);
+        }
+    </script>
 </body>
 
 </html>

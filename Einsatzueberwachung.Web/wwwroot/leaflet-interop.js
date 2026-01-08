@@ -1,6 +1,9 @@
-// Leaflet Map Interop f�r Einsatzueberwachung
-// Erm�glicht das Zeichnen und Verwalten von Suchgebieten auf einer interaktiven Karte
-
+﻿// Leaflet Map Interop fï¿½r Einsatzueberwachung
+// Ermï¿½glicht das Zeichnen und Verwalten von Suchgebieten auf einer interaktiven Karte
+// Debug-Flag - setze auf false fÃ¼r Production
+const DEBUG = false;
+const log = DEBUG ? console.log.bind(console) : () => {};
+const error = console.error.bind(console); // Errors immer loggen
 window.LeafletMap = {
 maps: {},
     
@@ -12,54 +15,54 @@ initialize: function(mapId, centerLat, centerLng, zoom, dotNetReference) {
             
         // Layer definieren
         const osmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '� OpenStreetMap contributors',
+            attribution: 'ï¿½ OpenStreetMap contributors',
             maxZoom: 19
         });
         
         // Esri Satellite Layer
         const satelliteLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-            attribution: 'Tiles � Esri',
+            attribution: 'Tiles ï¿½ Esri',
             maxZoom: 18
         });
         
-        // Google Satellite als Fallback (falls Esri nicht l�dt)
+        // Google Satellite als Fallback (falls Esri nicht lï¿½dt)
         const googleSatellite = L.tileLayer('https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
-            attribution: 'Map data � Google',
+            attribution: 'Map data ï¿½ Google',
             maxZoom: 20
         });
         
-        // Hybrid: Satellit mit Stra�ennamen
+        // Hybrid: Satellit mit Straï¿½ennamen
         const hybridLayer = L.tileLayer('https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {
-            attribution: 'Map data � Google',
+            attribution: 'Map data ï¿½ Google',
             maxZoom: 20
         });
         
-        console.log('Layer erstellt');
+        log('Layer erstellt');
         
-        // Standard-Layer hinzuf�gen
+        // Standard-Layer hinzufï¿½gen
         osmLayer.addTo(map);
         
         // Layer Control mit besserer Konfiguration
         const baseMaps = {
-            "Stra�enkarte": osmLayer,
+            "Straï¿½enkarte": osmLayer,
             "Satellit (Esri)": satelliteLayer,
             "Satellit (Google)": googleSatellite,
             "Hybrid (Google)": hybridLayer
         };
         
-        console.log('Layer Control wird hinzugef�gt');
+        log('Layer Control wird hinzugefÃ¼gt');
         const layerControl = L.control.layers(baseMaps, null, {
             position: 'topright',
-            collapsed: false  // Immer ausgeklappt f�r bessere Sichtbarkeit
+            collapsed: false  // Immer ausgeklappt fï¿½r bessere Sichtbarkeit
         });
         layerControl.addTo(map);
-        console.log('Layer Control hinzugef�gt:', layerControl);
+        log('Layer Control hinzugefï¿½gt:', layerControl);
             
-        // FeatureGroup f�r gezeichnete Items
+        // FeatureGroup fï¿½r gezeichnete Items
         const drawnItems = new L.FeatureGroup();
         map.addLayer(drawnItems);
             
-        // Draw Control hinzuf�gen
+        // Draw Control hinzufï¿½gen
         const drawControl = new L.Control.Draw({
             edit: {
                 featureGroup: drawnItems,
@@ -72,7 +75,7 @@ initialize: function(mapId, centerLat, centerLng, zoom, dotNetReference) {
                     showArea: true,
                     drawError: {
                         color: '#e74c3c',
-                        message: '<strong>Fehler!</strong> Polygone d�rfen sich nicht �berschneiden.'
+                        message: '<strong>Fehler!</strong> Polygone dï¿½rfen sich nicht ï¿½berschneiden.'
                     },
                     shapeOptions: {
                         color: '#3388ff',
@@ -88,7 +91,7 @@ initialize: function(mapId, centerLat, centerLng, zoom, dotNetReference) {
         });
         map.addControl(drawControl);
             
-        // Event-Listener f�r gezeichnete Shapes
+        // Event-Listener fï¿½r gezeichnete Shapes
         map.on(L.Draw.Event.CREATED, function(e) {
             const layer = e.layer;
             drawnItems.addLayer(layer);
@@ -100,7 +103,7 @@ initialize: function(mapId, centerLat, centerLng, zoom, dotNetReference) {
             }
         });
             
-        // Event-Listener f�r bearbeitete Shapes
+        // Event-Listener fï¿½r bearbeitete Shapes
         map.on(L.Draw.Event.EDITED, function(e) {
             const layers = e.layers;
             layers.eachLayer(function(layer) {
@@ -111,7 +114,7 @@ initialize: function(mapId, centerLat, centerLng, zoom, dotNetReference) {
             });
         });
             
-        // Event-Listener f�r gel�schte Shapes
+        // Event-Listener fï¿½r gelï¿½schte Shapes
         map.on(L.Draw.Event.DELETED, function(e) {
             const layers = e.layers;
             layers.eachLayer(function(layer) {
@@ -139,12 +142,12 @@ initialize: function(mapId, centerLat, centerLng, zoom, dotNetReference) {
             
         return true;
     } catch (error) {
-        console.error('Fehler beim Initialisieren der Karte:', error);
+        error('Fehler beim Initialisieren der Karte:', error);
         return false;
     }
 },
     
-    // F�gt ein Suchgebiet (Polygon) zur Karte hinzu
+    // Fï¿½gt ein Suchgebiet (Polygon) zur Karte hinzu
     addSearchArea: function(mapId, areaId, geoJSON, color, name) {
         try {
             const mapData = this.maps[mapId];
@@ -167,7 +170,7 @@ initialize: function(mapId, centerLat, centerLng, zoom, dotNetReference) {
             
             return true;
         } catch (error) {
-            console.error('Fehler beim Hinzuf�gen des Suchgebiets:', error);
+            error('Fehler beim HinzufÃ¼gen des Suchgebiets:', error);
             return false;
         }
     },
@@ -183,37 +186,37 @@ initialize: function(mapId, centerLat, centerLng, zoom, dotNetReference) {
             
             return true;
         } catch (error) {
-            console.error('Fehler beim Entfernen des Suchgebiets:', error);
+            error('Fehler beim Entfernen des Suchgebiets:', error);
             return false;
         }
     },
     
     // Setzt einen Marker auf der Karte
     setMarker: function(mapId, markerId, lat, lng, title, iconColor) {
-        console.log('setMarker aufgerufen:', { mapId, markerId, lat, lng, title });
+        log('setMarker aufgerufen:', { mapId, markerId, lat, lng, title });
         
         try {
             const mapData = this.maps[mapId];
             if (!mapData) {
-                console.error('Karte nicht gefunden:', mapId);
+                error('Karte nicht gefunden:', mapId);
                 return false;
             }
             
-            console.log('Karten-Daten gefunden:', mapData);
+            log('Karten-Daten gefunden:', mapData);
             
             // WICHTIG: Alten Marker IMMER entfernen (damit ELW-Position aktualisiert werden kann)
             if (mapData.markers[markerId]) {
-                console.log('Entferne alten Marker:', markerId);
+                log('Entferne alten Marker:', markerId);
                 mapData.map.removeLayer(mapData.markers[markerId]);
                 delete mapData.markers[markerId];  // Aus der Liste entfernen
             }
             
-            // Icon f�r ELW (spezielle rote Darstellung)
+            // Icon fÃ¼r ELW (spezielle rote Darstellung)
             let markerIcon = null;
             
             if (markerId === 'elw') {
-                console.log('Erstelle ROTES ELW-Icon');
-                // Erstelle einen roten Marker f�r ELW
+                log('Erstelle ROTES ELW-Icon');
+                // Erstelle einen roten Marker fï¿½r ELW
                 const svgIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="45" viewBox="0 0 32 45">
                     <path fill="#DC143C" stroke="#8B0000" stroke-width="2" d="M16 0 C7 0 0 7 0 16 C0 28 16 45 16 45 C16 45 32 28 32 16 C32 7 25 0 16 0 Z"/>
                     <circle cx="16" cy="16" r="8" fill="white"/>
@@ -228,7 +231,7 @@ initialize: function(mapId, centerLat, centerLng, zoom, dotNetReference) {
                     className: 'elw-marker-icon'
                 });
             } else if (markerId === 'einsatzort') {
-                console.log('Erstelle Standard Einsatzort-Icon');
+                log('Erstelle Standard Einsatzort-Icon');
                 markerIcon = L.icon({
                     iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
                     shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
@@ -238,7 +241,7 @@ initialize: function(mapId, centerLat, centerLng, zoom, dotNetReference) {
                     shadowSize: [41, 41]
                 });
             } else {
-                console.log('Erstelle Standard-Icon');
+                log('Erstelle Standard-Icon');
                 markerIcon = L.icon({
                     iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
                     shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
@@ -249,7 +252,7 @@ initialize: function(mapId, centerLat, centerLng, zoom, dotNetReference) {
                 });
             }
             
-            console.log('Erstelle Marker an Position:', lat, lng);
+            log('Erstelle Marker an Position:', lat, lng);
             
             // Neuen Marker erstellen
             const marker = L.marker([lat, lng], {
@@ -265,10 +268,10 @@ initialize: function(mapId, centerLat, centerLng, zoom, dotNetReference) {
             if (markerId === 'elw') {
                 marker.on('dragend', function(e) {
                     const newPos = e.target.getLatLng();
-                    console.log('ELW verschoben zu:', newPos);
+                    log('ELW verschoben zu:', newPos);
                     marker.setPopupContent(`<strong>${title}</strong><br><small>Lat: ${newPos.lat.toFixed(5)}, Lng: ${newPos.lng.toFixed(5)}</small>`);
                     
-                    // Informiere Blazor �ber neue Position
+                    // Informiere Blazor ï¿½ber neue Position
                     if (mapData.dotNetReference) {
                         mapData.dotNetReference.invokeMethodAsync('OnElwMarkerMoved', newPos.lat, newPos.lng);
                     }
@@ -278,11 +281,11 @@ initialize: function(mapId, centerLat, centerLng, zoom, dotNetReference) {
             // Marker speichern
             mapData.markers[markerId] = marker;
             
-            console.log('Marker erfolgreich erstellt:', markerId);
+            log('Marker erfolgreich erstellt:', markerId);
             
             return true;
         } catch (error) {
-            console.error('Fehler beim Setzen des Markers:', error);
+            error('Fehler beim Setzen des Markers:', error);
             return false;
         }
     },
@@ -298,7 +301,7 @@ initialize: function(mapId, centerLat, centerLng, zoom, dotNetReference) {
             
             return true;
         } catch (error) {
-            console.error('Fehler beim Entfernen des Markers:', error);
+            error('Fehler beim Entfernen des Markers:', error);
             return false;
         }
     },
@@ -312,12 +315,12 @@ initialize: function(mapId, centerLat, centerLng, zoom, dotNetReference) {
             mapData.map.setView([lat, lng], zoom || mapData.map.getZoom());
             return true;
         } catch (error) {
-            console.error('Fehler beim Zentrieren der Karte:', error);
+            error('Fehler beim Zentrieren der Karte:', error);
             return false;
         }
     },
     
-    // Gibt die aktuelle Kartenmitte zur�ck
+    // Gibt die aktuelle Kartenmitte zurï¿½ck
     getMapCenter: function(mapId) {
         try {
             const mapData = this.maps[mapId];
@@ -329,7 +332,7 @@ initialize: function(mapId, centerLat, centerLng, zoom, dotNetReference) {
                 lng: center.lng
             };
         } catch (error) {
-            console.error('Fehler beim Abrufen der Kartenmitte:', error);
+            error('Fehler beim Abrufen der Kartenmitte:', error);
             return { lat: 0, lng: 0 };
         }
     },
@@ -339,7 +342,7 @@ initialize: function(mapId, centerLat, centerLng, zoom, dotNetReference) {
         try {
             const mapData = this.maps[mapId];
             if (!mapData) {
-                console.error('Karte nicht gefunden:', mapId);
+                error('Karte nicht gefunden:', mapId);
                 return false;
             }
             
@@ -348,7 +351,7 @@ initialize: function(mapId, centerLat, centerLng, zoom, dotNetReference) {
                 mapData.map.removeLayer(mapData.currentLayer);
             }
             
-            // F�ge neuen Layer hinzu
+            // Fï¿½ge neuen Layer hinzu
             let newLayer = null;
             switch(layerType) {
                 case 'streets':
@@ -367,12 +370,12 @@ initialize: function(mapId, centerLat, centerLng, zoom, dotNetReference) {
             if (newLayer) {
                 newLayer.addTo(mapData.map);
                 mapData.currentLayer = newLayer;
-                console.log('Layer gewechselt zu:', layerType);
+                log('Layer gewechselt zu:', layerType);
             }
             
             return true;
         } catch (error) {
-            console.error('Fehler beim Wechseln des Layers:', error);
+            error('Fehler beim Wechseln des Layers:', error);
             return false;
         }
     },
@@ -388,7 +391,7 @@ initialize: function(mapId, centerLat, centerLng, zoom, dotNetReference) {
             
             return true;
         } catch (error) {
-            console.error('Fehler beim Anpassen der Bounds:', error);
+            error('Fehler beim Anpassen der Bounds:', error);
             return false;
         }
     },
@@ -410,27 +413,27 @@ initialize: function(mapId, centerLat, centerLng, zoom, dotNetReference) {
             
             return { success: false, message: 'Adresse nicht gefunden' };
         } catch (error) {
-            console.error('Fehler beim Geocoding:', error);
+            error('Fehler beim Geocoding:', error);
             return { success: false, message: error.message };
         }
     },
     
     // Druckt die Karte
     printMap: function(mapId) {
-        console.log('printMap aufgerufen f�r:', mapId);
+        log('printMap aufgerufen fÃ¼r:', mapId);
         try {
             const mapData = this.maps[mapId];
             if (!mapData) {
-                console.error('Karte nicht gefunden:', mapId);
+                error('Karte nicht gefunden:', mapId);
                 return false;
             }
             
-            console.log('Starte Druck-Dialog');
+            log('Starte Druck-Dialog');
             // Trigger Browser-Druck-Dialog
             window.print();
             return true;
         } catch (error) {
-            console.error('Fehler beim Drucken der Karte:', error);
+            error('Fehler beim Drucken der Karte:', error);
             return false;
         }
     },
@@ -441,16 +444,16 @@ initialize: function(mapId, centerLat, centerLng, zoom, dotNetReference) {
             const mapData = this.maps[mapId];
             if (!mapData) return false;
             
-            // Hinweis f�r Benutzer
+            // Hinweis fï¿½r Benutzer
             alert('Tipp: Nutzen Sie "Karte drucken" und speichern Sie als PDF, oder machen Sie einen Screenshot (Windows: Win+Shift+S, Mac: Cmd+Shift+4)');
             return true;
         } catch (error) {
-            console.error('Fehler beim Exportieren:', error);
+            error('Fehler beim Exportieren:', error);
             return false;
         }
     },
     
-    // Karte aufr�umen
+    // Karte aufrï¿½umen
     dispose: function(mapId) {
         try {
             const mapData = this.maps[mapId];
@@ -460,7 +463,7 @@ initialize: function(mapId, centerLat, centerLng, zoom, dotNetReference) {
             }
             return true;
         } catch (error) {
-            console.error('Fehler beim Dispose der Karte:', error);
+            error('Fehler beim Dispose der Karte:', error);
             return false;
         }
     }

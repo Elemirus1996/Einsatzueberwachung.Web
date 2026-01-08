@@ -1,11 +1,11 @@
-/* ========================================
+ï»¿/* ========================================
    DARK MODE BASE STYLES
-   Ergänzende Styles für Bootstrap 5.3 Dark Mode
+   ErgÃ¤nzende Styles fÃ¼r Bootstrap 5.3 Dark Mode
    ======================================== */
 
 /* Grundlegende Dark Mode Anpassungen */
 [data-bs-theme="dark"] {
-    /* Bootstrap Variablen überschreiben */
+    /* Bootstrap Variablen Ã¼berschreiben */
     --bs-body-bg: #121212;
     --bs-body-color: #e0e0e0;
     --bs-border-color: #404040;
@@ -19,7 +19,7 @@
     --info-color: #4DD0E1;
     --secondary-color: #B0BEC5;
     
-    /* Hintergründe */
+    /* HintergrÃ¼nde */
     --dark-bg-0: #121212;  /* Haupthintergrund */
     --dark-bg-1: #1e1e1e;  /* Cards, Panels */
     --dark-bg-2: #2d2d2d;  /* Headers, Inputs */
@@ -56,7 +56,7 @@
     color: #90CAF9;
 }
 
-/* Überschriften */
+/* Ãœberschriften */
 [data-bs-theme="dark"] h1,
 [data-bs-theme="dark"] h2,
 [data-bs-theme="dark"] h3,

@@ -1,4 +1,4 @@
-// Implementierung des Settings-Service
+﻿// Implementierung des Settings-Service
 // Quelle: Abgeleitet von WPF Services/SettingsService.cs
 
 using System;

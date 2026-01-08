@@ -1,5 +1,5 @@
-// Quelle: WPF-Projekt Models/PersonalEntry.cs
-// Repr‰sentiert eine Person mit Vor-/Nachname, Qualifikationen und Status
+Ôªø// Quelle: WPF-Projekt Models/PersonalEntry.cs
+// Repr√§sentiert eine Person mit Vor-/Nachname, Qualifikationen und Status
 
 using System;
 using System.Collections.Generic;
@@ -34,7 +34,7 @@ namespace Einsatzueberwachung.Domain.Models
             get
             {
                 if (Skills == PersonalSkills.None)
-                    return "Keine F‰higkeiten";
+                    return "Keine F√§higkeiten";
 
                 var skillList = new List<string>();
                 foreach (PersonalSkills skill in Enum.GetValues(typeof(PersonalSkills)))

@@ -1,5 +1,5 @@
-// Quelle: WPF-Projekt Models/GlobalNotesEntry.cs
-// Repräsentiert einen Funkspruch/Notiz-Eintrag mit Zeitstempel und Typ
+ï»¿// Quelle: WPF-Projekt Models/GlobalNotesEntry.cs
+// ReprÃ¤sentiert einen Funkspruch/Notiz-Eintrag mit Zeitstempel und Typ
 // Erweitert um: Bearbeitung, Antworten/Thread, Herkunft (Team-Pflichtfeld)
 
 using System;
@@ -30,7 +30,7 @@ namespace Einsatzueberwachung.Domain.Models
         public List<GlobalNotesReply> Replies { get; set; }
         public int ReplyCount => Replies?.Count ?? 0;
         
-        // Deprecated - für Rückwärtskompatibilität
+        // Deprecated - fÃ¼r RÃ¼ckwÃ¤rtskompatibilitÃ¤t
         [Obsolete("Use SourceTeamId instead")]
         public string TeamId
         {

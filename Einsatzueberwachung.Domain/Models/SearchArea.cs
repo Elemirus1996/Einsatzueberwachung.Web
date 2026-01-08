@@ -1,5 +1,5 @@
-// Quelle: WPF-Projekt Models/SearchArea.cs
-// Repräsentiert ein Suchgebiet auf der Karte mit Polygon-Koordinaten und Team-Zuordnung
+ï»¿// Quelle: WPF-Projekt Models/SearchArea.cs
+// ReprÃ¤sentiert ein Suchgebiet auf der Karte mit Polygon-Koordinaten und Team-Zuordnung
 
 using System;
 using System.Collections.Generic;
@@ -16,7 +16,7 @@ namespace Einsatzueberwachung.Domain.Models
         public bool IsCompleted { get; set; }
         public string Notes { get; set; }
         public List<(double Latitude, double Longitude)> Coordinates { get; set; }
-        public string GeoJsonData { get; set; } // Speichert das komplette GeoJSON für Leaflet
+        public string GeoJsonData { get; set; } // Speichert das komplette GeoJSON fÃ¼r Leaflet
         public DateTime CreatedAt { get; set; }
         public DateTime? CompletedAt { get; set; }
 
@@ -41,8 +41,8 @@ namespace Einsatzueberwachung.Domain.Models
                 if (Coordinates == null || Coordinates.Count < 3)
                     return 0;
 
-                // Verwende die Shoelace-Formel für Polygone auf der Erdoberfläche
-                // Annäherung: Für kleine Flächen (< 100km²) ist dies ausreichend genau
+                // Verwende die Shoelace-Formel fÃ¼r Polygone auf der ErdoberflÃ¤che
+                // AnnÃ¤herung: FÃ¼r kleine FlÃ¤chen (< 100kmÂ²) ist dies ausreichend genau
                 return CalculatePolygonArea(Coordinates);
             }
         }
@@ -68,7 +68,7 @@ namespace Einsatzueberwachung.Domain.Models
                 double lon1 = p1.Longitude * Math.PI / 180.0;
                 double lon2 = p2.Longitude * Math.PI / 180.0;
 
-                // Berechne Fläche mit sphärischem Exzess
+                // Berechne FlÃ¤che mit sphÃ¤rischem Exzess
                 area += (lon2 - lon1) * (2 + Math.Sin(lat1) + Math.Sin(lat2));
             }
 
@@ -87,13 +87,13 @@ namespace Einsatzueberwachung.Domain.Models
                 var sqm = AreaInSquareMeters;
                 
                 if (sqm < 1)
-                    return "< 1 m²";
+                    return "< 1 mÂ²";
                 else if (sqm < 50000)
-                    return $"{sqm:N0} m²";
+                    return $"{sqm:N0} mÂ²";
                 else if (sqm < 1000000)
                     return $"{AreaInHectares:N2} ha";
                 else
-                    return $"{AreaInSquareKilometers:N2} km²";
+                    return $"{AreaInSquareKilometers:N2} kmÂ²";
             }
         }
     }

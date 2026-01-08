@@ -1,7 +1,9 @@
-@* Base Component f�r alle Seiten - Stellt Theme automatisch bereit *@
+﻿@* Base Component für alle Seiten - Stellt Theme automatisch bereit *@
 @using Einsatzueberwachung.Domain.Services
+@using Microsoft.Extensions.Logging
 @inject ThemeService ThemeService
 @inject IJSRuntime JS
+@inject ILogger<PageBase> Logger
 @implements IDisposable
 
 @code {
@@ -41,11 +43,11 @@
         {
             var theme = ThemeService.CurrentTheme;
             await JS.InvokeVoidAsync("broadcastThemeChange", theme);
-            Console.WriteLine($"PageBase: Theme angewendet - {theme}");
+            Logger.LogDebug("Theme angewendet: {Theme}", theme);
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"PageBase: Fehler beim Anwenden des Themes - {ex.Message}");
+            Logger.LogError(ex, "Fehler beim Anwenden des Themes");
         }
     }
 

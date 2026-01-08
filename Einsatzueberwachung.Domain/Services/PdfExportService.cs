@@ -1,5 +1,5 @@
-// PDF-Export-Service mit QuestPDF
-// Erstellt professionelle PDF-Berichte f�r Eins�tze
+﻿// PDF-Export-Service mit QuestPDF
+// Erstellt professionelle PDF-Berichte fü¿½r Einsü¿½tze
 
 using System;
 using System.Collections.Generic;
@@ -19,7 +19,7 @@ namespace Einsatzueberwachung.Domain.Services
     {
         public PdfExportService()
         {
-            // QuestPDF Lizenz-Konfiguration (Community License f�r nicht-kommerzielle Nutzung)
+            // QuestPDF Lizenz-Konfiguration (Community License fü¿½r nicht-kommerzielle Nutzung)
             QuestPDF.Settings.License = LicenseType.Community;
         }
 
@@ -153,7 +153,7 @@ namespace Einsatzueberwachung.Domain.Services
                     AddTableRow(table, "Einsatzort:", einsatzData.Einsatzort);
                     AddTableRow(table, "Alarmiert durch:", einsatzData.Alarmiert);
                     AddTableRow(table, "Einsatzleiter:", einsatzData.Einsatzleiter);
-                    AddTableRow(table, "F�hrungsassistent:", einsatzData.Fuehrungsassistent);
+                    AddTableRow(table, "Fü¿½hrungsassistent:", einsatzData.Fuehrungsassistent);
                 });
             });
         }
@@ -302,7 +302,7 @@ namespace Einsatzueberwachung.Domain.Services
         {
             container.Column(column =>
             {
-                column.Item().Text($"Funkspr�che & Notizen ({notes.Count})")
+                column.Item().Text($"Funksprü¿½che & Notizen ({notes.Count})")
                     .FontSize(16)
                     .Bold()
                     .FontColor(Colors.Blue.Darken1);
@@ -325,9 +325,9 @@ namespace Einsatzueberwachung.Domain.Services
                                     .Bold()
                                     .FontColor(GetNoteTypeColor(note.Type));
 
-                                if (!string.IsNullOrEmpty(note.TeamName))
+                                if (!string.IsNullOrEmpty(note.SourceTeamName))
                                 {
-                                    row.AutoItem().PaddingLeft(10).Text($"[{note.TeamName}]")
+                                    row.AutoItem().PaddingLeft(10).Text($"[{note.SourceTeamName}]")
                                         .FontSize(9)
                                         .FontColor(Colors.Blue.Medium);
                                 }

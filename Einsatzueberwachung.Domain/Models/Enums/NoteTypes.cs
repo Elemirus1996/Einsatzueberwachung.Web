@@ -1,4 +1,4 @@
-// Quelle: WPF-Projekt Models/GlobalNotesEntry.cs und NotesEntry.cs
+﻿// Quelle: WPF-Projekt Models/GlobalNotesEntry.cs und NotesEntry.cs
 // Beschreibt Notiz-Typen und Ziele (Global, Team-spezifisch, etc.)
 
 namespace Einsatzueberwachung.Domain.Models.Enums

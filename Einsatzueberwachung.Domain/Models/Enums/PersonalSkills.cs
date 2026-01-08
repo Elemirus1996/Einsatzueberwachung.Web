@@ -1,5 +1,5 @@
-// Quelle: WPF-Projekt Models/PersonalSkills.cs
-// Beschreibt die Rollen/Qualifikationen von Personal (Hundeführer, Helfer, Führungsebenen, etc.)
+ï»¿// Quelle: WPF-Projekt Models/PersonalSkills.cs
+// Beschreibt die Rollen/Qualifikationen von Personal (HundefÃ¼hrer, Helfer, FÃ¼hrungsebenen, etc.)
 
 using System;
 
@@ -25,12 +25,12 @@ namespace Einsatzueberwachung.Domain.Models.Enums
         {
             return skill switch
             {
-                PersonalSkills.Hundefuehrer => "Hundeführer",
+                PersonalSkills.Hundefuehrer => "HundefÃ¼hrer",
                 PersonalSkills.Helfer => "Helfer",
-                PersonalSkills.Fuehrungsassistent => "Führungsassistent",
-                PersonalSkills.Gruppenfuehrer => "Gruppenführer",
-                PersonalSkills.Zugfuehrer => "Zugführer",
-                PersonalSkills.Verbandsfuehrer => "Verbandsführer",
+                PersonalSkills.Fuehrungsassistent => "FÃ¼hrungsassistent",
+                PersonalSkills.Gruppenfuehrer => "GruppenfÃ¼hrer",
+                PersonalSkills.Zugfuehrer => "ZugfÃ¼hrer",
+                PersonalSkills.Verbandsfuehrer => "VerbandsfÃ¼hrer",
                 PersonalSkills.Drohnenpilot => "Drohnenpilot",
                 PersonalSkills.Einsatzleiter => "Einsatzleiter",
                 _ => skill.ToString()
@@ -63,12 +63,12 @@ namespace Einsatzueberwachung.Domain.Models.Enums
 
         public static string GetHighestLeadershipLevel(this PersonalSkills skills)
         {
-            if (skills.HasFlag(PersonalSkills.Verbandsfuehrer)) return "Verbandsführer";
-            if (skills.HasFlag(PersonalSkills.Zugfuehrer)) return "Zugführer";
-            if (skills.HasFlag(PersonalSkills.Gruppenfuehrer)) return "Gruppenführer";
+            if (skills.HasFlag(PersonalSkills.Verbandsfuehrer)) return "VerbandsfÃ¼hrer";
+            if (skills.HasFlag(PersonalSkills.Zugfuehrer)) return "ZugfÃ¼hrer";
+            if (skills.HasFlag(PersonalSkills.Gruppenfuehrer)) return "GruppenfÃ¼hrer";
             if (skills.HasFlag(PersonalSkills.Einsatzleiter)) return "Einsatzleiter";
-            if (skills.HasFlag(PersonalSkills.Fuehrungsassistent)) return "Führungsassistent";
-            return "Keine Führungsqualifikation";
+            if (skills.HasFlag(PersonalSkills.Fuehrungsassistent)) return "FÃ¼hrungsassistent";
+            return "Keine FÃ¼hrungsqualifikation";
         }
     }
 }

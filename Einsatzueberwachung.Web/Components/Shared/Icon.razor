@@ -1,4 +1,4 @@
-@* Icon-Helper Component für einheitliche Icons *@
+ï»¿@* Icon-Helper Component fÃ¼r einheitliche Icons *@
 @code {
     [Parameter]
     public string IconName { get; set; } = "";
@@ -36,7 +36,7 @@
             "house" => "bi bi-house-fill",
             "search" => "bi bi-search",
             "dog" => "bi bi-heart-fill", // Hundeherz als Symbol
-            "drone" => "bi bi-triangle-fill", // Dreieck für Drohne
+            "drone" => "bi bi-triangle-fill", // Dreieck fÃ¼r Drohne
             "tools" => "bi bi-tools",
             "flag" => "bi bi-flag-fill",
             "geo" => "bi bi-geo-alt-fill",
@@ -48,12 +48,12 @@
 
     private string GetIconHtml()
     {
-        // Fallback für Icons die nicht in Bootstrap Icons sind
+        // Fallback fÃ¼r Icons die nicht in Bootstrap Icons sind
         return IconName switch
         {
-            "dog-custom" => "&#x1F415;", // Hund Emoji (falls benötigt)
-            "drone-custom" => "&#x1F6E9;", // Drohne Emoji (falls benötigt)
-            "alarm-custom" => "&#x1F6A8;", // Alarm Emoji (falls benötigt)
+            "dog-custom" => "&#x1F415;", // Hund Emoji (falls benÃ¶tigt)
+            "drone-custom" => "&#x1F6E9;", // Drohne Emoji (falls benÃ¶tigt)
+            "alarm-custom" => "&#x1F6A8;", // Alarm Emoji (falls benÃ¶tigt)
             _ => ""
         };
     }

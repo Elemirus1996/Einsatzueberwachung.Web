@@ -8,68 +8,94 @@
 <div class="home-container">
     <div class="hero-section">
         <div class="hero-content">
-            <h1 class="display-3"><i class="bi bi-alarm-fill text-danger"></i> Einsatzüberwachung</h1>
+            <h1 class="display-3"><i class="bi bi-alarm-fill"></i> Einsatzüberwachung</h1>
             <p class="lead">Moderne Web-Anwendung für die Koordination von Rettungshunde-Einsätzen</p>
+            <p class="text-white-50">Version 3.0.0 • Dark Mode • Mobile Support • PDF-Export • Map Enhancements</p>
         </div>
     </div>
 
     <div class="quick-actions">
         <div class="row g-4">
-            <div class="col-md-6">
-                <div class="action-card card-primary" @onclick='() => Navigation.NavigateTo("/einsatz/start")'>
+            <div class="col-12 col-md-6 col-lg-3">
+                <div class="action-card card-primary" @onclick='() => Navigation.NavigateTo("/einsatz/start")' role="button" tabindex="0" title="Klicken zum Starten">
                     <div class="action-icon"><i class="bi bi-alarm-fill"></i></div>
                     <h3>Neuer Einsatz</h3>
                     <p>Starten Sie einen neuen Einsatz oder eine Übung</p>
+                    <small style="opacity: 0.85; font-size: 0.9rem; font-weight: 500;">➜ Jetzt öffnen</small>
                 </div>
             </div>
 
             @if (EinsatzService.Teams.Any())
             {
-                <div class="col-md-6">
-                    <div class="action-card card-success" @onclick='() => Navigation.NavigateTo("/einsatz/monitor")'>
+                <div class="col-12 col-md-6 col-lg-3">
+                    <div class="action-card card-success" @onclick='() => Navigation.NavigateTo("/einsatz/monitor")' role="button" tabindex="0" title="Klicken zum Anzeigen">
                         <div class="action-icon"><i class="bi bi-bar-chart-fill"></i></div>
                         <h3>Einsatzmonitor</h3>
                         <p>Zurück zum laufenden Einsatz (@EinsatzService.Teams.Count Teams aktiv)</p>
+                        <small style="opacity: 0.85; font-size: 0.9rem; font-weight: 500;">➜ Jetzt öffnen</small>
                     </div>
                 </div>
             }
 
-            <div class="col-md-6">
-                <div class="action-card card-info" @onclick='() => Navigation.NavigateTo("/stammdaten")'>
+            <div class="col-12 col-md-6 col-lg-3">
+                <div class="action-card card-info" @onclick='() => Navigation.NavigateTo("/stammdaten")' role="button" tabindex="0" title="Klicken zum Verwalten">
                     <div class="action-icon"><i class="bi bi-clipboard-data"></i></div>
                     <h3>Stammdaten</h3>
                     <p>Personal und Hunde verwalten</p>
+                    <small style="opacity: 0.85; font-size: 0.9rem; font-weight: 500;">➜ Jetzt öffnen</small>
                 </div>
             </div>
 
-            <div class="col-md-6">
-                <div class="action-card card-secondary" @onclick='() => Navigation.NavigateTo("/einstellungen")'>
+            <div class="col-12 col-md-6 col-lg-3">
+                <div class="action-card card-secondary" @onclick='() => Navigation.NavigateTo("/einstellungen")' role="button" tabindex="0" title="Klicken zum Konfigurieren">
                     <div class="action-icon"><i class="bi bi-gear-fill"></i></div>
                     <h3>Einstellungen</h3>
                     <p>Staffel-Daten und App-Konfiguration</p>
+                    <small style="opacity: 0.85; font-size: 0.9rem; font-weight: 500;">➜ Jetzt öffnen</small>
                 </div>
             </div>
         </div>
     </div>
 
     <div class="info-section mt-5">
-        <div class="row">
-            <div class="col-md-4">
+        <h2 class="text-center mb-4">
+            <i class="bi bi-stars"></i> Features & Funktionen
+        </h2>
+        <div class="row g-4">
+            <div class="col-12 col-md-6 col-lg-3">
                 <div class="feature-box">
-                    <h4><i class="bi bi-clock-history"></i> Team-Timer</h4>
+                    <div class="feature-icon">
+                        <i class="bi bi-clock-history"></i>
+                    </div>
+                    <h4>Team-Timer</h4>
                     <p>Automatische Überwachung der Einsatzzeiten mit Warnungen</p>
                 </div>
             </div>
-            <div class="col-md-4">
+            <div class="col-12 col-md-6 col-lg-3">
                 <div class="feature-box">
-                    <h4><i class="bi bi-map-fill"></i> Karten-Ansicht</h4>
+                    <div class="feature-icon">
+                        <i class="bi bi-map-fill"></i>
+                    </div>
+                    <h4>Karten-Ansicht</h4>
                     <p>Suchgebiete definieren und Teams zuweisen</p>
                 </div>
             </div>
-            <div class="col-md-4">
+            <div class="col-12 col-md-6 col-lg-3">
                 <div class="feature-box">
-                    <h4><i class="bi bi-file-pdf-fill"></i> PDF-Export</h4>
+                    <div class="feature-icon">
+                        <i class="bi bi-file-pdf-fill"></i>
+                    </div>
+                    <h4>PDF-Export</h4>
                     <p>Vollständiger Einsatzbericht als PDF</p>
+                </div>
+            </div>
+            <div class="col-12 col-md-6 col-lg-3">
+                <div class="feature-box">
+                    <div class="feature-icon">
+                        <i class="bi bi-phone-fill"></i>
+                    </div>
+                    <h4>Mobile Dashboard</h4>
+                    <p>Echtzeit-Updates für Einsatzkräfte</p>
                 </div>
             </div>
         </div>

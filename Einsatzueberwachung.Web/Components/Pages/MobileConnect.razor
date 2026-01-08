@@ -1,4 +1,6 @@
-@page "/mobile/connect"
+ï»¿@page "/mobile/connect"
+@using System.Text.Json
+@using System.Text.Json.Serialization
 @inject IJSRuntime JSRuntime
 @inject NavigationManager Navigation
 @rendermode InteractiveServer
@@ -17,7 +19,7 @@
     {
         <div class="text-center py-5">
             <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status">
-                <span class="visually-hidden">Lädt...</span>
+                <span class="visually-hidden">LÃ¤dt...</span>
             </div>
             <p class="mt-3">Netzwerk-Informationen werden geladen...</p>
         </div>
@@ -39,7 +41,7 @@
                     </div>
                     <div class="qr-card-body">
                         <div class="qr-code-container">
-                            <img src="@qr.DataUri" alt="QR Code für @qr.Url" class="qr-code-image" />
+                            <img src="@qr.DataUri" alt="QR Code fÃ¼r @qr.Url" class="qr-code-image" />
                         </div>
                         <div class="url-info">
                             <p class="mb-2"><strong>Mobile Dashboard URL:</strong></p>
@@ -59,7 +61,7 @@
                     </div>
                     <div class="qr-card-footer">
                         <button class="btn btn-primary w-100" @onclick='() => Navigation.NavigateTo(qr.Url)'>
-                            <i class="bi bi-box-arrow-up-right"></i> Direkt öffnen
+                            <i class="bi bi-box-arrow-up-right"></i> Direkt Ã¶ffnen
                         </button>
                     </div>
                 </div>
@@ -75,19 +77,19 @@
                     <ol class="instructions-list">
                         <li>
                             <strong>QR-Code scannen:</strong>
-                            <p>Öffnen Sie die Kamera-App auf Ihrem Smartphone oder einen QR-Code-Scanner und scannen Sie einen der QR-Codes oben.</p>
+                            <p>Ã–ffnen Sie die Kamera-App auf Ihrem Smartphone oder einen QR-Code-Scanner und scannen Sie einen der QR-Codes oben.</p>
                         </li>
                         <li>
                             <strong>URL manuell eingeben:</strong>
-                            <p>Alternativ können Sie die URL auch manuell in den Browser Ihres mobilen Geräts eingeben.</p>
+                            <p>Alternativ kÃ¶nnen Sie die URL auch manuell in den Browser Ihres mobilen GerÃ¤ts eingeben.</p>
                         </li>
                         <li>
                             <strong>Gleiche Netzwerk-Verbindung:</strong>
-                            <p>Stellen Sie sicher, dass Ihr mobiles Gerät im <strong>gleichen WLAN/Netzwerk</strong> wie dieser Server ist.</p>
+                            <p>Stellen Sie sicher, dass Ihr mobiles GerÃ¤t im <strong>gleichen WLAN/Netzwerk</strong> wie dieser Server ist.</p>
                         </li>
                         <li>
                             <strong>Firewall-Einstellungen:</strong>
-                            <p>Falls die Verbindung nicht funktioniert, prüfen Sie die Firewall-Einstellungen des Servers.</p>
+                            <p>Falls die Verbindung nicht funktioniert, prÃ¼fen Sie die Firewall-Einstellungen des Servers.</p>
                         </li>
                     </ol>
 
@@ -100,7 +102,7 @@
                                     <td>@_hostName</td>
                                 </tr>
                                 <tr>
-                                    <td><strong>Verfügbare IPs:</strong></td>
+                                    <td><strong>VerfÃ¼gbare IPs:</strong></td>
                                     <td>@string.Join(", ", _qrCodes.Select(q => q.IP))</td>
                                 </tr>
                                 <tr>
@@ -123,7 +125,7 @@
                 <i class="bi bi-arrow-clockwise"></i> QR-Codes aktualisieren
             </button>
             <button class="btn btn-lg btn-outline-secondary" @onclick='() => Navigation.NavigateTo("/")'>
-                <i class="bi bi-house-fill"></i> Zurück zur Startseite
+                <i class="bi bi-house-fill"></i> ZurÃ¼ck zur Startseite
             </button>
         </div>
     }
@@ -138,49 +140,58 @@
 
     protected override async Task OnInitializedAsync()
     {
-        await LoadQRCodes();
+        await LoadQRCodesViaJS();
     }
 
-    private async Task LoadQRCodes()
+    private async Task LoadQRCodesViaJS()
     {
-        _isLoading = true;
-        _networkError = null;
-        StateHasChanged();
-
         try
         {
-            var response = await new HttpClient().GetFromJsonAsync<List<QRCodeInfo>>("/api/network/qrcodes");
-            
-            if (response != null && response.Any())
-            {
-                _qrCodes = response;
-                
-                // Hole zusätzliche Netzwerk-Infos
-                var networkInfo = await new HttpClient().GetFromJsonAsync<NetworkInfo>("/api/network/info");
-                if (networkInfo != null)
-                {
-                    _hostName = networkInfo.HostName ?? "Unbekannt";
-                }
-            }
-            else
-            {
-                _networkError = "Keine Netzwerk-IPs gefunden. Stellen Sie sicher, dass der Server mit einem Netzwerk verbunden ist.";
-            }
+            var thisRef = DotNetObjectReference.Create(this);
+            await JSRuntime.InvokeVoidAsync("QRCodeLoader.loadQRCodes", thisRef);
         }
         catch (Exception ex)
         {
             _networkError = $"Fehler beim Laden der QR-Codes: {ex.Message}";
-        }
-        finally
-        {
             _isLoading = false;
             StateHasChanged();
         }
     }
 
+    [JSInvokable]
+    public void SetQRCodes(JsonElement qrCodesData, string hostName)
+    {
+        try
+        {
+            var options = new JsonSerializerOptions 
+            { 
+                PropertyNameCaseInsensitive = true 
+            };
+            var qrCodesList = JsonSerializer.Deserialize<List<QRCodeInfo>>(qrCodesData.GetRawText(), options);
+            _qrCodes = qrCodesList ?? new List<QRCodeInfo>();
+            _hostName = hostName ?? "Unbekannt";
+            _isLoading = false;
+            _networkError = null;
+        }
+        catch (Exception ex)
+        {
+            _networkError = $"Fehler beim Verarbeiten der QR-Codes: {ex.Message}";
+            _isLoading = false;
+        }
+        StateHasChanged();
+    }
+
+    [JSInvokable]
+    public void SetError(string error)
+    {
+        _networkError = error;
+        _isLoading = false;
+        StateHasChanged();
+    }
+
     private async Task RefreshQRCodes()
     {
-        await LoadQRCodes();
+        await LoadQRCodesViaJS();
     }
 
     private async Task CopyToClipboard(string text, string ip)
