@@ -1,0 +1,223 @@
+@page "/mobile/connect"
+@inject IJSRuntime JSRuntime
+@inject NavigationManager Navigation
+@rendermode InteractiveServer
+
+<PageTitle>Mobile Verbindung - QR-Code</PageTitle>
+
+<link rel="stylesheet" href="mobile-connect.css" />
+
+<div class="connect-container">
+    <div class="connect-header">
+        <h1><i class="bi bi-qr-code"></i> Mobile Verbindung</h1>
+        <p class="lead">Scannen Sie den QR-Code mit Ihrem Smartphone oder Tablet</p>
+    </div>
+
+    @if (_isLoading)
+    {
+        <div class="text-center py-5">
+            <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status">
+                <span class="visually-hidden">Lädt...</span>
+            </div>
+            <p class="mt-3">Netzwerk-Informationen werden geladen...</p>
+        </div>
+    }
+    else if (_networkError != null)
+    {
+        <div class="alert alert-danger">
+            <i class="bi bi-exclamation-triangle-fill"></i> <strong>Fehler:</strong> @_networkError
+        </div>
+    }
+    else if (_qrCodes.Any())
+    {
+        <div class="qr-grid">
+            @foreach (var qr in _qrCodes)
+            {
+                <div class="qr-card">
+                    <div class="qr-card-header">
+                        <h3><i class="bi bi-hdd-network-fill"></i> Netzwerk: @qr.IP</h3>
+                    </div>
+                    <div class="qr-card-body">
+                        <div class="qr-code-container">
+                            <img src="@qr.DataUri" alt="QR Code für @qr.Url" class="qr-code-image" />
+                        </div>
+                        <div class="url-info">
+                            <p class="mb-2"><strong>Mobile Dashboard URL:</strong></p>
+                            <div class="input-group">
+                                <input type="text" class="form-control" value="@qr.Url" readonly id="url-@qr.IP" />
+                                <button class="btn btn-outline-primary" @onclick="() => CopyToClipboard(qr.Url, qr.IP)">
+                                    <i class="bi bi-clipboard"></i> Kopieren
+                                </button>
+                            </div>
+                            @if (_copiedUrl == qr.IP)
+                            {
+                                <small class="text-success">
+                                    <i class="bi bi-check-circle-fill"></i> In Zwischenablage kopiert!
+                                </small>
+                            }
+                        </div>
+                    </div>
+                    <div class="qr-card-footer">
+                        <button class="btn btn-primary w-100" @onclick='() => Navigation.NavigateTo(qr.Url)'>
+                            <i class="bi bi-box-arrow-up-right"></i> Direkt öffnen
+                        </button>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <div class="instructions-section">
+            <div class="card">
+                <div class="card-header">
+                    <h3><i class="bi bi-info-circle-fill"></i> Anleitung</h3>
+                </div>
+                <div class="card-body">
+                    <ol class="instructions-list">
+                        <li>
+                            <strong>QR-Code scannen:</strong>
+                            <p>Öffnen Sie die Kamera-App auf Ihrem Smartphone oder einen QR-Code-Scanner und scannen Sie einen der QR-Codes oben.</p>
+                        </li>
+                        <li>
+                            <strong>URL manuell eingeben:</strong>
+                            <p>Alternativ können Sie die URL auch manuell in den Browser Ihres mobilen Geräts eingeben.</p>
+                        </li>
+                        <li>
+                            <strong>Gleiche Netzwerk-Verbindung:</strong>
+                            <p>Stellen Sie sicher, dass Ihr mobiles Gerät im <strong>gleichen WLAN/Netzwerk</strong> wie dieser Server ist.</p>
+                        </li>
+                        <li>
+                            <strong>Firewall-Einstellungen:</strong>
+                            <p>Falls die Verbindung nicht funktioniert, prüfen Sie die Firewall-Einstellungen des Servers.</p>
+                        </li>
+                    </ol>
+
+                    <div class="network-info-box">
+                        <h4><i class="bi bi-server"></i> Server-Informationen</h4>
+                        <table class="table table-sm">
+                            <tbody>
+                                <tr>
+                                    <td><strong>Hostname:</strong></td>
+                                    <td>@_hostName</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Verfügbare IPs:</strong></td>
+                                    <td>@string.Join(", ", _qrCodes.Select(q => q.IP))</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>HTTP Port:</strong></td>
+                                    <td>5000</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>HTTPS Port:</strong></td>
+                                    <td>5001</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="action-buttons">
+            <button class="btn btn-lg btn-outline-primary" @onclick="RefreshQRCodes">
+                <i class="bi bi-arrow-clockwise"></i> QR-Codes aktualisieren
+            </button>
+            <button class="btn btn-lg btn-outline-secondary" @onclick='() => Navigation.NavigateTo("/")'>
+                <i class="bi bi-house-fill"></i> Zurück zur Startseite
+            </button>
+        </div>
+    }
+</div>
+
+@code {
+    private List<QRCodeInfo> _qrCodes = new();
+    private bool _isLoading = true;
+    private string? _networkError = null;
+    private string? _copiedUrl = null;
+    private string _hostName = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadQRCodes();
+    }
+
+    private async Task LoadQRCodes()
+    {
+        _isLoading = true;
+        _networkError = null;
+        StateHasChanged();
+
+        try
+        {
+            var response = await new HttpClient().GetFromJsonAsync<List<QRCodeInfo>>("/api/network/qrcodes");
+            
+            if (response != null && response.Any())
+            {
+                _qrCodes = response;
+                
+                // Hole zusätzliche Netzwerk-Infos
+                var networkInfo = await new HttpClient().GetFromJsonAsync<NetworkInfo>("/api/network/info");
+                if (networkInfo != null)
+                {
+                    _hostName = networkInfo.HostName ?? "Unbekannt";
+                }
+            }
+            else
+            {
+                _networkError = "Keine Netzwerk-IPs gefunden. Stellen Sie sicher, dass der Server mit einem Netzwerk verbunden ist.";
+            }
+        }
+        catch (Exception ex)
+        {
+            _networkError = $"Fehler beim Laden der QR-Codes: {ex.Message}";
+        }
+        finally
+        {
+            _isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task RefreshQRCodes()
+    {
+        await LoadQRCodes();
+    }
+
+    private async Task CopyToClipboard(string text, string ip)
+    {
+        try
+        {
+            await JSRuntime.InvokeVoidAsync("navigator.clipboard.writeText", text);
+            _copiedUrl = ip;
+            StateHasChanged();
+
+            // Reset nach 3 Sekunden
+            await Task.Delay(3000);
+            if (_copiedUrl == ip)
+            {
+                _copiedUrl = null;
+                StateHasChanged();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Fehler beim Kopieren: {ex.Message}");
+        }
+    }
+
+    private class QRCodeInfo
+    {
+        public string IP { get; set; } = "";
+        public string Url { get; set; } = "";
+        public string QRCodeBase64 { get; set; } = "";
+        public string DataUri { get; set; } = "";
+    }
+
+    private class NetworkInfo
+    {
+        public List<string> ServerIPs { get; set; } = new();
+        public int Port { get; set; }
+        public int HttpsPort { get; set; }
+        public string? HostName { get; set; }
+    }
+}

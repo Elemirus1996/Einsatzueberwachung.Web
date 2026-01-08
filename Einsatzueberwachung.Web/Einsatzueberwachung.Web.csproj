@@ -1,15 +1,24 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
-  <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
-    <Nullable>enable</Nullable>
-    <ImplicitUsings>enable</ImplicitUsings>
-  </PropertyGroup>
+<PropertyGroup>
+  <TargetFramework>net8.0</TargetFramework>
+  <Nullable>enable</Nullable>
+  <ImplicitUsings>enable</ImplicitUsings>
+  <Version>2.5.0</Version>
+  <AssemblyVersion>2.5.0.0</AssemblyVersion>
+  <FileVersion>2.5.0.0</FileVersion>
+  <Product>Einsatzüberwachung Web - Mobile Dashboard mit Dark Mode</Product>
+  <Description>Moderne Web-Anwendung für Rettungshunde-Einsätze mit mobilem Dashboard, Dark Mode und erweiterten Funktionen</Description>
+</PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Einsatzueberwachung.Domain\Einsatzueberwachung.Domain.csproj" />
     <ProjectReference Include="..\Einsatzueberwachung.Web.Client\Einsatzueberwachung.Web.Client.csproj" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="8.0.22" />
+    <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="8.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
+    <PackageReference Include="QRCoder" Version="1.4.3" />
   </ItemGroup>
 
 </Project>

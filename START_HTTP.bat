@@ -30,15 +30,18 @@ echo.
 REM Wechsle ins Projektverzeichnis
 cd /d "%~dp0Einsatzueberwachung.Web"
 
-echo Starte Anwendung (HTTP-Modus)...
-echo Browser oeffnet automatisch unter: http://localhost:5222
+echo Starte Anwendung (HTTP-Modus - Netzwerk-Zugriff)...
+echo Server ist erreichbar unter:
+echo  - Lokal:    http://localhost:5000
+echo  - Netzwerk: http://[IHRE-IP]:5000
+echo  - Mobile:   http://[IHRE-IP]:5000/mobile/connect (QR-Code)
 echo.
 echo ========================================
 echo  Druecken Sie STRG+C zum Beenden
 echo ========================================
 echo.
 
-REM Starte die Anwendung
-dotnet run --launch-profile http
+REM Starte die Anwendung auf allen Netzwerk-Interfaces
+dotnet run --urls "http://0.0.0.0:5000;https://0.0.0.0:5001"
 
 pause

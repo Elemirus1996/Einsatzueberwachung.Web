@@ -1,0 +1,297 @@
+@page "/mobile"
+@inject IEinsatzService EinsatzService
+@inject NavigationManager Navigation
+@rendermode InteractiveServer
+
+<PageTitle>Mobile Dashboard</PageTitle>
+
+<div class="mobile-dashboard">
+    <!-- Header -->
+    <div class="mobile-header">
+        <div class="header-content">
+            <h1><i class="bi bi-phone-fill"></i> Mobile Dashboard</h1>
+            <p class="mb-0">
+                @if (EinsatzService.CurrentEinsatz.IstEinsatz)
+                {
+                    <span class="badge bg-danger pulse">EINSATZ</span>
+                }
+                else
+                {
+                    <span class="badge bg-warning">ÜBUNG</span>
+                }
+                @EinsatzService.CurrentEinsatz.Einsatzort
+            </p>
+        </div>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="quick-stats">
+        <div class="stat-card">
+            <div class="stat-icon text-primary"><i class="bi bi-people-fill"></i></div>
+            <div class="stat-info">
+                <div class="stat-value">@_teams.Count</div>
+                <div class="stat-label">Teams</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon text-success"><i class="bi bi-play-fill"></i></div>
+            <div class="stat-info">
+                <div class="stat-value">@_teams.Count(t => t.IsRunning)</div>
+                <div class="stat-label">Aktiv</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon text-warning"><i class="bi bi-exclamation-triangle-fill"></i></div>
+            <div class="stat-info">
+                <div class="stat-value">@_teams.Count(t => t.IsFirstWarning)</div>
+                <div class="stat-label">Warnung</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon text-danger"><i class="bi bi-alarm-fill"></i></div>
+            <div class="stat-info">
+                <div class="stat-value">@_teams.Count(t => t.IsSecondWarning)</div>
+                <div class="stat-label">Kritisch</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Teams List -->
+    <div class="mobile-section">
+        <div class="section-header-mobile">
+            <h2><i class="bi bi-people-fill"></i> Teams</h2>
+            <button class="btn btn-sm btn-primary" @onclick='() => Navigation.NavigateTo("/einsatz/monitor")'>
+                <i class="bi bi-arrow-right-circle"></i> Zum Monitor
+            </button>
+        </div>
+
+        @if (_teams.Any())
+        {
+            <div class="teams-mobile-list">
+                @foreach (var team in _teams.OrderBy(t => t.TeamName))
+                {
+                    <div class="team-mobile-card @GetTeamCssClass(team)">
+                        <div class="team-mobile-header">
+                            <div class="team-mobile-title">
+                                <h3>@team.TeamName</h3>
+                                @if (team.IsDroneTeam)
+                                {
+                                    <span class="badge bg-info">
+                                        <i class="bi bi-airplane"></i> Drohne
+                                    </span>
+                                }
+                                else if (team.IsSupportTeam)
+                                {
+                                    <span class="badge bg-secondary">
+                                        <i class="bi bi-tools"></i> Support
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge" style="background-color: @GetDogSpecializationColor(team.DogSpecialization)">
+                                        <i class="bi bi-award-fill"></i> @team.DogSpecialization
+                                    </span>
+                                }
+                            </div>
+                            <div class="status-indicator @GetStatusClass(team)"></div>
+                        </div>
+
+                        <div class="team-mobile-timer">
+                            <div class="timer-display-mobile @GetTimerClass(team)">
+                                @team.ElapsedTime.ToString(@"hh\:mm\:ss")
+                            </div>
+                            @if (team.IsSecondWarning)
+                            {
+                                <span class="badge bg-danger">Zweite Warnung!</span>
+                            }
+                            else if (team.IsFirstWarning)
+                            {
+                                <span class="badge bg-warning">Erste Warnung</span>
+                            }
+                        </div>
+
+                        <div class="team-mobile-info">
+                            @if (!string.IsNullOrEmpty(team.SearchAreaName))
+                            {
+                                <div class="info-item">
+                                    <i class="bi bi-geo-alt-fill"></i>
+                                    <span>@team.SearchAreaName</span>
+                                </div>
+                            }
+                            @if (!string.IsNullOrEmpty(team.HundefuehrerName))
+                            {
+                                <div class="info-item">
+                                    <i class="bi bi-person-fill"></i>
+                                    <span>@team.HundefuehrerName</span>
+                                </div>
+                            }
+                        </div>
+
+                        <div class="team-mobile-controls">
+                            @if (team.IsRunning)
+                            {
+                                <button class="btn btn-sm btn-warning w-100" @onclick="() => StopTeamTimer(team.TeamId)">
+                                    <i class="bi bi-pause-fill"></i> Stoppen
+                                </button>
+                            }
+                            else
+                            {
+                                <button class="btn btn-sm btn-success w-100" @onclick="() => StartTeamTimer(team.TeamId)">
+                                    <i class="bi bi-play-fill"></i> Starten
+                                </button>
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="empty-state-mobile">
+                <i class="bi bi-inbox"></i>
+                <p>Keine Teams aktiv</p>
+            </div>
+        }
+    </div>
+
+    <!-- Recent Notes -->
+    <div class="mobile-section">
+        <div class="section-header-mobile">
+            <h2><i class="bi bi-chat-left-text-fill"></i> Aktuelle Meldungen</h2>
+            <span class="badge bg-primary">@_notes.Count</span>
+        </div>
+
+        @if (_notes.Any())
+        {
+            <div class="notes-mobile-list">
+                @foreach (var note in _notes.Take(10))
+                {
+                    <div class="note-mobile-card note-type-@note.Type.ToString().ToLower()">
+                        <div class="note-mobile-header">
+                            <span class="note-time">
+                                <i class="bi bi-@note.TypeIcon"></i>
+                                @note.FormattedTimestamp
+                            </span>
+                            @if (!string.IsNullOrEmpty(note.SourceTeamName))
+                            {
+                                <span class="note-team">@note.SourceTeamName</span>
+                            }
+                        </div>
+                        <div class="note-mobile-text">@note.Text</div>
+                        @if (note.ReplyCount > 0)
+                        {
+                            <div class="note-mobile-footer">
+                                <span class="badge bg-info">
+                                    <i class="bi bi-chat-dots-fill"></i> @note.ReplyCount Antworten
+                                </span>
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="empty-state-mobile">
+                <i class="bi bi-chat-left-text"></i>
+                <p>Keine Meldungen</p>
+            </div>
+        }
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="mobile-quick-actions">
+        <button class="btn btn-lg btn-primary w-100 mb-2" @onclick='() => Navigation.NavigateTo("/einsatz/karte")'>
+            <i class="bi bi-map-fill"></i> Karte anzeigen
+        </button>
+        <button class="btn btn-lg btn-outline-primary w-100" @onclick='() => Navigation.NavigateTo("/")'>
+            <i class="bi bi-house-fill"></i> Zur Startseite
+        </button>
+    </div>
+</div>
+
+@code {
+    private List<Team> _teams = new();
+    private List<GlobalNotesEntry> _notes = new();
+    private System.Threading.Timer? _refreshTimer;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _teams = EinsatzService.Teams;
+        _notes = EinsatzService.GlobalNotes;
+
+        // Event-Subscriptions
+        EinsatzService.TeamAdded += OnDataChanged;
+        EinsatzService.TeamRemoved += OnDataChanged;
+        EinsatzService.TeamUpdated += OnDataChanged;
+        EinsatzService.NoteAdded += OnDataChanged;
+
+        // Timer für UI-Refresh (1 Sekunde)
+        _refreshTimer = new System.Threading.Timer(_ => InvokeAsync(StateHasChanged), null, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(1));
+    }
+
+    private void OnDataChanged(object? obj = null)
+    {
+        InvokeAsync(() =>
+        {
+            _teams = EinsatzService.Teams;
+            _notes = EinsatzService.GlobalNotes.OrderByDescending(n => n.Timestamp).ToList();
+            StateHasChanged();
+        });
+    }
+
+    private async Task StartTeamTimer(string teamId)
+    {
+        await EinsatzService.StartTeamTimerAsync(teamId);
+    }
+
+    private async Task StopTeamTimer(string teamId)
+    {
+        await EinsatzService.StopTeamTimerAsync(teamId);
+    }
+
+    private string GetTeamCssClass(Team team)
+    {
+        if (!team.IsRunning) return "team-ready";
+        if (team.IsSecondWarning) return "team-critical";
+        if (team.IsFirstWarning) return "team-warning";
+        return "team-active";
+    }
+
+    private string GetStatusClass(Team team)
+    {
+        if (!team.IsRunning) return "status-ready";
+        if (team.IsSecondWarning) return "status-critical";
+        if (team.IsFirstWarning) return "status-warning";
+        return "status-active";
+    }
+
+    private string GetTimerClass(Team team)
+    {
+        if (team.IsSecondWarning) return "timer-critical";
+        if (team.IsFirstWarning) return "timer-warning";
+        if (team.IsRunning) return "timer-active";
+        return "timer-ready";
+    }
+
+    private string GetDogSpecializationColor(DogSpecialization spec)
+    {
+        return spec switch
+        {
+            DogSpecialization.Flaechensuche => "#4CAF50",
+            DogSpecialization.Truemmersuche => "#FF9800",
+            DogSpecialization.Wasserortung => "#2196F3",
+            DogSpecialization.Mantrailing => "#9C27B0",
+            _ => "#757575"
+        };
+    }
+
+    public void Dispose()
+    {
+        _refreshTimer?.Dispose();
+        EinsatzService.TeamAdded -= OnDataChanged;
+        EinsatzService.TeamRemoved -= OnDataChanged;
+        EinsatzService.TeamUpdated -= OnDataChanged;
+        EinsatzService.NoteAdded -= OnDataChanged;
+    }
+}
