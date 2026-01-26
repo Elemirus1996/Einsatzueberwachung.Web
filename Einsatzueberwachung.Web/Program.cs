@@ -153,7 +153,13 @@ builder.Services.AddProblemDetails();
 
 // Health Checks
 builder.Services.AddHealthChecks();
-// SignalR Broadcast Service fü¿½r mobile Updates
+
+// Update Services für GitHub Auto-Update
+builder.Services.AddHttpClient<GitHubUpdateService>();
+builder.Services.AddSingleton<GitHubUpdateService>();
+builder.Services.AddHostedService<Einsatzueberwachung.Web.Services.UpdateCheckService>();
+
+// SignalR Broadcast Service für mobile Updates
 builder.Services.AddHostedService<Einsatzueberwachung.Web.Services.SignalRBroadcastService>();
 
 var app = builder.Build();

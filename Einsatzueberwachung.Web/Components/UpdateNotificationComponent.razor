@@ -1,0 +1,117 @@
+@using Einsatzueberwachung.Domain.Services
+@using Einsatzueberwachung.Web.Services
+@implements IAsyncDisposable
+@inject GitHubUpdateService UpdateService
+@inject UpdateCheckService UpdateCheckService
+@inject ILogger<UpdateNotificationComponent> Logger
+
+<div class="update-notification-container">
+    @if (_showNotification && _updateInfo != null)
+    {
+        <div class="alert alert-warning alert-dismissible fade show position-fixed" role="alert" style="top: 80px; right: 20px; z-index: 9999; min-width: 400px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+            <div class="d-flex align-items-start">
+                <div class="flex-grow-1">
+                    <h5 class="alert-heading">
+                        <i class="bi bi-arrow-repeat"></i> Update verfuegbar!
+                    </h5>
+                    <p class="mb-2">
+                        Version <strong>@_updateInfo.LatestVersion</strong> ist verfuegbar.
+                        <br/>
+                        <small>Aktuelle Version: @_updateInfo.CurrentVersion</small>
+                    </p>
+                </div>
+                <button type="button" class="btn-close" @onclick="() => _showNotification = false" aria-label="Schliessen"></button>
+            </div>
+            <hr class="my-2"/>
+            <div class="d-flex gap-2 justify-content-end">
+                <button type="button" class="btn btn-sm btn-secondary" @onclick="() => _showNotification = false">
+                    Spaeter
+                </button>
+                <button type="button" class="btn btn-sm btn-primary" @onclick="StartUpdate" disabled="@_isUpdating">
+                    @if (_isUpdating)
+                    {
+                        <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                        <span>Wird aktualisiert...</span>
+                    }
+                    else
+                    {
+                        <span><i class="bi bi-download"></i> Update installieren</span>
+                    }
+                </button>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    private UpdateCheckResult? _updateInfo;
+    private bool _showNotification = false;
+    private bool _isUpdating = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            if (UpdateCheckService != null)
+            {
+                UpdateCheckService.UpdateAvailable += OnUpdateAvailable;
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Fehler beim Initialisieren der Update-Benachrichtigung");
+        }
+    }
+
+    private void OnUpdateAvailable(UpdateCheckResult result)
+    {
+        _updateInfo = result;
+        _showNotification = true;
+        StateHasChanged();
+    }
+
+    private async Task StartUpdate()
+    {
+        if (_updateInfo == null || UpdateCheckService == null)
+            return;
+
+        _isUpdating = true;
+        StateHasChanged();
+
+        try
+        {
+            var success = await UpdateCheckService.StartUpdateAsync(_updateInfo);
+            if (success)
+            {
+                await Task.Delay(3000);
+            }
+        }
+        finally
+        {
+            _isUpdating = false;
+            StateHasChanged();
+        }
+    }
+
+    async ValueTask IAsyncDisposable.DisposeAsync()
+    {
+        if (UpdateCheckService != null)
+        {
+            UpdateCheckService.UpdateAvailable -= OnUpdateAvailable;
+        }
+    }
+}
+
+<style>
+    .update-notification-container {
+        position: fixed;
+        top: 0;
+        right: 0;
+        z-index: 9000;
+        pointer-events: none;
+    }
+
+    .update-notification-container .alert {
+        pointer-events: auto;
+    }
+</style>
