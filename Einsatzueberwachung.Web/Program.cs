@@ -157,7 +157,8 @@ builder.Services.AddHealthChecks();
 // Update Services für GitHub Auto-Update
 builder.Services.AddHttpClient<GitHubUpdateService>();
 builder.Services.AddSingleton<GitHubUpdateService>();
-builder.Services.AddHostedService<Einsatzueberwachung.Web.Services.UpdateCheckService>();
+builder.Services.AddSingleton<Einsatzueberwachung.Web.Services.UpdateCheckService>();
+builder.Services.AddHostedService(sp => sp.GetRequiredService<Einsatzueberwachung.Web.Services.UpdateCheckService>());
 
 // SignalR Broadcast Service für mobile Updates
 builder.Services.AddHostedService<Einsatzueberwachung.Web.Services.SignalRBroadcastService>();
