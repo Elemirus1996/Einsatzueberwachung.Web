@@ -145,6 +145,20 @@ function Start-Application {
         Write-Host "Starte im Lokal-Modus..." -ForegroundColor $Colors.Info
     }
     
+    # Lösche alte Binaries um Sperr-Konflikte zu vermeiden
+    Write-Host ""
+    Write-Host "Räume alte Build-Artefakte auf..." -ForegroundColor $Colors.Info
+    $projectDir = Split-Path $projectPath
+    $binDir = Join-Path $projectDir "bin"
+    $objDir = Join-Path $projectDir "obj"
+    
+    if (Test-Path $binDir) {
+        Remove-Item $binDir -Recurse -Force -ErrorAction SilentlyContinue | Out-Null
+    }
+    if (Test-Path $objDir) {
+        Remove-Item $objDir -Recurse -Force -ErrorAction SilentlyContinue | Out-Null
+    }
+    
     Write-Host ""
     Write-Host "Starte Server..." -ForegroundColor $Colors.Info
     
