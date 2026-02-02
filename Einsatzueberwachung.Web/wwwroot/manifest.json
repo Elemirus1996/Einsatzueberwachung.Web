@@ -10,15 +10,21 @@
   "icons": [
     {
       "src": "/icon-192.png",
-      "sizes": "192x192",
+      "sizes": "32x32",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
       "src": "/icon-512.png",
-      "sizes": "512x512",
+      "sizes": "32x32",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
+    },
+    {
+      "src": "/favicon.png",
+      "sizes": "32x32",
+      "type": "image/png",
+      "purpose": "any"
     }
   ],
   "categories": ["productivity", "utilities"],
@@ -29,14 +35,14 @@
       "short_name": "Einsatz",
       "description": "Neuen Einsatz starten",
       "url": "/einsatz/start",
-      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+      "icons": [{ "src": "/icon-192.png", "sizes": "32x32" }]
     },
     {
       "name": "Monitor",
       "short_name": "Monitor",
       "description": "Einsatz überwachen",
       "url": "/einsatz/monitor",
-      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+      "icons": [{ "src": "/icon-192.png", "sizes": "32x32" }]
     }
   ],
   "prefer_related_applications": false

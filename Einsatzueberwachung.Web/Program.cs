@@ -183,12 +183,21 @@ else
 // Global Exception Handler (für alle Umgebungen)
 app.UseExceptionHandler();
 
+// Static Files BEFORE HTTPS Redirect for better compatibility
+app.UseStaticFiles(new StaticFileOptions
+{
+    OnPrepareResponse = ctx =>
+    {
+        // Cache static files for 30 days
+        ctx.Context.Response.Headers.Append("Cache-Control", "public,max-age=2592000");
+    }
+});
+
 app.UseHttpsRedirection();
 
 // Response Caching
 app.UseResponseCaching();
 
-app.UseStaticFiles();
 app.UseCookiePolicy();
 
 // CORS muss vor Authentication/Authorization kommen
