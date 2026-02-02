@@ -99,6 +99,9 @@ function Start-Application {
     
     if (!(Test-Path $projectPath)) {
         Write-Host "[FEHLER] Projekt nicht gefunden: $projectPath" -ForegroundColor $Colors.Error
+        Write-Host ""
+        Write-Host "Aktuelles Verzeichnis: $(Get-Location)" -ForegroundColor $Colors.Info
+        Write-Host ""
         Read-Host "Druecken Sie Enter zum Beenden"
         exit 1
     }
