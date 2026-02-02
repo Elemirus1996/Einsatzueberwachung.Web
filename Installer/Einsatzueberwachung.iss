@@ -20,11 +20,12 @@ Name: "german"; MessagesFile: "compiler:Languages\German.isl"
 Name: "desktopicon"; Description: "Desktop-Verknüpfung erstellen"; GroupDescription: "Zusätzliche Symbole:"; Flags: unchecked
 
 [Files]
+; Solution file
+Source: "..\Einsatzueberwachung.Web.sln"; DestDir: "{app}"; Flags: ignoreversion
 ; Hauptprojekt Dateien (ohne bin/obj)
-Source: "..\Einsatzueberwachung.Web\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs; Excludes: "bin,obj,*.user"
+Source: "..\Einsatzueberwachung.Web\*"; DestDir: "{app}\Einsatzueberwachung.Web"; Flags: ignoreversion recursesubdirs createallsubdirs; Excludes: "bin,obj,*.user"
 Source: "..\Einsatzueberwachung.Web.Client\*"; DestDir: "{app}\Einsatzueberwachung.Web.Client"; Flags: ignoreversion recursesubdirs createallsubdirs; Excludes: "bin,obj,*.user"
 Source: "..\Einsatzueberwachung.Domain\*"; DestDir: "{app}\Einsatzueberwachung.Domain"; Flags: ignoreversion recursesubdirs createallsubdirs; Excludes: "bin,obj,*.user"
-Source: "..\Einsatzueberwachung.Web.sln"; DestDir: "{app}"; Flags: ignoreversion
 Source: "Einsatzueberwachung-Starter.ps1"; DestDir: "{app}"; Flags: ignoreversion
 Source: "Einsatzueberwachung-Starter.bat"; DestDir: "{app}"; Flags: ignoreversion
 

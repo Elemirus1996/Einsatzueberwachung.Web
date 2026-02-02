@@ -100,13 +100,13 @@ function Start-Application {
     # Suche die .csproj Datei in aktuellen oder Unterverzeichnissen
     $projectPath = $null
     
-    # Prüfe im aktuellen Verzeichnis
-    if (Test-Path ".\Einsatzueberwachung.Web.csproj") {
-        $projectPath = ".\Einsatzueberwachung.Web.csproj"
-    }
-    # Prüfe in Unterverzeichnis
-    elseif (Test-Path ".\Einsatzueberwachung.Web\Einsatzueberwachung.Web.csproj") {
+    # Prüfe in Einsatzueberwachung.Web Unterverzeichnis
+    if (Test-Path ".\Einsatzueberwachung.Web\Einsatzueberwachung.Web.csproj") {
         $projectPath = ".\Einsatzueberwachung.Web\Einsatzueberwachung.Web.csproj"
+    }
+    # Prüfe im aktuellen Verzeichnis
+    elseif (Test-Path ".\Einsatzueberwachung.Web.csproj") {
+        $projectPath = ".\Einsatzueberwachung.Web.csproj"
     }
     # Suche rekursiv
     else {
