@@ -3,13 +3,13 @@ AppName=Einsatzüberwachung
 AppVersion=3.2
 AppPublisher=Rettungshunde-Einsatz-Koordination
 AppPublisherURL=https://github.com/Elemirus1996/Einsatzueberwachung.Web
-DefaultDirName={autopf}\Einsatzueberwachung
+DefaultDirName={userpf}\Einsatzueberwachung
 DefaultGroupName=Einsatzüberwachung
 OutputBaseFilename=EinsatzueberwachungSetup
 Compression=lzma2/max
 SolidCompression=yes
 ArchitecturesInstallIn64BitMode=x64
-PrivilegesRequired=admin
+PrivilegesRequired=lowest
 WizardStyle=modern
 DisableProgramGroupPage=yes
 
