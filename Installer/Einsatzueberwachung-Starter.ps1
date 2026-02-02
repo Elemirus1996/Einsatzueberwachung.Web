@@ -171,10 +171,13 @@ function Start-Application {
     
     # Starte dotnet
     if ($IsNetworkMode) {
-        $env:ASPNETCORE_URLS = "https://localhost:7059;http://localhost:5222;http://0.0.0.0:5222"
-        dotnet run --project $projectPath --configuration Release
+        $env:ASPNETCORE_URLS = "https://localhost:7059;http://0.0.0.0:5222"
+        $env:ASPNETCORE_ENVIRONMENT = "Production"
+        dotnet run --project $projectPath --configuration Release --no-launch-profile
     } else {
-        dotnet run --project $projectPath --configuration Release
+        $env:ASPNETCORE_URLS = "https://localhost:7059;http://localhost:5222"
+        $env:ASPNETCORE_ENVIRONMENT = "Production"
+        dotnet run --project $projectPath --configuration Release --no-launch-profile
     }
 }
 
