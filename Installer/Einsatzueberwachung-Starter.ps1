@@ -27,7 +27,7 @@ function Show-StartupInfo {
 }
 
 function Get-LocalIPAddresses {
-    $ips = @()
+    [string[]]$ips = @()
     try {
         $adapters = Get-NetIPAddress -AddressFamily IPv4 -ErrorAction SilentlyContinue | Where-Object { 
             $_.IPAddress -notlike "127.*" -and $_.IPAddress -notlike "169.254.*" 
@@ -35,18 +35,16 @@ function Get-LocalIPAddresses {
         
         if ($adapters) {
             if ($adapters -is [array]) {
-                foreach ($adapter in $adapters) {
-                    $ips += $adapter.IPAddress
-                }
+                $ips = @($adapters | ForEach-Object { $_.IPAddress })
             } else {
-                $ips += $adapters.IPAddress
+                $ips = @($adapters.IPAddress)
             }
         }
     } catch {
         Write-Host "[WARN] Fehler beim Abrufen der IP-Adressen" -ForegroundColor $Colors.Warning
     }
     
-    return @($ips)  # Stelle sicher dass ein Array zurückkommt
+    return $ips
 }
 
 function Show-AccessInfo {
