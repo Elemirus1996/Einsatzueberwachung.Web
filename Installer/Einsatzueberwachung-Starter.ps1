@@ -74,18 +74,20 @@ function Show-AccessInfo {
 function Test-DotNet {
     try {
         $version = dotnet --version
-        if ($version -match '^8\.') {
-            Write-Host "[OK] .NET 8 SDK gefunden: $version" -ForegroundColor $Colors.Success
+        $majorVersion = [int]($version -split '\.' | Select-Object -First 1)
+        
+        if ($majorVersion -ge 8) {
+            Write-Host "[OK] .NET $version gefunden" -ForegroundColor $Colors.Success
             return $true
         } else {
-            Write-Host "[WARNUNG] .NET Version $version gefunden, aber .NET 8 wird benoetigt!" -ForegroundColor $Colors.Warning
+            Write-Host "[WARNUNG] .NET Version $version gefunden, aber .NET 8 oder hoeher wird benoetigt!" -ForegroundColor $Colors.Warning
             return $false
         }
     } catch {
-        Write-Host "[FEHLER] .NET 8 SDK ist nicht installiert!" -ForegroundColor $Colors.Error
+        Write-Host "[FEHLER] .NET 8+ SDK ist nicht installiert!" -ForegroundColor $Colors.Error
         Write-Host ""
-        Write-Host "Bitte installieren Sie .NET 8 SDK von:" -ForegroundColor $Colors.Warning
-        Write-Host "https://dotnet.microsoft.com/download/dotnet/8.0" -ForegroundColor $Colors.Info
+        Write-Host "Bitte installieren Sie .NET 8 SDK oder hoeher von:" -ForegroundColor $Colors.Warning
+        Write-Host "https://dotnet.microsoft.com/download/dotnet" -ForegroundColor $Colors.Info
         Write-Host ""
         Read-Host "Druecken Sie Enter zum Beenden"
         return $false
