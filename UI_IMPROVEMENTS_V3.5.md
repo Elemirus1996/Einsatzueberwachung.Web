@@ -1,4 +1,4 @@
-# UI Verbesserungen Version 3.2
+# UI Verbesserungen Version 3.5
 
 ## Umgesetzte Änderungen
 
@@ -61,7 +61,7 @@
 ## Build-Status
 - **Warnings**: 5 (nicht-blockierend)
 - **Errors**: 0
-- **Version**: 3.2
+- **Version**: 3.5
 
 ## Offene Punkte
 1. **PWA Icons**: Hochauflösende 192x192 und 512x512 PNG-Icons erstellen
