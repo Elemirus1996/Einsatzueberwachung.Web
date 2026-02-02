@@ -27,24 +27,35 @@ function Show-StartupInfo {
 }
 
 function Get-LocalIPAddresses {
-    [string[]]$ips = @()
+    Write-Host "[DEBUG] Starte IP-Erkennung..." -ForegroundColor Gray
+    
+    $ipAddresses = @()
+    
     try {
-        $adapters = Get-NetIPAddress -AddressFamily IPv4 -ErrorAction SilentlyContinue | Where-Object { 
-            $_.IPAddress -notlike "127.*" -and $_.IPAddress -notlike "169.254.*" 
-        }
+        # Finde alle aktiven IPv4-Adressen (außer localhost und APIPA)
+        $allAdapters = Get-NetIPAddress -AddressFamily IPv4 -ErrorAction SilentlyContinue
         
-        if ($adapters) {
-            if ($adapters -is [array]) {
-                $ips = @($adapters | ForEach-Object { $_.IPAddress })
-            } else {
-                $ips = @($adapters.IPAddress)
+        Write-Host "[DEBUG] Gefundene Adapter: $($allAdapters.Count)" -ForegroundColor Gray
+        
+        if ($allAdapters) {
+            foreach ($adapter in $allAdapters) {
+                Write-Host "[DEBUG] Adapter: $($adapter.IPAddress) - InterfaceAlias: $($adapter.InterfaceAlias)" -ForegroundColor Gray
+                
+                # Filtere localhost und APIPA
+                if ($adapter.IPAddress -notlike "127.*" -and $adapter.IPAddress -notlike "169.254.*") {
+                    $ipAddresses += $adapter.IPAddress
+                    Write-Host "[DEBUG] IP hinzugefügt: $($adapter.IPAddress)" -ForegroundColor Green
+                }
             }
         }
     } catch {
-        Write-Host "[WARN] Fehler beim Abrufen der IP-Adressen" -ForegroundColor $Colors.Warning
+        Write-Host "[WARN] Fehler beim Abrufen der IP-Adressen: $_" -ForegroundColor Yellow
     }
     
-    return $ips
+    Write-Host "[DEBUG] Rückgabe: $(@($ipAddresses | Select-Object -Unique).Count) eindeutige IPs" -ForegroundColor Gray
+    
+    # Eindeutige IPs
+    return @($ipAddresses | Select-Object -Unique)
 }
 
 function Show-AccessInfo {
@@ -180,10 +191,20 @@ function Start-Application {
     
     if ($IsNetworkMode) {
         # Netzwerk-Mode: öffne mit Netzwerk-IP
+        Write-Host "[DEBUG] Netzwerk-Mode aktiviert" -ForegroundColor Gray
+        Write-Host "[DEBUG] Verfügbare IPs: $($ips -join ', ')" -ForegroundColor Gray
+        Write-Host "[DEBUG] IP-Count: $($ips.Count)" -ForegroundColor Gray
+        
         if ($ips.Count -gt 0) {
-            $browserUrl = "http://$($ips[0]):5000"
+            $selectedIP = $ips[0]
+            Write-Host "[DEBUG] Wähle erste IP: '$selectedIP'" -ForegroundColor Green
+            $browserUrl = "http://${selectedIP}:5000"
             Write-Host "Öffne: $browserUrl" -ForegroundColor $Colors.Info
+            Write-Host "[DEBUG] URL konstruiert: '$browserUrl'" -ForegroundColor Gray
             Start-Process $browserUrl
+        } else {
+            Write-Host "[WARN] Keine Netzwerk-IP gefunden, öffne localhost" -ForegroundColor $Colors.Warning
+            Start-Process "http://localhost:5000"
         }
     } else {
         # Local-Mode: öffne mit localhost
