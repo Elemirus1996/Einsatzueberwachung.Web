@@ -28,15 +28,25 @@ function Show-StartupInfo {
 
 function Get-LocalIPAddresses {
     $ips = @()
-    $adapters = Get-NetIPAddress -AddressFamily IPv4 | Where-Object { 
-        $_.IPAddress -notlike "127.*" -and $_.IPAddress -notlike "169.254.*" 
+    try {
+        $adapters = Get-NetIPAddress -AddressFamily IPv4 -ErrorAction SilentlyContinue | Where-Object { 
+            $_.IPAddress -notlike "127.*" -and $_.IPAddress -notlike "169.254.*" 
+        }
+        
+        if ($adapters) {
+            if ($adapters -is [array]) {
+                foreach ($adapter in $adapters) {
+                    $ips += $adapter.IPAddress
+                }
+            } else {
+                $ips += $adapters.IPAddress
+            }
+        }
+    } catch {
+        Write-Host "[WARN] Fehler beim Abrufen der IP-Adressen" -ForegroundColor $Colors.Warning
     }
     
-    foreach ($adapter in $adapters) {
-        $ips += $adapter.IPAddress
-    }
-    
-    return $ips
+    return @($ips)  # Stelle sicher dass ein Array zurückkommt
 }
 
 function Show-AccessInfo {
@@ -172,9 +182,11 @@ function Start-Application {
     
     if ($IsNetworkMode) {
         # Netzwerk-Mode: öffne mit Netzwerk-IP
-        $browserUrl = "http://$($ips[0]):5000"
-        Write-Host "Öffne: $browserUrl" -ForegroundColor $Colors.Info
-        Start-Process $browserUrl
+        if ($ips.Count -gt 0) {
+            $browserUrl = "http://$($ips[0]):5000"
+            Write-Host "Öffne: $browserUrl" -ForegroundColor $Colors.Info
+            Start-Process $browserUrl
+        }
     } else {
         # Local-Mode: öffne mit localhost
         $browserUrl = "http://localhost:5000"
@@ -184,11 +196,11 @@ function Start-Application {
     
     # Starte dotnet
     if ($IsNetworkMode) {
-        $env:ASPNETCORE_URLS = "https://localhost:7059;http://0.0.0.0:5222"
+        $env:ASPNETCORE_URLS = "https://localhost:7059;http://0.0.0.0:5000"
         $env:ASPNETCORE_ENVIRONMENT = "Production"
         dotnet run --project $projectPath --configuration Release --no-launch-profile
     } else {
-        $env:ASPNETCORE_URLS = "https://localhost:7059;http://localhost:5222"
+        $env:ASPNETCORE_URLS = "https://localhost:7059;http://localhost:5000"
         $env:ASPNETCORE_ENVIRONMENT = "Production"
         dotnet run --project $projectPath --configuration Release --no-launch-profile
     }
