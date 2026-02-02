@@ -97,16 +97,38 @@ function Test-DotNet {
 function Start-Application {
     param([bool]$IsNetworkMode)
     
-    $projectPath = ".\Einsatzueberwachung.Web\Einsatzueberwachung.Web.csproj"
+    # Suche die .csproj Datei in aktuellen oder Unterverzeichnissen
+    $projectPath = $null
     
-    if (!(Test-Path $projectPath)) {
-        Write-Host "[FEHLER] Projekt nicht gefunden: $projectPath" -ForegroundColor $Colors.Error
+    # Prüfe im aktuellen Verzeichnis
+    if (Test-Path ".\Einsatzueberwachung.Web.csproj") {
+        $projectPath = ".\Einsatzueberwachung.Web.csproj"
+    }
+    # Prüfe in Unterverzeichnis
+    elseif (Test-Path ".\Einsatzueberwachung.Web\Einsatzueberwachung.Web.csproj") {
+        $projectPath = ".\Einsatzueberwachung.Web\Einsatzueberwachung.Web.csproj"
+    }
+    # Suche rekursiv
+    else {
+        $found = Get-ChildItem -Recurse -Filter "Einsatzueberwachung.Web.csproj" -ErrorAction SilentlyContinue | Select-Object -First 1
+        if ($found) {
+            $projectPath = $found.FullName
+        }
+    }
+    
+    if (!$projectPath -or !(Test-Path $projectPath)) {
+        Write-Host "[FEHLER] Projekt nicht gefunden!" -ForegroundColor $Colors.Error
         Write-Host ""
         Write-Host "Aktuelles Verzeichnis: $(Get-Location)" -ForegroundColor $Colors.Info
+        Write-Host "Verfuegbare Dateien:" -ForegroundColor $Colors.Info
+        Get-ChildItem -Recurse -Filter "*.csproj" | Select-Object -First 5 | ForEach-Object { Write-Host "  $_" }
         Write-Host ""
         Read-Host "Druecken Sie Enter zum Beenden"
         exit 1
     }
+    
+    Write-Host "[OK] Projekt gefunden: $projectPath" -ForegroundColor $Colors.Success
+    Write-Host ""
     
     # Bestimme URLs
     $localUrl = "https://localhost:7059"
