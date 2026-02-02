@@ -235,11 +235,10 @@ OnTeamTypeChanged="UpdateTeamName" />
         // F�ge fehlende Felder zu alten Notizen hinzu
         foreach (var note in _notes)
         {
-            if (string.IsNullOrEmpty(note.SourceTeamId) && !string.IsNullOrEmpty(note.TeamId))
+            if (string.IsNullOrEmpty(note.SourceTeamId) && !string.IsNullOrEmpty(note.SourceTeamName))
             {
-                // Alte Notiz - migriere zu neuem Format
-                note.SourceTeamId = note.TeamId;
-                note.SourceTeamName = note.TeamName;
+                // Alte Notiz ohne SourceTeamId - setze default
+                note.SourceTeamId = "unknown";
                 note.SourceType = "Legacy";
             }
             

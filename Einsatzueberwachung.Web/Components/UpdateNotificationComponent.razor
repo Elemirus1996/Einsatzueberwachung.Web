@@ -1,6 +1,6 @@
 @using Einsatzueberwachung.Domain.Services
 @using Einsatzueberwachung.Web.Services
-@implements IAsyncDisposable
+@implements IDisposable
 @inject GitHubUpdateService UpdateService
 @inject UpdateCheckService UpdateCheckService
 @inject ILogger<UpdateNotificationComponent> Logger
@@ -8,26 +8,27 @@
 <div class="update-notification-container">
     @if (_showNotification && _updateInfo != null)
     {
-        <div class="alert alert-warning alert-dismissible fade show position-fixed" role="alert" style="top: 80px; right: 20px; z-index: 9999; min-width: 400px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+        <div class="alert alert-warning alert-dismissible fade show position-fixed" role="alert" 
+             style="top: 70px; left: 50%; transform: translateX(-50%); z-index: 9999; min-width: 500px; max-width: 600px; box-shadow: 0 6px 12px rgba(0,0,0,0.15); border-left: 5px solid #ff9800;">
             <div class="d-flex align-items-start">
                 <div class="flex-grow-1">
-                    <h5 class="alert-heading">
-                        <i class="bi bi-arrow-repeat"></i> Update verfuegbar!
+                    <h5 class="alert-heading mb-2">
+                        <i class="bi bi-arrow-repeat"></i> Neue Version verfügbar!
                     </h5>
                     <p class="mb-2">
-                        Version <strong>@_updateInfo.LatestVersion</strong> ist verfuegbar.
+                        Version <strong class="text-primary">@_updateInfo.LatestVersion</strong> steht zum Download bereit.
                         <br/>
-                        <small>Aktuelle Version: @_updateInfo.CurrentVersion</small>
+                        <small class="text-muted">Ihre Version: @_updateInfo.CurrentVersion</small>
                     </p>
                 </div>
-                <button type="button" class="btn-close" @onclick="() => _showNotification = false" aria-label="Schliessen"></button>
+                <button type="button" class="btn-close" @onclick="() => _showNotification = false" aria-label="Schließen"></button>
             </div>
             <hr class="my-2"/>
             <div class="d-flex gap-2 justify-content-end">
-                <button type="button" class="btn btn-sm btn-secondary" @onclick="() => _showNotification = false">
-                    Spaeter
+                <button type="button" class="btn btn-sm btn-outline-secondary" @onclick="() => _showNotification = false">
+                    <i class="bi bi-x-circle"></i> Später
                 </button>
-                <button type="button" class="btn btn-sm btn-primary" @onclick="StartUpdate" disabled="@_isUpdating">
+                <button type="button" class="btn btn-sm btn-warning" @onclick="StartUpdate" disabled="@_isUpdating">
                     @if (_isUpdating)
                     {
                         <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
@@ -35,7 +36,7 @@
                     }
                     else
                     {
-                        <span><i class="bi bi-download"></i> Update installieren</span>
+                        <span><i class="bi bi-download"></i> Jetzt aktualisieren</span>
                     }
                 </button>
             </div>
@@ -48,7 +49,7 @@
     private bool _showNotification = false;
     private bool _isUpdating = false;
 
-    protected override async Task OnInitializedAsync()
+    protected override void OnInitialized()
     {
         try
         {
@@ -93,7 +94,7 @@
         }
     }
 
-    async ValueTask IAsyncDisposable.DisposeAsync()
+    public void Dispose()
     {
         if (UpdateCheckService != null)
         {
