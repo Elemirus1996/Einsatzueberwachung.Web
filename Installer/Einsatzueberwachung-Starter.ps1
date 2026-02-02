@@ -52,10 +52,11 @@ function Get-LocalIPAddresses {
         Write-Host "[WARN] Fehler beim Abrufen der IP-Adressen: $_" -ForegroundColor Yellow
     }
     
-    Write-Host "[DEBUG] Rückgabe: $(@($ipAddresses | Select-Object -Unique).Count) eindeutige IPs" -ForegroundColor Gray
+    # Eindeutige IPs als Array
+    $uniqueIPs = @($ipAddresses | Select-Object -Unique)
+    Write-Host "[DEBUG] Rückgabe: $($uniqueIPs.Count) eindeutige IPs" -ForegroundColor Gray
     
-    # Eindeutige IPs
-    return @($ipAddresses | Select-Object -Unique)
+    return $uniqueIPs
 }
 
 function Show-AccessInfo {

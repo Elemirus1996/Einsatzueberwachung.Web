@@ -11,6 +11,7 @@ main {
     display: flex;
     flex-direction: column;
     overflow: auto;
+    margin-left: 250px; /* Abstand für fixed sidebar */
 }
 
 .sidebar {
