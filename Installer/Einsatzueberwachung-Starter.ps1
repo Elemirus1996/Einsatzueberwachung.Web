@@ -131,15 +131,15 @@ function Start-Application {
     Write-Host ""
     
     # Bestimme URLs
-    $localUrl = "https://localhost:7059"
-    $httpUrl = "http://localhost:5222"
+    $localUrl = "http://localhost:5000"
+    $httpUrl = "http://localhost:5000"
     $ips = Get-LocalIPAddresses
     $networkUrls = @()
     
     if ($IsNetworkMode) {
         Write-Host "Starte im Netzwerk-Modus..." -ForegroundColor $Colors.Info
         foreach ($ip in $ips) {
-            $networkUrls += "http://${ip}:5222"
+            $networkUrls += "http://${ip}:5000"
         }
     } else {
         Write-Host "Starte im Lokal-Modus..." -ForegroundColor $Colors.Info
@@ -165,9 +165,22 @@ function Start-Application {
     # Zeige Zugriffsinformationen
     Show-AccessInfo -LocalUrl $localUrl -NetworkUrls $networkUrls
     
-    # Browser oeffnen (lokaler Zugriff)
+    # Browser oeffnen (verwende den tatsächlichen Port)
+    Write-Host ""
+    Write-Host "Öffne Browser..." -ForegroundColor $Colors.Info
     Start-Sleep -Seconds 2
-    Start-Process $localUrl
+    
+    if ($IsNetworkMode) {
+        # Netzwerk-Mode: öffne mit Netzwerk-IP
+        $browserUrl = "http://$($ips[0]):5000"
+        Write-Host "Öffne: $browserUrl" -ForegroundColor $Colors.Info
+        Start-Process $browserUrl
+    } else {
+        # Local-Mode: öffne mit localhost
+        $browserUrl = "http://localhost:5000"
+        Write-Host "Öffne: $browserUrl" -ForegroundColor $Colors.Info
+        Start-Process $browserUrl
+    }
     
     # Starte dotnet
     if ($IsNetworkMode) {
