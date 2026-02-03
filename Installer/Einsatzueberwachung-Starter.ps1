@@ -26,6 +26,38 @@ function Show-StartupInfo {
     Write-Host ""
 }
 
+function Stop-OldServers {
+    Write-Host "Pruefe auf laufende Server-Prozesse..." -ForegroundColor $Colors.Info
+    
+    # Finde alle dotnet-Prozesse die Einsatzueberwachung laufen
+    $dotnetProcesses = Get-Process -Name "dotnet" -ErrorAction SilentlyContinue
+    $killedAny = $false
+    
+    if ($dotnetProcesses) {
+        foreach ($proc in $dotnetProcesses) {
+            try {
+                # Prüfe ob es ein Einsatzueberwachung-Prozess ist
+                $cmdLine = (Get-CimInstance Win32_Process -Filter "ProcessId = $($proc.Id)" -ErrorAction SilentlyContinue).CommandLine
+                if ($cmdLine -like "*Einsatzueberwachung*") {
+                    Write-Host "[STOP] Beende alten Server-Prozess (PID: $($proc.Id))..." -ForegroundColor $Colors.Warning
+                    Stop-Process -Id $proc.Id -Force -ErrorAction SilentlyContinue
+                    $killedAny = $true
+                }
+            } catch {
+                # Ignoriere Fehler beim Prüfen einzelner Prozesse
+            }
+        }
+    }
+    
+    if ($killedAny) {
+        Write-Host "[OK] Alte Server-Prozesse beendet" -ForegroundColor $Colors.Success
+        Start-Sleep -Seconds 2
+    } else {
+        Write-Host "[OK] Keine laufenden Server gefunden" -ForegroundColor $Colors.Success
+    }
+    Write-Host ""
+}
+
 function Get-LocalIPAddresses {
     Write-Host "[DEBUG] Starte IP-Erkennung..." -ForegroundColor Gray
     
@@ -209,6 +241,9 @@ function Start-Application {
 
 # MAIN
 Show-StartupInfo
+
+# Beende alte Server-Prozesse
+Stop-OldServers
 
 if (!(Test-DotNet)) {
     exit 1
