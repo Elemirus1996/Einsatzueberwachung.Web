@@ -11,8 +11,8 @@ main {
     display: flex;
     flex-direction: column;
     overflow: auto;
-    margin-left: 0;
-    width: 100%;
+    margin-left: 250px;
+    width: calc(100% - 250px);
 }
 
 .sidebar {
@@ -24,7 +24,6 @@ main {
     top: 0;
     overflow-y: auto;
     z-index: 100;
-    display: none; /* Versteckt auf Mobile per default */
 }
 
 .top-row {
@@ -61,7 +60,9 @@ main {
     }
     
     .sidebar {
-        display: none; /* Versteckt auf Mobile */
+        width: 100%;
+        height: auto;
+        position: relative;
     }
     
     main {
@@ -70,7 +71,10 @@ main {
     }
 }
 
-@media (min-width: 641px) {
+@media (min-width: 641p
+        width: 250px;
+        height: 100vh;
+        position: fixed;
     .sidebar {
         display: block; /* Zeigt Sidebar auf Desktop */
     }
