@@ -1,7 +1,10 @@
 @page "/einsatz/monitor"
 @using Einsatzueberwachung.Domain.Services
+@using Einsatzueberwachung.Domain.Interfaces
+@using Einsatzueberwachung.Web.Components.Widgets
 @inject IEinsatzService EinsatzService
 @inject IMasterDataService MasterDataService
+@inject IArchivService ArchivService
 @inject NavigationManager Navigation
 @inject IJSRuntime JSRuntime
 @inject ToastService ToastService
@@ -20,13 +23,26 @@
                 Datum: @EinsatzService.CurrentEinsatz.EinsatzDatum.ToString("dd.MM.yyyy HH:mm")
             </p>
         </div>
-        <div>
-            <button class="btn btn-info btn-lg" @onclick="GoToMap">
-                Karte
-            </button>
-            <button class="btn btn-primary btn-lg" @onclick="GoToReport">
-                Bericht
-            </button>
+        <div class="d-flex align-items-start gap-3">
+            @if (EinsatzService.CurrentEinsatz.ElwLatitude.HasValue && EinsatzService.CurrentEinsatz.ElwLongitude.HasValue)
+            {
+                <div class="wetter-container" style="min-width: 200px;">
+                    <WetterWidget Latitude="EinsatzService.CurrentEinsatz.ElwLatitude" 
+                                  Longitude="EinsatzService.CurrentEinsatz.ElwLongitude" 
+                                  RefreshIntervalMinutes="10" />
+                </div>
+            }
+            <div class="btn-group-vertical">
+                <button class="btn btn-info btn-lg" @onclick="GoToMap">
+                    <i class="bi bi-map me-1"></i>Karte
+                </button>
+                <button class="btn btn-primary btn-lg" @onclick="GoToReport">
+                    <i class="bi bi-file-text me-1"></i>Bericht
+                </button>
+                <button class="btn btn-danger btn-lg" @onclick="ShowEndEinsatzDialog">
+                    <i class="bi bi-stop-circle me-1"></i>Beenden
+                </button>
+            </div>
         </div>
     </div>
 
@@ -175,6 +191,78 @@
     </div>
 </div>
 
+<!-- Einsatz beenden Dialog -->
+@if (_showEndDialog)
+{
+    <div class="modal-backdrop show"></div>
+    <div class="modal show d-block" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title"><i class="bi bi-stop-circle me-2"></i>Einsatz beenden und archivieren</h5>
+                    <button type="button" class="btn-close btn-close-white" @onclick="CloseEndEinsatzDialog"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-warning">
+                        <i class="bi bi-exclamation-triangle me-2"></i>
+                        <strong>Achtung:</strong> Nach dem Beenden wird der Einsatz archiviert und alle Teams werden zurueckgesetzt.
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Ergebnis</label>
+                            <select class="form-select" @bind="_endErgebnis">
+                                <option value="">-- Bitte waehlen --</option>
+                                <option value="Person gefunden - lebend">Person gefunden - lebend</option>
+                                <option value="Person gefunden - verstorben">Person gefunden - verstorben</option>
+                                <option value="Person anderweitig gefunden">Person anderweitig gefunden</option>
+                                <option value="Abbruch - Wetter">Abbruch - Wetter</option>
+                                <option value="Abbruch - Dunkelheit">Abbruch - Dunkelheit</option>
+                                <option value="Suche erfolglos abgeschlossen">Suche erfolglos abgeschlossen</option>
+                                <option value="Uebung abgeschlossen">Uebung abgeschlossen</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Ende-Zeit</label>
+                            <input type="time" class="form-control" @bind="_endZeit" />
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Bemerkungen</label>
+                        <textarea class="form-control" rows="3" @bind="_endBemerkungen" 
+                                  placeholder="Zusaetzliche Informationen zum Einsatzabschluss..."></textarea>
+                    </div>
+                    
+                    <div class="bg-light p-3 rounded">
+                        <h6>Einsatz-Zusammenfassung</h6>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <small class="text-muted">Teams:</small>
+                                <div class="fw-bold">@_teams.Count</div>
+                            </div>
+                            <div class="col-md-4">
+                                <small class="text-muted">Personal:</small>
+                                <div class="fw-bold">@_teams.Sum(t => (string.IsNullOrEmpty(t.HundefuehrerName) ? 0 : 1) + (string.IsNullOrEmpty(t.HelferName) ? 0 : 1))</div>
+                            </div>
+                            <div class="col-md-4">
+                                <small class="text-muted">Hunde:</small>
+                                <div class="fw-bold">@_teams.Count(t => !string.IsNullOrEmpty(t.DogName))</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" @onclick="CloseEndEinsatzDialog">Abbrechen</button>
+                    <button class="btn btn-danger" @onclick="EndEinsatzConfirmed" disabled="@string.IsNullOrEmpty(_endErgebnis)">
+                        <i class="bi bi-archive me-1"></i>Einsatz beenden & archivieren
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
 <TeamDialog 
 IsVisible="@_showDialog"
 IsEdit="@(_editingTeam != null)"
@@ -203,6 +291,12 @@ OnTeamTypeChanged="UpdateTeamName" />
     private bool _showDialog = false;
     private Team _currentTeam = new();
     private Team? _editingTeam = null;
+    
+    // Einsatz beenden Dialog
+    private bool _showEndDialog = false;
+    private string _endErgebnis = "";
+    private string _endBemerkungen = "";
+    private TimeOnly _endZeit = TimeOnly.FromDateTime(DateTime.Now);
 
     protected override async Task OnInitializedAsync()
     {
@@ -553,6 +647,49 @@ OnTeamTypeChanged="UpdateTeamName" />
     private void GoToReport()
     {
         Navigation.NavigateTo("/einsatz/bericht");
+    }
+
+    private void ShowEndEinsatzDialog()
+    {
+        _endZeit = TimeOnly.FromDateTime(DateTime.Now);
+        _endErgebnis = "";
+        _endBemerkungen = "";
+        _showEndDialog = true;
+    }
+
+    private void CloseEndEinsatzDialog()
+    {
+        _showEndDialog = false;
+    }
+
+    private async Task EndEinsatzConfirmed()
+    {
+        try
+        {
+            // Setze die Einsatz-Ende Zeit
+            var endDateTime = EinsatzService.CurrentEinsatz.EinsatzDatum.Date.Add(_endZeit.ToTimeSpan());
+            EinsatzService.CurrentEinsatz.EinsatzEnde = endDateTime;
+            
+            // Archiviere den Einsatz
+            var archived = await ArchivService.ArchiveEinsatzAsync(
+                EinsatzService.CurrentEinsatz, 
+                _endErgebnis, 
+                _endBemerkungen);
+            
+            ToastService.ShowSuccess("Einsatz wurde erfolgreich archiviert.");
+            
+            // Reset EinsatzService (Teams und Notizen loeschen)
+            EinsatzService.ResetEinsatz();
+            
+            _showEndDialog = false;
+            
+            // Zur Archiv-Seite navigieren
+            Navigation.NavigateTo($"/archiv/{archived.Id}");
+        }
+        catch (Exception ex)
+        {
+            ToastService.ShowError($"Fehler beim Archivieren: {ex.Message}");
+        }
     }
 
     public void Dispose()

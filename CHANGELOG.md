@@ -1,5 +1,54 @@
 # 📋 CHANGELOG
 
+## Version 3.8.0 - "Archiv & Wetter" (Februar 2026)
+
+### 🎯 Hauptverbesserungen
+
+#### **Einsatz-Archiv** 🆕
+- 📚 **Archivierung**
+  - Abgeschlossene Einsätze und Übungen können archiviert werden
+  - "Einsatz beenden"-Dialog im Monitor mit Ergebnis-Auswahl
+  - Automatische Erfassung von Statistiken (Teams, Personal, Hunde, Drohnen)
+  
+- 🔍 **Archiv-Suche**
+  - Durchsuchbare Liste aller archivierten Einsätze
+  - Filter nach Zeitraum, Typ (Einsatz/Übung), und Freitext
+  - Detailansicht mit allen Einsatzinformationen
+  
+- 📊 **Statistiken-Dashboard**
+  - Übersicht über Gesamtzahlen
+  - Jahresstatistik
+  - Personal- und Hunde-Einsätze im Überblick
+  
+- 💾 **Export/Import**
+  - JSON-Export aller archivierten Einsätze
+  - Import von Archivdaten aus anderen Systemen
+
+#### **DWD Wetter-Integration** 🆕
+- 🌤️ **Echtzeit-Wetterdaten**
+  - Integration mit dem Deutschen Wetterdienst (DWD)
+  - Automatische Wetter-Anzeige basierend auf ELW-Position
+  - Aktualisierung alle 10 Minuten
+  
+- 📍 **Wetter-Widget im Monitor**
+  - Temperatur (inkl. gefühlte Temperatur)
+  - Windgeschwindigkeit und -richtung
+  - Niederschlag und Sichtweite
+  - DWD-Wetterwarnungen
+
+#### **Technische Details**
+- 🏗️ **Archiv-Service**
+  - JSON-basierte Datenspeicherung
+  - Volltext-Suche über alle Felder
+  - Caching für performante Abfragen
+  
+- 🌐 **Wetter-Service**
+  - Nutzung der BrightSky API (Open Source DWD-Proxy)
+  - 5-Minuten-Cache zur Reduzierung der API-Aufrufe
+  - Wind-Chill/Heat-Index Berechnung
+
+---
+
 ## Version 3.7.0 - "Excel Import/Export" (Februar 2026)
 
 ### 🎯 Hauptverbesserungen

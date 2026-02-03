@@ -1,0 +1,469 @@
+@page "/archiv"
+@page "/archiv/{archivId}"
+@using Einsatzueberwachung.Domain.Interfaces
+@using Einsatzueberwachung.Domain.Models
+@inject IArchivService ArchivService
+@inject IJSRuntime JSRuntime
+@rendermode InteractiveServer
+
+<PageTitle>Einsatz-Archiv</PageTitle>
+
+<div class="container-fluid">
+    <div class="page-header mb-4">
+        <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+            <div>
+                <h1><i class="bi bi-archive me-2"></i>Einsatz-Archiv</h1>
+                <p class="text-muted">Vergangene Einsaetze und Uebungen</p>
+            </div>
+            <div class="btn-group">
+                <button class="btn btn-outline-primary" @onclick="ExportArchiv">
+                    <i class="bi bi-download me-2"></i>Exportieren
+                </button>
+                <label class="btn btn-outline-secondary">
+                    <i class="bi bi-upload me-2"></i>Importieren
+                    <InputFile OnChange="ImportArchiv" accept=".json" class="d-none" />
+                </label>
+            </div>
+        </div>
+    </div>
+
+    @if (_showDetail && _selectedEinsatz != null)
+    {
+        <!-- Detail-Ansicht -->
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h4 class="mb-0">
+                    <span class="badge @(_selectedEinsatz.IstEinsatz ? "bg-danger" : "bg-info") me-2">
+                        @_selectedEinsatz.EinsatzTyp
+                    </span>
+                    @_selectedEinsatz.Einsatzort
+                </h4>
+                <button class="btn btn-outline-secondary" @onclick="CloseDetail">
+                    <i class="bi bi-x-lg"></i> Schliessen
+                </button>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h5>Einsatzdaten</h5>
+                        <table class="table table-sm">
+                            <tr><th>Datum:</th><td>@_selectedEinsatz.EinsatzDatum.ToString("dd.MM.yyyy")</td></tr>
+                            <tr><th>Einsatznummer:</th><td>@_selectedEinsatz.EinsatzNummer</td></tr>
+                            <tr><th>Einsatzleiter:</th><td>@_selectedEinsatz.Einsatzleiter</td></tr>
+                            <tr><th>Fuehrungsassistent:</th><td>@_selectedEinsatz.Fuehrungsassistent</td></tr>
+                            <tr><th>Staffel:</th><td>@_selectedEinsatz.StaffelName</td></tr>
+                            <tr><th>Alarmierung:</th><td>@(_selectedEinsatz.AlarmierungsZeit?.ToString("HH:mm") ?? "-")</td></tr>
+                            <tr><th>Ende:</th><td>@(_selectedEinsatz.EinsatzEnde?.ToString("HH:mm") ?? "-")</td></tr>
+                            <tr><th>Dauer:</th><td>@_selectedEinsatz.DauerFormatiert</td></tr>
+                        </table>
+                    </div>
+                    <div class="col-md-6">
+                        <h5>Ergebnis</h5>
+                        <div class="alert @GetErgebnisAlertClass(_selectedEinsatz.Ergebnis)">
+                            <strong>@_selectedEinsatz.Ergebnis</strong>
+                            @if (!string.IsNullOrEmpty(_selectedEinsatz.Bemerkungen))
+                            {
+                                <hr />
+                                <p class="mb-0">@_selectedEinsatz.Bemerkungen</p>
+                            }
+                        </div>
+                        
+                        <h5>Ressourcen</h5>
+                        <div class="d-flex gap-3 flex-wrap">
+                            <div class="border rounded p-2 text-center" style="min-width: 80px;">
+                                <div class="h4 mb-0">@_selectedEinsatz.AnzahlTeams</div>
+                                <small class="text-muted">Teams</small>
+                            </div>
+                            <div class="border rounded p-2 text-center" style="min-width: 80px;">
+                                <div class="h4 mb-0">@_selectedEinsatz.AnzahlPersonal</div>
+                                <small class="text-muted">Personal</small>
+                            </div>
+                            <div class="border rounded p-2 text-center" style="min-width: 80px;">
+                                <div class="h4 mb-0">@_selectedEinsatz.AnzahlHunde</div>
+                                <small class="text-muted">Hunde</small>
+                            </div>
+                            <div class="border rounded p-2 text-center" style="min-width: 80px;">
+                                <div class="h4 mb-0">@_selectedEinsatz.AnzahlDrohnen</div>
+                                <small class="text-muted">Drohnen</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                @if (_selectedEinsatz.Teams.Any())
+                {
+                    <hr />
+                    <h5>Eingesetzte Teams</h5>
+                    <div class="row">
+                        @foreach (var team in _selectedEinsatz.Teams)
+                        {
+                            <div class="col-md-4 mb-3">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h6>@team.TeamName</h6>
+                                        <small class="text-muted">Funkrufname: @team.Funkrufname</small>
+                                        <ul class="list-unstyled mb-0 mt-2">
+                                            @foreach (var member in team.MemberNames)
+                                            {
+                                                <li><i class="bi bi-person me-1"></i>@member</li>
+                                            }
+                                            @if (!string.IsNullOrEmpty(team.DogName))
+                                            {
+                                                <li><i class="bi bi-heart me-1"></i>@team.DogName</li>
+                                            }
+                                            @if (!string.IsNullOrEmpty(team.DroneName))
+                                            {
+                                                <li><i class="bi bi-airplane me-1"></i>@team.DroneName</li>
+                                            }
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+            <div class="card-footer">
+                <button class="btn btn-danger btn-sm" @onclick="() => ConfirmDelete(_selectedEinsatz)">
+                    <i class="bi bi-trash me-1"></i>Eintrag loeschen
+                </button>
+            </div>
+        </div>
+    }
+    else
+    {
+        <!-- Statistiken -->
+        @if (_stats != null)
+        {
+            <div class="row mb-4">
+                <div class="col-md-2 col-6 mb-3">
+                    <div class="card text-center h-100">
+                        <div class="card-body">
+                            <div class="h2 mb-0 text-primary">@_stats.GesamtAnzahl</div>
+                            <small class="text-muted">Gesamt</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-2 col-6 mb-3">
+                    <div class="card text-center h-100">
+                        <div class="card-body">
+                            <div class="h2 mb-0 text-danger">@_stats.AnzahlEinsaetze</div>
+                            <small class="text-muted">Einsaetze</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-2 col-6 mb-3">
+                    <div class="card text-center h-100">
+                        <div class="card-body">
+                            <div class="h2 mb-0 text-info">@_stats.AnzahlUebungen</div>
+                            <small class="text-muted">Uebungen</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-2 col-6 mb-3">
+                    <div class="card text-center h-100">
+                        <div class="card-body">
+                            <div class="h2 mb-0 text-success">@_stats.AnzahlDiesesJahr</div>
+                            <small class="text-muted">Dieses Jahr</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-2 col-6 mb-3">
+                    <div class="card text-center h-100">
+                        <div class="card-body">
+                            <div class="h2 mb-0">@_stats.GesamtPersonalEinsaetze</div>
+                            <small class="text-muted">Personal-Einsaetze</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-2 col-6 mb-3">
+                    <div class="card text-center h-100">
+                        <div class="card-body">
+                            <div class="h2 mb-0">@_stats.GesamtHundeEinsaetze</div>
+                            <small class="text-muted">Hunde-Einsaetze</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+
+        <!-- Suchfilter -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label class="form-label">Suche</label>
+                        <input type="text" class="form-control" placeholder="Ort, Einsatzleiter, Nummer..."
+                               @bind="_searchCriteria.Suchtext" @bind:event="oninput" @onkeyup="SearchDebounced" />
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Von Datum</label>
+                        <input type="date" class="form-control" @bind="_searchCriteria.VonDatum" @bind:after="Search" />
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Bis Datum</label>
+                        <input type="date" class="form-control" @bind="_searchCriteria.BisDatum" @bind:after="Search" />
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Typ</label>
+                        <select class="form-select" @bind="_typFilter" @bind:after="Search">
+                            <option value="">Alle</option>
+                            <option value="true">Nur Einsaetze</option>
+                            <option value="false">Nur Uebungen</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2 d-flex align-items-end">
+                        <button class="btn btn-outline-secondary w-100" @onclick="ResetFilter">
+                            <i class="bi bi-x-circle me-1"></i>Filter loeschen
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Ergebnisliste -->
+        @if (_archivList.Any())
+        {
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Datum</th>
+                            <th>Typ</th>
+                            <th>Ort</th>
+                            <th>Einsatzleiter</th>
+                            <th>Teams</th>
+                            <th>Dauer</th>
+                            <th>Ergebnis</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var einsatz in _archivList)
+                        {
+                            <tr @onclick="() => ShowDetail(einsatz)" style="cursor: pointer;">
+                                <td>@einsatz.EinsatzDatum.ToString("dd.MM.yyyy")</td>
+                                <td>
+                                    <span class="badge @(einsatz.IstEinsatz ? "bg-danger" : "bg-info")">
+                                        @einsatz.EinsatzTyp
+                                    </span>
+                                </td>
+                                <td><strong>@einsatz.Einsatzort</strong></td>
+                                <td>@einsatz.Einsatzleiter</td>
+                                <td>@einsatz.AnzahlTeams</td>
+                                <td>@einsatz.DauerFormatiert</td>
+                                <td>
+                                    <span class="badge @GetErgebnisBadgeClass(einsatz.Ergebnis)">
+                                        @(string.IsNullOrEmpty(einsatz.Ergebnis) ? "-" : einsatz.Ergebnis)
+                                    </span>
+                                </td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-primary" @onclick:stopPropagation="true" @onclick="() => ShowDetail(einsatz)">
+                                        <i class="bi bi-eye"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="alert alert-info">
+                <i class="bi bi-info-circle me-2"></i>
+                @if (string.IsNullOrEmpty(_searchCriteria.Suchtext) && !_searchCriteria.VonDatum.HasValue && string.IsNullOrEmpty(_typFilter))
+                {
+                    <strong>Noch keine Einsaetze archiviert.</strong>
+                    <br />
+                    <small>Beendete Einsaetze koennen ueber den Einsatz-Monitor archiviert werden.</small>
+                }
+                else
+                {
+                    <strong>Keine Einsaetze fuer diese Filterkriterien gefunden.</strong>
+                }
+            </div>
+        }
+    }
+</div>
+
+@if (_showDeleteConfirm)
+{
+    <div class="modal-backdrop show"></div>
+    <div class="modal show d-block" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title">Eintrag loeschen?</h5>
+                    <button type="button" class="btn-close btn-close-white" @onclick="() => _showDeleteConfirm = false"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Moechten Sie diesen Archiveintrag wirklich loeschen?</p>
+                    <p class="text-muted mb-0">
+                        <strong>@_deleteCandidate?.Einsatzort</strong> vom @_deleteCandidate?.EinsatzDatum.ToString("dd.MM.yyyy")
+                    </p>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" @onclick="() => _showDeleteConfirm = false">Abbrechen</button>
+                    <button class="btn btn-danger" @onclick="DeleteConfirmed">Loeschen</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public string? ArchivId { get; set; }
+
+    private List<ArchivedEinsatz> _archivList = new();
+    private ArchivStatistics? _stats;
+    private ArchivSearchCriteria _searchCriteria = new();
+    private string _typFilter = "";
+    
+    private bool _showDetail = false;
+    private ArchivedEinsatz? _selectedEinsatz;
+    
+    private bool _showDeleteConfirm = false;
+    private ArchivedEinsatz? _deleteCandidate;
+
+    private System.Timers.Timer? _searchTimer;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadData();
+        
+        // Detail-Ansicht wenn ID uebergeben wurde
+        if (!string.IsNullOrEmpty(ArchivId))
+        {
+            var einsatz = await ArchivService.GetByIdAsync(ArchivId);
+            if (einsatz != null)
+            {
+                ShowDetail(einsatz);
+            }
+        }
+    }
+
+    private async Task LoadData()
+    {
+        _archivList = await ArchivService.GetAllArchivedAsync();
+        _stats = await ArchivService.GetStatisticsAsync();
+    }
+
+    private async Task Search()
+    {
+        // Typ-Filter anwenden
+        _searchCriteria.NurEinsaetze = _typFilter switch
+        {
+            "true" => true,
+            "false" => false,
+            _ => null
+        };
+
+        _archivList = await ArchivService.SearchAsync(_searchCriteria);
+    }
+
+    private void SearchDebounced()
+    {
+        _searchTimer?.Stop();
+        _searchTimer?.Dispose();
+        
+        _searchTimer = new System.Timers.Timer(300);
+        _searchTimer.Elapsed += async (s, e) =>
+        {
+            _searchTimer?.Stop();
+            await InvokeAsync(async () =>
+            {
+                await Search();
+                StateHasChanged();
+            });
+        };
+        _searchTimer.Start();
+    }
+
+    private async Task ResetFilter()
+    {
+        _searchCriteria = new();
+        _typFilter = "";
+        await LoadData();
+    }
+
+    private void ShowDetail(ArchivedEinsatz einsatz)
+    {
+        _selectedEinsatz = einsatz;
+        _showDetail = true;
+    }
+
+    private void CloseDetail()
+    {
+        _showDetail = false;
+        _selectedEinsatz = null;
+    }
+
+    private void ConfirmDelete(ArchivedEinsatz einsatz)
+    {
+        _deleteCandidate = einsatz;
+        _showDeleteConfirm = true;
+    }
+
+    private async Task DeleteConfirmed()
+    {
+        if (_deleteCandidate != null)
+        {
+            await ArchivService.DeleteAsync(_deleteCandidate.Id);
+            _showDeleteConfirm = false;
+            _deleteCandidate = null;
+            CloseDetail();
+            await LoadData();
+        }
+    }
+
+    private async Task ExportArchiv()
+    {
+        var data = await ArchivService.ExportAllAsJsonAsync();
+        var fileName = $"Einsatz_Archiv_{DateTime.Now:yyyy-MM-dd}.json";
+        await JSRuntime.InvokeVoidAsync("downloadFileFromByteArray", fileName, data, "application/json");
+    }
+
+    private async Task ImportArchiv(InputFileChangeEventArgs e)
+    {
+        var file = e.File;
+        if (file == null) return;
+
+        using var stream = new MemoryStream();
+        await file.OpenReadStream(5 * 1024 * 1024).CopyToAsync(stream);
+        var data = stream.ToArray();
+
+        var imported = await ArchivService.ImportFromJsonAsync(data);
+        
+        if (imported > 0)
+        {
+            await LoadData();
+        }
+    }
+
+    private string GetErgebnisBadgeClass(string? ergebnis)
+    {
+        if (string.IsNullOrEmpty(ergebnis)) return "bg-secondary";
+        
+        var lower = ergebnis.ToLowerInvariant();
+        if (lower.Contains("gefunden") || lower.Contains("erfolg")) return "bg-success";
+        if (lower.Contains("abgebrochen") || lower.Contains("erfolglos")) return "bg-warning text-dark";
+        return "bg-secondary";
+    }
+
+    private string GetErgebnisAlertClass(string? ergebnis)
+    {
+        if (string.IsNullOrEmpty(ergebnis)) return "alert-secondary";
+        
+        var lower = ergebnis.ToLowerInvariant();
+        if (lower.Contains("gefunden") || lower.Contains("erfolg")) return "alert-success";
+        if (lower.Contains("abgebrochen") || lower.Contains("erfolglos")) return "alert-warning";
+        return "alert-secondary";
+    }
+
+    public void Dispose()
+    {
+        _searchTimer?.Dispose();
+    }
+}

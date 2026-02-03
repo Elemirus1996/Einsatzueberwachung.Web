@@ -1,0 +1,194 @@
+@using Einsatzueberwachung.Domain.Interfaces
+@inject IWeatherService WeatherService
+@implements IDisposable
+
+<div class="wetter-widget @(_isLoading ? "loading" : "") @(_hasError ? "error" : "")">
+    @if (_isLoading && _weatherData == null)
+    {
+        <div class="text-center py-2">
+            <div class="spinner-border spinner-border-sm text-primary" role="status">
+                <span class="visually-hidden">Laden...</span>
+            </div>
+        </div>
+    }
+    else if (_hasError)
+    {
+        <div class="text-muted small text-center py-2">
+            <i class="bi bi-cloud-slash me-1"></i>
+            Wetter nicht verfuegbar
+        </div>
+    }
+    else if (_weatherData != null)
+    {
+        <div class="d-flex align-items-center gap-2">
+            <div class="wetter-icon">
+                <i class="bi @_weatherData.GetBootstrapIcon() fs-3" style="color: @GetWeatherIconColor(_weatherData.Wetterlage)"></i>
+            </div>
+            <div class="wetter-info flex-grow-1">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <span class="fs-4 fw-bold">@_weatherData.TemperaturFormatiert</span>
+                        @if (Math.Abs(_weatherData.GefuehlteTemperatur - _weatherData.Temperatur) > 2)
+                        {
+                            <small class="text-muted ms-1">(gefuehlt @_weatherData.GefuehlteTemperatur.ToString("F0")°)</small>
+                        }
+                    </div>
+                    @if (_weatherData.HatWarnung)
+                    {
+                        <span class="badge @_weatherData.GetWarnungBadgeClass()">
+                            <i class="bi bi-exclamation-triangle me-1"></i>Warnung
+                        </span>
+                    }
+                </div>
+                <div class="small text-muted">
+                    @_weatherData.Wetterlage
+                </div>
+                <div class="wetter-details small mt-1">
+                    @if (_weatherData.Windgeschwindigkeit > 0)
+                    {
+                        <span class="me-2" title="Windgeschwindigkeit">
+                            <i class="bi bi-wind"></i> @_weatherData.WindFormatiert
+                        </span>
+                    }
+                    <span class="me-2" title="Luftfeuchtigkeit">
+                        <i class="bi bi-droplet"></i> @_weatherData.LuftfeuchtigkeitFormatiert
+                    </span>
+                    @if (_weatherData.Niederschlag > 0)
+                    {
+                        <span class="me-2 text-info" title="Niederschlag">
+                            <i class="bi bi-cloud-rain"></i> @_weatherData.Niederschlag.ToString("F1") mm
+                        </span>
+                    }
+                    @if (_weatherData.Sichtweite < 5)
+                    {
+                        <span class="text-warning" title="Eingeschraenkte Sicht">
+                            <i class="bi bi-eye-slash"></i> @FormatSichtweite(_weatherData.Sichtweite)
+                        </span>
+                    }
+                </div>
+            </div>
+        </div>
+        
+        @if (_weatherData.HatWarnung && !string.IsNullOrEmpty(_weatherData.Warnung))
+        {
+            <div class="wetter-warnungen mt-2">
+                <div class="alert @GetWarnungsAlertClass(_weatherData.WarnungsStufe) py-1 px-2 mb-1 small">
+                    <i class="bi bi-exclamation-triangle me-1"></i>
+                    @_weatherData.Warnung
+                </div>
+            </div>
+        }
+
+        <div class="text-end">
+            <small class="text-muted" style="font-size: 0.7rem;">
+                DWD • @_weatherData.Zeitpunkt.ToString("HH:mm")
+            </small>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public double? Latitude { get; set; }
+
+    [Parameter]
+    public double? Longitude { get; set; }
+
+    [Parameter]
+    public int RefreshIntervalMinutes { get; set; } = 10;
+
+    [Parameter]
+    public bool Compact { get; set; } = false;
+
+    private WeatherData? _weatherData;
+    private bool _isLoading = false;
+    private bool _hasError = false;
+    private System.Timers.Timer? _refreshTimer;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadWeather();
+        StartRefreshTimer();
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (Latitude.HasValue && Longitude.HasValue)
+        {
+            await LoadWeather();
+        }
+    }
+
+    private async Task LoadWeather()
+    {
+        if (!Latitude.HasValue || !Longitude.HasValue)
+            return;
+
+        _isLoading = true;
+        _hasError = false;
+
+        try
+        {
+            _weatherData = await WeatherService.GetCurrentWeatherAsync(Latitude.Value, Longitude.Value);
+        }
+        catch
+        {
+            _hasError = true;
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+
+    private void StartRefreshTimer()
+    {
+        _refreshTimer = new System.Timers.Timer(RefreshIntervalMinutes * 60 * 1000);
+        _refreshTimer.Elapsed += async (s, e) =>
+        {
+            await InvokeAsync(async () =>
+            {
+                await LoadWeather();
+                StateHasChanged();
+            });
+        };
+        _refreshTimer.Start();
+    }
+
+    private string GetWeatherIconColor(string? wetterlage)
+    {
+        if (string.IsNullOrEmpty(wetterlage)) return "#6c757d";
+        
+        var lower = wetterlage.ToLowerInvariant();
+        if (lower.Contains("sonnig") || lower.Contains("klar")) return "#ffc107";
+        if (lower.Contains("regen") || lower.Contains("schauer")) return "#0dcaf0";
+        if (lower.Contains("gewitter")) return "#6f42c1";
+        if (lower.Contains("schnee")) return "#adb5bd";
+        return "#6c757d";
+    }
+
+    private string GetWarnungsAlertClass(WarnungsStufe stufe)
+    {
+        return stufe switch
+        {
+            WarnungsStufe.ExtremesUnwetter => "alert-danger",
+            WarnungsStufe.Unwetter => "alert-danger",
+            WarnungsStufe.Markant => "alert-warning",
+            WarnungsStufe.Vorabwarnung => "alert-info",
+            _ => "alert-secondary"
+        };
+    }
+
+    private string FormatSichtweite(double km)
+    {
+        if (km >= 1)
+            return $"{km:F1} km";
+        return $"{(km * 1000):F0} m";
+    }
+
+    public void Dispose()
+    {
+        _refreshTimer?.Stop();
+        _refreshTimer?.Dispose();
+    }
+}

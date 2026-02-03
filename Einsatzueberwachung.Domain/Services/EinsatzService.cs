@@ -410,6 +410,32 @@ namespace Einsatzueberwachung.Domain.Services
             
             return Task.FromResult(note.Replies.OrderBy(r => r.Timestamp).ToList());
         }
+        
+        public void ResetEinsatz()
+        {
+            // Alle Timer stoppen
+            foreach (var team in _teams)
+            {
+                team.StopTimer();
+                team.TimerStarted -= Team_TimerStarted;
+                team.TimerStopped -= Team_TimerStopped;
+                team.TimerReset -= Team_TimerReset;
+                team.WarningTriggered -= Team_WarningTriggered;
+            }
+            
+            // Teams und Notizen leeren
+            _teams.Clear();
+            _globalNotes.Clear();
+            
+            // Einsatz-Daten zuruecksetzen
+            _currentEinsatz = new EinsatzData
+            {
+                EinsatzDatum = DateTime.Now,
+                IstEinsatz = true
+            };
+            
+            EinsatzChanged?.Invoke();
+        }
     }
 }
 

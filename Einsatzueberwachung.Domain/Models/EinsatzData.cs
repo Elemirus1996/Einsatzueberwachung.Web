@@ -17,6 +17,7 @@ namespace Einsatzueberwachung.Domain.Models
         public bool IstEinsatz { get; set; }
         public int AnzahlTeams { get; set; }
         public DateTime EinsatzDatum { get; set; }
+        public DateTime? EinsatzEnde { get; set; }
 
         public string EinsatzNummer { get; set; }
         public string StaffelName { get; set; }
@@ -28,6 +29,10 @@ namespace Einsatzueberwachung.Domain.Models
         public List<Team> Teams { get; set; }
 
         public (double Latitude, double Longitude)? ElwPosition { get; set; }
+        
+        // Koordinaten fuer Wetter-Abfrage
+        public double? ElwLatitude => ElwPosition?.Latitude;
+        public double? ElwLongitude => ElwPosition?.Longitude;
 
         public EinsatzData()
         {
@@ -40,6 +45,7 @@ namespace Einsatzueberwachung.Domain.Models
             IstEinsatz = true;
             AnzahlTeams = 1;
             EinsatzDatum = DateTime.Now;
+            EinsatzEnde = null;
             EinsatzNummer = string.Empty;
             StaffelName = string.Empty;
             StaffelLogoPfad = string.Empty;

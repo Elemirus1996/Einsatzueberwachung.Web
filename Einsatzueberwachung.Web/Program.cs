@@ -142,8 +142,12 @@ builder.Services.AddSingleton<IEinsatzService, EinsatzService>();
 builder.Services.AddSingleton<ISettingsService, SettingsService>();
 builder.Services.AddSingleton<IPdfExportService, PdfExportService>();
 builder.Services.AddSingleton<IExcelExportService, ExcelExportService>();
+builder.Services.AddSingleton<IArchivService, ArchivService>();
 builder.Services.AddSingleton<ToastService>();
 builder.Services.AddSingleton<ThemeService>();
+
+// Wetter-Service (DWD via BrightSky API)
+builder.Services.AddHttpClient<IWeatherService, DwdWeatherService>();
 
 // FluentValidation Validators registrieren
 builder.Services.AddValidatorsFromAssembly(typeof(Einsatzueberwachung.Domain.Models.PersonalEntry).Assembly);
