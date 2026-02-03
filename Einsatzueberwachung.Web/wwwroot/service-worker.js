@@ -1,21 +1,25 @@
 // Service Worker für Offline-Support
 // Cacht wichtige Ressourcen und ermöglicht Offline-Funktionalität
 
-const CACHE_NAME = 'einsatzueberwachung-v1.0.0';
-const STATIC_CACHE = 'static-v1';
-const DYNAMIC_CACHE = 'dynamic-v1';
+const CACHE_NAME = 'einsatzueberwachung-v1.0.1';
+const STATIC_CACHE = 'static-v1.0.1';
+const DYNAMIC_CACHE = 'dynamic-v1.0.1';
 
 // Zu cachende Ressourcen
 const STATIC_ASSETS = [
     '/',
-    '/index.html',
-    '/css/app.css',
-    '/css/bootstrap/bootstrap.min.css',
-    '/css/open-iconic/font/css/open-iconic-bootstrap.min.css',
+    '/app.css',
+    '/dark-mode-base.css',
+    '/notes-enhanced.css',
+    '/mobile-dashboard.css',
+    '/print-map.css',
+    '/bootstrap/bootstrap.min.css',
+    '/bootstrap/bootstrap.min.css.map',
     '/_framework/blazor.web.js',
     '/manifest.json',
     '/icon-192.png',
-    '/icon-512.png'
+    '/icon-512.png',
+    '/favicon.png'
 ];
 
 // Installation - Cache erstellen
