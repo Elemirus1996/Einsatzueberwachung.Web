@@ -1,6 +1,6 @@
 # Einsatzüberwachung Web
 
-**Version 3.7** - Moderne, touch-optimierte Web-Anwendung für die Koordination und Überwachung von Rettungshunde-Einsätzen mit Dark Mode Support.
+**Version 3.8** - Moderne, touch-optimierte Web-Anwendung für die Koordination und Überwachung von Rettungshunde-Einsätzen mit Dark Mode Support.
 
 ---
 
