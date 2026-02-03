@@ -141,6 +141,7 @@ builder.Services.AddSingleton<IMasterDataService, MasterDataService>();
 builder.Services.AddSingleton<IEinsatzService, EinsatzService>();
 builder.Services.AddSingleton<ISettingsService, SettingsService>();
 builder.Services.AddSingleton<IPdfExportService, PdfExportService>();
+builder.Services.AddSingleton<IExcelExportService, ExcelExportService>();
 builder.Services.AddSingleton<ToastService>();
 builder.Services.AddSingleton<ThemeService>();
 

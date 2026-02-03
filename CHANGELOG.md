@@ -1,5 +1,36 @@
 # 📋 CHANGELOG
 
+## Version 3.7.0 - "Excel Import/Export" (Februar 2026)
+
+### 🎯 Hauptverbesserungen
+
+#### **Excel Import/Export für Stammdaten** 🆕
+- 📊 **Excel Export**
+  - Export aller Stammdaten (Personal, Hunde, Drohnen) als Excel-Datei
+  - Separate Arbeitsblätter für jede Kategorie
+  - Formatierte Kopfzeilen mit Farbcodierung
+  - Automatische Spaltenbreitenanpassung
+  
+- 📥 **Excel Import**
+  - Import von Stammdaten aus Excel-Dateien
+  - Unterstützung für mehrzeilige Importe
+  - Automatische Duplikaterkennung (verhindert doppelte Einträge)
+  - Intelligentes Parsing von Qualifikationen und Spezialisierungen
+  - Verknüpfung von Hundeführern/Drohnenpiloten mit Personal
+  
+- 📄 **Import-Vorlage**
+  - Downloadbare Excel-Vorlage mit Beispieldaten
+  - Hinweise zu möglichen Qualifikationen und Spezialisierungen
+  - Einfache Befüllung für neue Einträge
+
+#### **Technische Details**
+- 📦 **ClosedXML Integration**
+  - Verwendung der ClosedXML-Bibliothek (MIT-Lizenz)
+  - Keine externen Abhängigkeiten zu Microsoft Office
+  - Plattformunabhängig (Windows, Linux, macOS)
+
+---
+
 ## Version 3.6.0 - "UI Fixes & Stability" (Februar 2026)
 
 ### 🎯 Hauptverbesserungen

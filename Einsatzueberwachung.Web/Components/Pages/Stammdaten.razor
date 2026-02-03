@@ -4,15 +4,63 @@
 @using Einsatzueberwachung.Domain.Models
 @using Einsatzueberwachung.Domain.Models.Enums
 @inject IMasterDataService MasterDataService
+@inject IExcelExportService ExcelExportService
+@inject IJSRuntime JSRuntime
 @rendermode InteractiveServer
 
 <PageTitle>Stammdaten</PageTitle>
 
 <div class="stammdaten-container">
     <div class="page-header">
-        <h1>Stammdaten-Verwaltung</h1>
-        <p class="text-muted">Personal, Hunde und Drohnen verwalten</p>
+        <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+            <div>
+                <h1>Stammdaten-Verwaltung</h1>
+                <p class="text-muted">Personal, Hunde und Drohnen verwalten</p>
+            </div>
+            <div class="btn-group-vertical btn-group-lg">
+                <div class="btn-group" role="group">
+                    <button class="btn btn-outline-primary" @onclick="ExportToExcel" disabled="@_isExporting">
+                        @if (_isExporting)
+                        {
+                            <span class="spinner-border spinner-border-sm me-2"></span>
+                        }
+                        <i class="bi bi-file-earmark-excel me-2"></i>Exportieren
+                    </button>
+                    <button class="btn btn-outline-secondary" @onclick="DownloadTemplate">
+                        <i class="bi bi-download me-2"></i>Vorlage
+                    </button>
+                </div>
+                <div class="mt-2">
+                    <InputFile OnChange="ImportFromExcel" accept=".xlsx,.xls" class="form-control" disabled="@_isImporting" />
+                </div>
+            </div>
+        </div>
     </div>
+
+    @if (!string.IsNullOrEmpty(_importMessage))
+    {
+        <div class="alert @(_importSuccess ? "alert-success" : "alert-danger") alert-dismissible fade show" role="alert">
+            <strong>@(_importSuccess ? "Import erfolgreich!" : "Import-Fehler:")</strong> @_importMessage
+            @if (_importWarnings.Any())
+            {
+                <hr />
+                <details>
+                    <summary>Warnungen anzeigen (@_importWarnings.Count)</summary>
+                    <ul class="mb-0 mt-2">
+                        @foreach (var warning in _importWarnings.Take(10))
+                        {
+                            <li>@warning</li>
+                        }
+                        @if (_importWarnings.Count > 10)
+                        {
+                            <li><em>... und @(_importWarnings.Count - 10) weitere</em></li>
+                        }
+                    </ul>
+                </details>
+            }
+            <button type="button" class="btn-close" @onclick="ClearImportMessage"></button>
+        </div>
+    }
 
     <ul class="nav nav-tabs nav-tabs-lg mb-4">
         <li class="nav-item">
@@ -462,6 +510,13 @@ private List<DroneEntry> _droneList = new();
     private DroneEntry _currentDrone = new();
     private DroneEntry? _editingDrone = null;
 
+    // Excel Import/Export Status
+    private bool _isExporting = false;
+    private bool _isImporting = false;
+    private string _importMessage = "";
+    private bool _importSuccess = false;
+    private List<string> _importWarnings = new();
+
     protected override async Task OnInitializedAsync()
     {
         await LoadData();
@@ -645,6 +700,102 @@ private List<DroneEntry> _droneList = new();
     {
         _showDroneDialog = false;
         _editingDrone = null;
+    }
+
+    // Excel Import/Export Methoden
+    private async Task ExportToExcel()
+    {
+        _isExporting = true;
+        _importMessage = "";
+        StateHasChanged();
+
+        try
+        {
+            var excelData = await ExcelExportService.ExportStammdatenAsync();
+            var fileName = $"Stammdaten_{DateTime.Now:yyyy-MM-dd_HH-mm}.xlsx";
+            
+            await JSRuntime.InvokeVoidAsync("downloadFileFromByteArray", fileName, excelData, 
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+            
+            _importMessage = "Export erfolgreich durchgeführt.";
+            _importSuccess = true;
+        }
+        catch (Exception ex)
+        {
+            _importMessage = $"Fehler beim Export: {ex.Message}";
+            _importSuccess = false;
+        }
+        finally
+        {
+            _isExporting = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task DownloadTemplate()
+    {
+        try
+        {
+            var templateData = await ExcelExportService.CreateImportTemplateAsync();
+            await JSRuntime.InvokeVoidAsync("downloadFileFromByteArray", "Stammdaten_Vorlage.xlsx", templateData,
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        }
+        catch (Exception ex)
+        {
+            _importMessage = $"Fehler beim Erstellen der Vorlage: {ex.Message}";
+            _importSuccess = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task ImportFromExcel(InputFileChangeEventArgs e)
+    {
+        _isImporting = true;
+        _importMessage = "";
+        _importWarnings.Clear();
+        StateHasChanged();
+
+        try
+        {
+            var file = e.File;
+            if (file == null)
+            {
+                _importMessage = "Keine Datei ausgewählt.";
+                _importSuccess = false;
+                return;
+            }
+
+            // Max 5 MB
+            const int maxFileSize = 5 * 1024 * 1024;
+            using var stream = new MemoryStream();
+            await file.OpenReadStream(maxFileSize).CopyToAsync(stream);
+            var excelData = stream.ToArray();
+
+            var result = await ExcelExportService.ImportStammdatenAsync(excelData);
+            
+            _importSuccess = result.Success;
+            _importMessage = result.Message ?? "Import abgeschlossen.";
+            _importWarnings = result.Warnings;
+
+            // Daten neu laden nach Import
+            await LoadData();
+        }
+        catch (Exception ex)
+        {
+            _importMessage = $"Fehler beim Import: {ex.Message}";
+            _importSuccess = false;
+        }
+        finally
+        {
+            _isImporting = false;
+            StateHasChanged();
+        }
+    }
+
+    private void ClearImportMessage()
+    {
+        _importMessage = "";
+        _importWarnings.Clear();
     }
 }
 
