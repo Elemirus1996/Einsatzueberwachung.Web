@@ -32,6 +32,12 @@
                                   RefreshIntervalMinutes="10" />
                 </div>
             }
+            else
+            {
+                <div class="text-muted small" style="min-width: 200px;">
+                    <i class="bi bi-cloud me-1"></i>Wetter: ELW-Position auf Karte setzen
+                </div>
+            }
             <div class="btn-group-vertical">
                 <button class="btn btn-info btn-lg" @onclick="GoToMap">
                     <i class="bi bi-map me-1"></i>Karte
@@ -315,6 +321,7 @@ OnTeamTypeChanged="UpdateTeamName" />
         EinsatzService.TeamUpdated += OnDataChanged;
         EinsatzService.NoteAdded += OnDataChanged;
         EinsatzService.TeamWarningTriggered += OnWarningTriggered;
+        EinsatzService.EinsatzChanged += OnEinsatzChanged;
 
         foreach (var team in _teams)
         {
@@ -701,10 +708,16 @@ OnTeamTypeChanged="UpdateTeamName" />
         EinsatzService.TeamUpdated -= OnDataChanged;
         EinsatzService.NoteAdded -= OnDataChanged;
         EinsatzService.TeamWarningTriggered -= OnWarningTriggered;
+        EinsatzService.EinsatzChanged -= OnEinsatzChanged;
 
         foreach (var team in _teams)
         {
             team.TimerTick -= OnTimerTick;
         }
+    }
+    
+    private void OnEinsatzChanged()
+    {
+        InvokeAsync(StateHasChanged);
     }
 }
