@@ -1,5 +1,45 @@
 # 📋 CHANGELOG
 
+## Version 3.9.0 - "Flugwetter" (Februar 2026)
+
+### 🎯 Hauptverbesserungen
+
+#### **Erweiterte Flugwetter-Anzeige** 🆕
+- ✈️ **Flugkategorien nach FAA-Standard**
+  - VFR (Visual Flight Rules) - Grün
+  - MVFR (Marginal VFR) - Blau  
+  - IFR (Instrument Flight Rules) - Gelb
+  - LIFR (Low IFR) - Rot
+  
+- 🚁 **Drohnen-Flugbewertung**
+  - Automatische Bewertung der Flugbedingungen
+  - Windgrenzen-Prüfung (max. 38 km/h Böen)
+  - Sichtweiten-Bewertung (min. 1 km für Sichtflug)
+  - Wetterlage-Analyse (Regen, Gewitter, Nebel)
+
+- 📊 **Erweiterte Flugwetter-Daten**
+  - QNH (Luftdruck auf Meereshöhe)
+  - Spread (Temperatur - Taupunkt) für Nebelwarnung
+  - Wolkenuntergrenze in Metern und Fuß
+  - Pseudo-METAR Anzeige
+
+- 🔄 **Auto-Refresh**
+  - Automatische Aktualisierung alle 10 Minuten
+  - Visueller Hinweis im UI
+
+#### **Technische Details**
+- 🏗️ **FlugwetterData-Klasse**
+  - Neue Datenstruktur für Flugwetter-Informationen
+  - Kategorieberechnung nach FAA-Kriterien
+  - Helper-Methoden für UI-Darstellung
+  
+- 🌐 **DWD Open Data Integration**
+  - Nutzung der BrightSky API für Echtzeitdaten
+  - Wolkenuntergrenze nach Spread-Formel (125m/°C)
+  - Windrichtungs-Umrechnung für METAR
+
+---
+
 ## Version 3.8.0 - "Archiv & Wetter" (Februar 2026)
 
 ### 🎯 Hauptverbesserungen

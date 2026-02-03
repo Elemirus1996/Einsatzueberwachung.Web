@@ -147,8 +147,11 @@
                             </div>
                         </div>
                     </div>
-                    <div class="card-footer text-muted small">
-                        Aktualisiert: @_weatherData.Zeitpunkt.ToString("dd.MM.yyyy HH:mm") Uhr
+                    <div class="card-footer text-muted small d-flex justify-content-between align-items-center">
+                        <span>Aktualisiert: @_weatherData.Zeitpunkt.ToString("dd.MM.yyyy HH:mm") Uhr</span>
+                        <span class="badge bg-secondary">
+                            <i class="bi bi-arrow-repeat me-1"></i>Auto-Refresh: 10 Min
+                        </span>
                     </div>
                 </div>
             </div>
@@ -156,23 +159,48 @@
             <!-- Flugwetter -->
             <div class="col-lg-6 mb-4">
                 <div class="card h-100">
-                    <div class="card-header bg-info text-white">
+                    <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
                         <h5 class="mb-0"><i class="bi bi-airplane me-2"></i>Flugwetter (Drohnen)</h5>
+                        @if (_flugwetterData != null)
+                        {
+                            <span class="badge @_flugwetterData.GetKategorieBadgeClass() fs-6">
+                                @_flugwetterData.Kategorie
+                            </span>
+                        }
                     </div>
                     <div class="card-body">
-                        @{
-                            var flugwetter = GetFlugwetterBewertung();
-                        }
-                        
-                        <div class="alert @flugwetter.AlertClass mb-4">
-                            <div class="d-flex align-items-center">
-                                <i class="bi @flugwetter.Icon fs-1 me-3"></i>
-                                <div>
-                                    <h4 class="mb-1">@flugwetter.Status</h4>
-                                    <p class="mb-0">@flugwetter.Beschreibung</p>
+                        @if (_flugwetterData != null)
+                        {
+                            <!-- Flugkategorie-Anzeige -->
+                            <div class="alert @(_flugwetterData.IstDrohnenflugMoeglich ? "alert-success" : "alert-danger") mb-3">
+                                <div class="d-flex align-items-center">
+                                    <i class="bi @(_flugwetterData.IstDrohnenflugMoeglich ? "bi-check-circle-fill" : "bi-x-circle-fill") fs-1 me-3"></i>
+                                    <div>
+                                        <h4 class="mb-1">@_flugwetterData.GetKategorieText()</h4>
+                                        <p class="mb-0">@_flugwetterData.DrohnenflugHinweis</p>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
+                            
+                            <!-- Station Info -->
+                            <div class="small text-muted mb-3">
+                                <i class="bi bi-broadcast me-1"></i>Station: @_flugwetterData.StationsName
+                            </div>
+                        }
+                        else
+                        {
+                            var flugwetter = GetFlugwetterBewertung();
+                            
+                            <div class="alert @flugwetter.AlertClass mb-4">
+                                <div class="d-flex align-items-center">
+                                    <i class="bi @flugwetter.Icon fs-1 me-3"></i>
+                                    <div>
+                                        <h4 class="mb-1">@flugwetter.Status</h4>
+                                        <p class="mb-0">@flugwetter.Beschreibung</p>
+                                    </div>
+                                </div>
+                            </div>
+                        }
 
                         <h6 class="mb-3">Flugbedingungen im Detail:</h6>
                         <table class="table table-sm">
@@ -281,13 +309,62 @@
                                         }
                                     </td>
                                 </tr>
+                                @if (_flugwetterData != null)
+                                {
+                                    <tr>
+                                        <td><i class="bi bi-speedometer2 me-2"></i>QNH</td>
+                                        <td class="fw-bold">@_flugwetterData.QNH hPa</td>
+                                        <td>
+                                            @if (_flugwetterData.QNH > 1000 && _flugwetterData.QNH < 1030)
+                                            {
+                                                <span class="badge bg-success">Normal</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-info">Abweichend</span>
+                                            }
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td><i class="bi bi-droplet me-2"></i>Spread (T-Td)</td>
+                                        <td class="fw-bold">@_flugwetterData.Spread.ToString("F1")°C</td>
+                                        <td>
+                                            @if (_flugwetterData.Spread > 5)
+                                            {
+                                                <span class="badge bg-success">Gut</span>
+                                            }
+                                            else if (_flugwetterData.Spread > 2)
+                                            {
+                                                <span class="badge bg-warning text-dark">Vorsicht</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-danger">Nebel möglich</span>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
                             </tbody>
                         </table>
+
+                        @if (_flugwetterData?.MetarRaw != null)
+                        {
+                            <div class="card bg-dark text-light mt-3">
+                                <div class="card-body py-2">
+                                    <small class="text-muted">METAR (berechnet):</small>
+                                    <code class="d-block text-light small">@_flugwetterData.MetarRaw</code>
+                                </div>
+                            </div>
+                        }
 
                         <div class="alert alert-info small mt-3">
                             <i class="bi bi-info-circle me-1"></i>
                             <strong>Hinweis:</strong> Drohnenflug nur bei Sichtweite &gt; 1 km, Wind &lt; 35 km/h, 
                             kein Niederschlag und Wolkenuntergrenze &gt; 50 m empfohlen.
+                            @if (_flugwetterData != null)
+                            {
+                                <br/><small>Daten basierend auf DWD Open Data via BrightSky API.</small>
+                            }
                         </div>
                     </div>
                 </div>
@@ -387,6 +464,7 @@
     
     private WeatherData? _weatherData;
     private WeatherForecast? _forecast;
+    private FlugwetterData? _flugwetterData;
     private double? _windGusts;
     private double? _cloudBase;
     
@@ -394,6 +472,7 @@
     private string? _error;
     
     private System.Timers.Timer? _refreshTimer;
+    private DateTime? _lastRefresh;
 
     protected override async Task OnInitializedAsync()
     {
@@ -405,7 +484,8 @@
         }
         
         // Auto-Refresh alle 10 Minuten
-        _refreshTimer = new System.Timers.Timer(10 * 60 * 1000);
+        _refreshTimer = new System.Timers.Timer(10 * 60 * 1000); // 10 Minuten
+        _refreshTimer.AutoReset = true; // Wiederholt automatisch
         _refreshTimer.Elapsed += async (s, e) =>
         {
             if (_weatherData != null)
@@ -413,6 +493,7 @@
                 await InvokeAsync(async () =>
                 {
                     await LoadWeatherData();
+                    _lastRefresh = DateTime.Now;
                     StateHasChanged();
                 });
             }
@@ -488,21 +569,40 @@
             _weatherData = await WeatherService.GetCurrentWeatherAsync(_latitude, _longitude);
             _forecast = await WeatherService.GetForecastAsync(_latitude, _longitude);
             
-            // Simulierte Flugwetter-Daten (in Realitaet von separater API)
-            // Windboeen sind typischerweise 1.5-2x der mittleren Windgeschwindigkeit
-            if (_weatherData != null)
+            // Flugwetter-Daten vom Service abrufen (mit Kategorieberechnung)
+            _flugwetterData = await WeatherService.GetFlugwetterAsync(_latitude, _longitude);
+            
+            // Fallback auf berechnete Werte, wenn FlugwetterData verfügbar
+            if (_flugwetterData != null)
             {
-                _windGusts = _weatherData.Windgeschwindigkeit * (1.3 + new Random().NextDouble() * 0.4);
+                _windGusts = _flugwetterData.Windboeen;
+                _cloudBase = _flugwetterData.Wolkenuntergrenze;
+            }
+            else if (_weatherData != null)
+            {
+                // Echte Boeen-Daten von der API verwenden
+                _windGusts = _weatherData.Windboeen > 0 ? _weatherData.Windboeen : _weatherData.Windgeschwindigkeit * 1.3;
                 
-                // Wolkenuntergrenze basierend auf Bewoelkung schaetzen
+                // Wolkenuntergrenze basierend auf Bewoelkung und Taupunkt schaetzen
+                // Bei hoher Bewoelkung und niedrigem Spread (Temperatur - Taupunkt) niedrige Wolken
+                var spread = _weatherData.Temperatur - _weatherData.Taupunkt;
                 if (_weatherData.Bewoelkung > 80)
-                    _cloudBase = 100 + new Random().Next(200);
+                {
+                    // Faustformel: Wolkenuntergrenze ~ 125m pro 1°C Spread
+                    _cloudBase = Math.Max(100, (int)(spread * 125));
+                }
                 else if (_weatherData.Bewoelkung > 50)
-                    _cloudBase = 300 + new Random().Next(500);
+                {
+                    _cloudBase = Math.Max(300, (int)(spread * 125));
+                }
                 else if (_weatherData.Bewoelkung > 20)
-                    _cloudBase = 800 + new Random().Next(1000);
+                {
+                    _cloudBase = Math.Max(800, (int)(spread * 125));
+                }
                 else
-                    _cloudBase = null; // Wolkenfrei
+                {
+                    _cloudBase = null; // Weitgehend wolkenfrei
+                }
             }
         }
         catch (Exception ex)
@@ -512,6 +612,7 @@
         finally
         {
             _isLoading = false;
+            StateHasChanged();
         }
     }
 

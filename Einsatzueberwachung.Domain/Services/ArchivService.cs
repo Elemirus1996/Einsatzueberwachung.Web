@@ -161,7 +161,7 @@ namespace Einsatzueberwachung.Domain.Services
             var exportData = new
             {
                 ExportDatum = DateTime.Now,
-                Version = "3.8.0",
+                Version = "3.9.0",
                 AnzahlEinsaetze = _archiv.Count,
                 Einsaetze = _archiv
             };

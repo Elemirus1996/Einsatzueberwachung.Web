@@ -1,6 +1,6 @@
 [Setup]
 AppName=Einsatzüberwachung
-AppVersion=3.8.0
+AppVersion=3.9.0
 AppId={{B8C1B81C-2C7F-4D58-9B4F-83A6F3E1C2C5}
 AppPublisher=Rettungshunde-Einsatz-Koordination
 AppPublisherURL=https://github.com/Elemirus1996/Einsatzueberwachung.Web
