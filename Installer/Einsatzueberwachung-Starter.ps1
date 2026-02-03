@@ -1,12 +1,18 @@
 # ============================================================
 # Einsatzueberwachung - Verbesserter Starter mit IP-Anzeige
+# Version: 4.0 mit automatischer Update-Prüfung
 # ============================================================
 
 param(
-    [switch]$NetworkMode
+    [switch]$NetworkMode,
+    [switch]$SkipUpdateCheck
 )
 
 $ErrorActionPreference = "Stop"
+
+# Aktuelle Version und GitHub-Repository
+$script:CurrentVersion = "3.7.0"
+$script:GitHubRepo = "Elemirus1996/Einsatzueberwachung.Web"
 
 # Farben
 $Colors = @{
@@ -15,15 +21,133 @@ $Colors = @{
     Warning = 'Yellow'
     Error = 'Red'
     Info = 'Gray'
+    Update = 'Magenta'
 }
 
 function Show-StartupInfo {
     Clear-Host
     Write-Host ""
     Write-Host "============================================================" -ForegroundColor $Colors.Header
-    Write-Host "   EINSATZUEBERWACHUNG - Server Start" -ForegroundColor $Colors.Header
+    Write-Host "   EINSATZUEBERWACHUNG - Server Start v4.0" -ForegroundColor $Colors.Header
+    Write-Host "   Installierte Version: $script:CurrentVersion" -ForegroundColor $Colors.Info
     Write-Host "============================================================" -ForegroundColor $Colors.Header
     Write-Host ""
+}
+
+function Test-ForUpdates {
+    Write-Host "Pruefe auf Updates..." -ForegroundColor $Colors.Info
+    
+    try {
+        # GitHub API für neueste Release abfragen
+        $apiUrl = "https://api.github.com/repos/$script:GitHubRepo/releases/latest"
+        
+        # TLS 1.2 aktivieren
+        [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+        
+        $response = Invoke-RestMethod -Uri $apiUrl -TimeoutSec 10 -ErrorAction Stop
+        $latestVersion = $response.tag_name -replace '^v', ''
+        $downloadUrl = $response.assets | Where-Object { $_.name -like "*.exe" } | Select-Object -First 1 -ExpandProperty browser_download_url
+        $releaseNotes = $response.body
+        $releaseDate = [DateTime]::Parse($response.published_at).ToString("dd.MM.yyyy")
+        
+        # Versionen vergleichen
+        $current = [Version]$script:CurrentVersion
+        $latest = [Version]$latestVersion
+        
+        if ($latest -gt $current) {
+            Write-Host ""
+            Write-Host "============================================================" -ForegroundColor $Colors.Update
+            Write-Host "   NEUE VERSION VERFUEGBAR!" -ForegroundColor $Colors.Update
+            Write-Host "============================================================" -ForegroundColor $Colors.Update
+            Write-Host ""
+            Write-Host "  Installiert:  v$script:CurrentVersion" -ForegroundColor $Colors.Warning
+            Write-Host "  Verfuegbar:   v$latestVersion (vom $releaseDate)" -ForegroundColor $Colors.Success
+            Write-Host ""
+            
+            # Release-Notes anzeigen (gekürzt)
+            if ($releaseNotes) {
+                Write-Host "  Was ist neu:" -ForegroundColor $Colors.Header
+                $notes = $releaseNotes -split "`n" | Select-Object -First 8
+                foreach ($line in $notes) {
+                    $cleanLine = $line.Trim()
+                    if ($cleanLine) {
+                        Write-Host "    $cleanLine" -ForegroundColor $Colors.Info
+                    }
+                }
+                Write-Host ""
+            }
+            
+            Write-Host "============================================================" -ForegroundColor $Colors.Update
+            Write-Host ""
+            
+            $choice = Read-Host "Update jetzt herunterladen und installieren? (J/N)"
+            
+            if ($choice -match '^[JjYy]') {
+                if ($downloadUrl) {
+                    Install-Update -DownloadUrl $downloadUrl -Version $latestVersion
+                } else {
+                    Write-Host "[!] Kein Installer in diesem Release gefunden." -ForegroundColor $Colors.Warning
+                    Write-Host "    Bitte manuell herunterladen von:" -ForegroundColor $Colors.Info
+                    Write-Host "    https://github.com/$script:GitHubRepo/releases/latest" -ForegroundColor $Colors.Info
+                    Write-Host ""
+                    Read-Host "Druecken Sie Enter um fortzufahren"
+                }
+            } else {
+                Write-Host ""
+                Write-Host "[i] Update uebersprungen. Sie koennen spaeter aktualisieren." -ForegroundColor $Colors.Info
+                Write-Host ""
+            }
+        } else {
+            Write-Host "[OK] Sie verwenden die neueste Version ($script:CurrentVersion)" -ForegroundColor $Colors.Success
+        }
+    } catch {
+        Write-Host "[!] Update-Pruefung fehlgeschlagen (keine Internetverbindung?)" -ForegroundColor $Colors.Warning
+    }
+    Write-Host ""
+}
+
+function Install-Update {
+    param(
+        [string]$DownloadUrl,
+        [string]$Version
+    )
+    
+    Write-Host ""
+    Write-Host "Lade Update herunter..." -ForegroundColor $Colors.Info
+    
+    try {
+        # Download-Pfad
+        $downloadPath = Join-Path $env:TEMP "EinsatzueberwachungSetup_v$Version.exe"
+        
+        Write-Host "  Von: $DownloadUrl" -ForegroundColor $Colors.Info
+        Write-Host "  Nach: $downloadPath" -ForegroundColor $Colors.Info
+        Write-Host ""
+        
+        # Download durchführen
+        Invoke-WebRequest -Uri $DownloadUrl -OutFile $downloadPath -TimeoutSec 120
+        
+        Write-Host "[OK] Download abgeschlossen!" -ForegroundColor $Colors.Success
+        Write-Host ""
+        
+        # Installer starten
+        Write-Host "Starte Installer..." -ForegroundColor $Colors.Info
+        Write-Host "[i] Das aktuelle Fenster wird geschlossen." -ForegroundColor $Colors.Warning
+        Write-Host ""
+        
+        Start-Sleep -Seconds 2
+        
+        # Installer ausführen und Script beenden
+        Start-Process -FilePath $downloadPath
+        exit 0
+        
+    } catch {
+        Write-Host "[FEHLER] Download fehlgeschlagen: $($_.Exception.Message)" -ForegroundColor $Colors.Error
+        Write-Host ""
+        Write-Host "    Bitte manuell herunterladen von:" -ForegroundColor $Colors.Info
+        Write-Host "    https://github.com/$script:GitHubRepo/releases/latest" -ForegroundColor $Colors.Info
+        Write-Host ""
+        Read-Host "Druecken Sie Enter um fortzufahren"
+    }
 }
 
 function Stop-OldServers {
@@ -241,6 +365,11 @@ function Start-Application {
 
 # MAIN
 Show-StartupInfo
+
+# Update-Prüfung als erstes (außer wenn übersprungen)
+if (-not $SkipUpdateCheck) {
+    Test-ForUpdates
+}
 
 # Beende alte Server-Prozesse
 Stop-OldServers
