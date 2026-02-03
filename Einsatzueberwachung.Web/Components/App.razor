@@ -95,6 +95,31 @@
     <script src="/swipe-handler.js"></script>
     
     <script src="_framework/blazor.web.js"></script>
+
+    <!-- One-time Cache/Service Worker reset for updated assets -->
+    <script>
+        (async function () {
+            try {
+                const resetKey = 'sw-reset-2026-02-03';
+                if (!localStorage.getItem(resetKey)) {
+                    if ('serviceWorker' in navigator) {
+                        const regs = await navigator.serviceWorker.getRegistrations();
+                        for (const reg of regs) {
+                            await reg.unregister();
+                        }
+                    }
+                    if ('caches' in window) {
+                        const keys = await caches.keys();
+                        await Promise.all(keys.map(k => caches.delete(k)));
+                    }
+                    localStorage.setItem(resetKey, '1');
+                    location.reload();
+                }
+            } catch (e) {
+                console.warn('Service Worker reset skipped:', e);
+            }
+        })();
+    </script>
     
     <!-- Initialize Clock nach Blazor -->
     <script>
