@@ -1,7 +1,8 @@
 // Service Worker Registration und Management
 // Handhabt Installation, Updates und Offline-Status
 
-const DEBUG = false;
+if (!window.swManager) {
+    const DEBUG = false;
 
 class ServiceWorkerManager {
     constructor() {
@@ -229,3 +230,4 @@ window.getServiceWorkerCacheSize = async function() {
     const mb = (bytes / (1024 * 1024)).toFixed(2);
     return `${mb} MB`;
 };
+}

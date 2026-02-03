@@ -1,7 +1,7 @@
 // Swipe-Gesten Utility für Touch-Interaktionen
 // Unterstützt Links/Rechts-Swipe für Aktionen
 
-export class SwipeHandler {
+class SwipeHandler {
     constructor(element, options = {}) {
         this.element = element;
         this.options = {
