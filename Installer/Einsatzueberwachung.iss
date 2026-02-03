@@ -29,8 +29,8 @@ Source: "..\Einsatzueberwachung.Web.sln"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\Einsatzueberwachung.Web\*"; DestDir: "{app}\Einsatzueberwachung.Web"; Flags: ignoreversion recursesubdirs createallsubdirs; Excludes: "bin,obj,*.user"
 Source: "..\Einsatzueberwachung.Web.Client\*"; DestDir: "{app}\Einsatzueberwachung.Web.Client"; Flags: ignoreversion recursesubdirs createallsubdirs; Excludes: "bin,obj,*.user"
 Source: "..\Einsatzueberwachung.Domain\*"; DestDir: "{app}\Einsatzueberwachung.Domain"; Flags: ignoreversion recursesubdirs createallsubdirs; Excludes: "bin,obj,*.user"
-Source: "Einsatzueberwachung-Starter.ps1"; DestDir: "{app}"; Flags: ignoreversion
-Source: "Einsatzueberwachung-Starter.bat"; DestDir: "{app}"; Flags: ignoreversion
+Source: "Einsatzueberwachung-Starter.ps1"; DestDir: "{app}"; Flags: ignoreversion replacesameversion
+Source: "Einsatzueberwachung-Starter.bat"; DestDir: "{app}"; Flags: ignoreversion replacesameversion
 
 [Icons]
 Name: "{autoprograms}\Einsatzüberwachung"; Filename: "{app}\Einsatzueberwachung-Starter.bat"
