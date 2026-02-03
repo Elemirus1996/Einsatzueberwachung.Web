@@ -1,5 +1,30 @@
 # 📋 CHANGELOG
 
+## Version 3.6.0 - "UI Fixes & Stability" (Februar 2026)
+
+### 🎯 Hauptverbesserungen
+
+#### **UI/UX Fixes**
+- 🎨 **Sidebar Navigation Fix**
+  - Linkfarben in der Sidebar im Light Theme auf Weiß korrigiert
+  - Bessere Lesbarkeit der Navigation auf dunklem Hintergrund
+  
+#### **Service Worker & PWA**
+- ⚡ **Service Worker Optimierungen**
+  - POST-Requests werden nicht mehr gecacht (Cache-Fehler behoben)
+  - Stabilere Offline-Funktionalität
+  
+- 📱 **Manifest Korrekturen**
+  - Icon-Größen in Shortcuts korrigiert (192x192)
+  - Verbesserte PWA-Kompatibilität
+
+#### **Technische Verbesserungen**
+- 🛡️ **Stabilität**
+  - Weniger Konsolenfehler
+  - Besseres Error-Handling im Service Worker
+
+---
+
 ## Version 3.0.0 - "Enhanced User Experience & Performance" (Januar 2026)
 
 ### 🎯 Hauptverbesserungen

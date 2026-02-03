@@ -127,7 +127,8 @@ async function networkFirst(request) {
     try {
         const response = await fetch(request);
         
-        if (response.ok) {
+        // Nur GET-Requests können gecacht werden
+        if (response.ok && request.method === 'GET') {
             cache.put(request, response.clone());
         }
         
