@@ -190,29 +190,10 @@ function Start-Application {
     Write-Host "Öffne Browser..." -ForegroundColor $Colors.Info
     Start-Sleep -Seconds 2
     
-    if ($IsNetworkMode) {
-        # Netzwerk-Mode: öffne mit Netzwerk-IP
-        Write-Host "[DEBUG] Netzwerk-Mode aktiviert" -ForegroundColor Gray
-        Write-Host "[DEBUG] Verfügbare IPs: $($ips -join ', ')" -ForegroundColor Gray
-        Write-Host "[DEBUG] IP-Count: $($ips.Count)" -ForegroundColor Gray
-        
-        if ($ips.Count -gt 0) {
-            $selectedIP = $ips[0]
-            Write-Host "[DEBUG] Wähle erste IP: '$selectedIP'" -ForegroundColor Green
-            $browserUrl = "http://${selectedIP}:5000"
-            Write-Host "Öffne: $browserUrl" -ForegroundColor $Colors.Info
-            Write-Host "[DEBUG] URL konstruiert: '$browserUrl'" -ForegroundColor Gray
-            Start-Process $browserUrl
-        } else {
-            Write-Host "[WARN] Keine Netzwerk-IP gefunden, öffne localhost" -ForegroundColor $Colors.Warning
-            Start-Process "http://localhost:5000"
-        }
-    } else {
-        # Local-Mode: öffne mit localhost
-        $browserUrl = "http://localhost:5000"
-        Write-Host "Öffne: $browserUrl" -ForegroundColor $Colors.Info
-        Start-Process $browserUrl
-    }
+    # Öffne immer localhost im Browser (auch im Netzwerk-Modus)
+    $browserUrl = "http://localhost:5000"
+    Write-Host "Öffne: $browserUrl" -ForegroundColor $Colors.Info
+    Start-Process $browserUrl
     
     # Starte dotnet
     if ($IsNetworkMode) {
