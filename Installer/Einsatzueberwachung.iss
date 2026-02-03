@@ -1,6 +1,7 @@
 [Setup]
 AppName=Einsatzüberwachung
-AppVersion=3.2
+AppVersion=3.5.1
+AppId={{B8C1B81C-2C7F-4D58-9B4F-83A6F3E1C2C5}
 AppPublisher=Rettungshunde-Einsatz-Koordination
 AppPublisherURL=https://github.com/Elemirus1996/Einsatzueberwachung.Web
 DefaultDirName={userpf}\Einsatzueberwachung
@@ -12,6 +13,8 @@ ArchitecturesInstallIn64BitMode=x64
 PrivilegesRequired=lowest
 WizardStyle=modern
 DisableProgramGroupPage=yes
+UsePreviousAppDir=yes
+UsePreviousGroup=yes
 
 [Languages]
 Name: "german"; MessagesFile: "compiler:Languages\German.isl"
@@ -37,6 +40,9 @@ Name: "{autodesktop}\Einsatzüberwachung"; Filename: "{app}\Einsatzueberwachung-
 Filename: "{app}\Einsatzueberwachung-Starter.bat"; Description: "Einsatzüberwachung jetzt starten"; Flags: postinstall nowait skipifsilent
 
 [Code]
+const
+  AppIdValue = '{B8C1B81C-2C7F-4D58-9B4F-83A6F3E1C2C5}';
+
 function IsDotNetInstalled: Boolean;
 var
   ResultCode: Integer;
@@ -44,9 +50,49 @@ begin
   Result := Exec('dotnet', '--version', '', SW_HIDE, ewWaitUntilTerminated, ResultCode) and (ResultCode = 0);
 end;
 
+function GetUninstallString: string;
+var
+  Key: string;
+begin
+  Key := 'Software\Microsoft\Windows\CurrentVersion\Uninstall\' + AppIdValue + '_is1';
+
+  if RegQueryStringValue(HKCU, Key, 'UninstallString', Result) then
+    exit;
+
+  if RegQueryStringValue(HKLM, Key, 'UninstallString', Result) then
+    exit;
+
+  Result := '';
+end;
+
+function UninstallExisting: Boolean;
+var
+  UninstallCmd: string;
+  ResultCode: Integer;
+begin
+  Result := True;
+  UninstallCmd := GetUninstallString;
+
+  if UninstallCmd <> '' then
+  begin
+    MsgBox('Eine ältere Version wurde gefunden und wird nun deinstalliert.', mbInformation, MB_OK);
+    if not Exec(RemoveQuotes(UninstallCmd), '/VERYSILENT /SUPPRESSMSGBOXES /NORESTART', '', SW_HIDE, ewWaitUntilTerminated, ResultCode) then
+    begin
+      MsgBox('Die ältere Version konnte nicht automatisch deinstalliert werden. Bitte manuell deinstallieren und erneut starten.', mbError, MB_OK);
+      Result := False;
+    end;
+  end;
+end;
+
 function InitializeSetup(): Boolean;
 begin
   Result := True;
+
+  if not UninstallExisting then
+  begin
+    Result := False;
+    exit;
+  end;
   
   if not IsDotNetInstalled then
   begin
