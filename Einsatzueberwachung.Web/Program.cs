@@ -40,19 +40,19 @@ builder.Services.Configure<GzipCompressionProviderOptions>(options =>
 // Response Caching
 builder.Services.AddResponseCaching();
 
-// Cookie-Policy fü¿½r HTTPS
+// Cookie-Policy für HTTPS
 builder.Services.Configure<CookiePolicyOptions>(options =>
 {
     options.MinimumSameSitePolicy = SameSiteMode.Strict;
     options.Secure = CookieSecurePolicy.Always;
 });
 
-// API Controllers fü¿½r Mobile Support
+// API Controllers für Mobile Support
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// HttpClient fü¿½r interne API-Calls
+// HttpClient für interne API-Calls
 builder.Services.AddHttpClient();
 
 // SignalR fä¼r Echtzeit-Updates mit optimierter Konfiguration
@@ -66,7 +66,7 @@ builder.Services.AddSignalR(options =>
     options.StreamBufferCapacity = 10;
 });
 
-// CORS fü¿½r mobile Clients (lokales Netzwerk)
+// CORS für mobile Clients (lokales Netzwerk)
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("MobilePolicy", policy =>
@@ -99,7 +99,7 @@ builder.Services.AddCors(options =>
     });
 });
 
-// JWT Authentication fü¿½r zukü¿½nftigen externen Zugriff
+// JWT Authentication für zukünftigen externen Zugriff
 var jwtKey = builder.Configuration["Jwt:Key"] ?? "EinsatzueberwachungSecretKey2024!";
 var jwtIssuer = builder.Configuration["Jwt:Issuer"] ?? "Einsatzueberwachung";
 var jwtAudience = builder.Configuration["Jwt:Audience"] ?? "EinsatzueberwachungMobile";

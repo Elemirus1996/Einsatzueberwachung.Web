@@ -1,5 +1,52 @@
 # 📋 CHANGELOG
 
+## Version 3.11.0 - "Tastenkürzel, Sound & Multi-Monitor" (März 2026)
+
+### 🎯 Hauptverbesserungen
+
+#### **Globale Tastenkürzel** 🆕
+- ⌨️ **Schnelle Navigation**
+  - `Ctrl+H` - Zur Startseite
+  - `Ctrl+M` - Zur Kartenansicht
+  - `Ctrl+E` - Zum Einsatzmonitor
+  - `Ctrl+D` - Dark/Light Mode umschalten
+  - `F2` oder `Ctrl+T` - Neues Team hinzufügen
+  - `Ctrl+/` oder `?` - Tastenkürzel-Übersicht anzeigen
+
+#### **Konfigurierbare Sound-Warnungen** 🔊
+- 🔔 **Team-Timer-Warnungen**
+  - Aktivierbar in den Einstellungen
+  - Verschiedene Warntöne: Beep, Bell, Alarm
+  - Lautstärke-Regler (0-100%)
+  - Konfigurierbare Frequenz (Minuten vor Ablauf)
+  - Wiederholende Warn-Option
+- 🧪 **Test-Buttons** für jeden Sound direkt in Einstellungen
+
+#### **Multi-Monitor Support** 🖥️
+- 📺 **Popout-Fenster für zweiten Monitor**
+  - Teams-Ansicht als separates Fenster
+  - Notizen/Funkmeldungen als separates Fenster
+  - Theme-Synchronisation zwischen Fenstern
+  - Automatisches Schließen beim Schließen des Hauptfensters
+
+### 🛠️ Technische Details
+- 🗂️ **Neue Dateien**
+  - `keyboard-shortcuts.js` - Globales Tastenkürzel-System
+  - `multi-monitor.js` - Fenster-Management für Multi-Monitor
+  - `PopoutTeams.razor` - Standalone Teams-Ansicht
+  - `PopoutNotes.razor` - Standalone Notizen-Ansicht
+
+- 🔧 **Erweiterte Dateien**
+  - `audio-alerts.js` - Umfangreich erweitert für Sound-Warnungen
+  - `SessionData.cs` - 8 neue Properties für Sound-Konfiguration
+  - `Einstellungen.razor` - Sound-Konfiguration UI
+
+- 🔤 **Encoding-Fix**
+  - UTF-8 Umlaute in allen aktiven Projektdateien korrigiert
+  - Betroffene Dateien: Services, Razor-Komponenten, Models
+
+---
+
 ## Version 3.10.0 - "PDF Export & Theme Fix" (März 2026)
 
 ### 🎯 Hauptverbesserungen

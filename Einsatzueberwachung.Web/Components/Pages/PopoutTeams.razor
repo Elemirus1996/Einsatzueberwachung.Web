@@ -1,0 +1,252 @@
+@page "/popout/teams"
+@using Einsatzueberwachung.Domain.Services
+@using Einsatzueberwachung.Domain.Interfaces
+@using Einsatzueberwachung.Domain.Models
+@inject IEinsatzService EinsatzService
+@inject IJSRuntime JSRuntime
+@rendermode InteractiveServer
+@implements IDisposable
+
+<PageTitle>Teams - Popout</PageTitle>
+
+<div class="popout-container">
+    <div class="popout-header">
+        <h2><i class="bi bi-people-fill"></i> Teams (@_teams.Count)</h2>
+        <span class="badge bg-primary">@EinsatzService.CurrentEinsatz.EinsatzTyp</span>
+        <span class="badge bg-info">@EinsatzService.CurrentEinsatz.Einsatzort</span>
+    </div>
+
+    <div class="teams-popout-grid">
+        @foreach (var team in _teams)
+        {
+            <div class="team-card-popout @GetTeamStatusClass(team)">
+                <div class="team-header-popout">
+                    <h4>@team.TeamName</h4>
+                    <span class="team-type-badge">
+                        @if (team.IsDroneTeam)
+                        {
+                            <i class="bi bi-airplane"></i>
+                        }
+                        else if (team.IsSupportTeam)
+                        {
+                            <i class="bi bi-tools"></i>
+                        }
+                        else
+                        {
+                            <i class="bi bi-emoji-sunglasses-fill"></i>
+                        }
+                    </span>
+                </div>
+
+                @if (!team.IsDroneTeam && !team.IsSupportTeam)
+                {
+                    <div class="team-timer-popout @GetTimerClass(team)">
+                        @FormatTimeSpan(team.ElapsedTime)
+                    </div>
+
+                    @if (team.IsSecondWarning)
+                    {
+                        <div class="warning-badge-popout danger">
+                            <i class="bi bi-exclamation-triangle-fill"></i> KRITISCH
+                        </div>
+                    }
+                    else if (team.IsFirstWarning)
+                    {
+                        <div class="warning-badge-popout warning">
+                            <i class="bi bi-exclamation-circle-fill"></i> Warnung
+                        </div>
+                    }
+                }
+
+                <div class="team-details-popout">
+                    @if (!string.IsNullOrEmpty(team.DogName))
+                    {
+                        <div><i class="bi bi-award-fill"></i> @team.DogName</div>
+                    }
+                    @if (!string.IsNullOrEmpty(team.HundefuehrerName))
+                    {
+                        <div><i class="bi bi-person-fill"></i> @team.HundefuehrerName</div>
+                    }
+                    @if (!string.IsNullOrEmpty(team.SearchAreaName))
+                    {
+                        <div><i class="bi bi-geo-alt-fill"></i> @team.SearchAreaName</div>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<style>
+    .popout-container {
+        padding: 20px;
+        min-height: 100vh;
+        background: var(--bs-body-bg);
+        color: var(--bs-body-color);
+    }
+
+    .popout-header {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid var(--bs-border-color);
+    }
+
+    .popout-header h2 {
+        margin: 0;
+        flex-grow: 1;
+    }
+
+    .teams-popout-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 15px;
+    }
+
+    .team-card-popout {
+        background: var(--bs-tertiary-bg);
+        border-radius: 12px;
+        padding: 15px;
+        border-left: 5px solid var(--bs-primary);
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .team-card-popout:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    .team-card-popout.team-warning {
+        border-left-color: var(--bs-warning);
+        background: rgba(255, 193, 7, 0.1);
+    }
+
+    .team-card-popout.team-critical {
+        border-left-color: var(--bs-danger);
+        background: rgba(220, 53, 69, 0.1);
+        animation: pulse 1s ease-in-out infinite;
+    }
+
+    .team-header-popout {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+    }
+
+    .team-header-popout h4 {
+        margin: 0;
+        font-size: 1.1rem;
+    }
+
+    .team-timer-popout {
+        font-size: 2rem;
+        font-weight: bold;
+        font-family: 'Consolas', monospace;
+        text-align: center;
+        padding: 10px;
+        background: var(--bs-secondary-bg);
+        border-radius: 8px;
+        margin: 10px 0;
+    }
+
+    .team-timer-popout.timer-warning {
+        color: var(--bs-warning);
+    }
+
+    .team-timer-popout.timer-critical {
+        color: var(--bs-danger);
+    }
+
+    .warning-badge-popout {
+        text-align: center;
+        padding: 8px;
+        border-radius: 6px;
+        font-weight: bold;
+        margin-bottom: 10px;
+    }
+
+    .warning-badge-popout.warning {
+        background: var(--bs-warning);
+        color: #000;
+    }
+
+    .warning-badge-popout.danger {
+        background: var(--bs-danger);
+        color: #fff;
+    }
+
+    .team-details-popout {
+        font-size: 0.9rem;
+        opacity: 0.9;
+    }
+
+    .team-details-popout div {
+        margin: 5px 0;
+    }
+
+    .team-details-popout i {
+        margin-right: 8px;
+        opacity: 0.7;
+    }
+
+    @@keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.8; }
+    }
+</style>
+
+@code {
+    private List<Team> _teams = new();
+    private System.Threading.Timer? _refreshTimer;
+
+    protected override void OnInitialized()
+    {
+        _teams = EinsatzService.Teams;
+
+        EinsatzService.TeamAdded += OnTeamChanged;
+        EinsatzService.TeamRemoved += OnTeamChanged;
+        EinsatzService.TeamUpdated += OnTeamChanged;
+
+        _refreshTimer = new System.Threading.Timer(_ => 
+            InvokeAsync(StateHasChanged), null, 1000, 1000);
+    }
+
+    private void OnTeamChanged(Team? team = null)
+    {
+        InvokeAsync(() =>
+        {
+            _teams = EinsatzService.Teams;
+            StateHasChanged();
+        });
+    }
+
+    private string GetTeamStatusClass(Team team)
+    {
+        if (team.IsSecondWarning) return "team-critical";
+        if (team.IsFirstWarning) return "team-warning";
+        return "";
+    }
+
+    private string GetTimerClass(Team team)
+    {
+        if (team.IsSecondWarning) return "timer-critical";
+        if (team.IsFirstWarning) return "timer-warning";
+        return "";
+    }
+
+    private string FormatTimeSpan(TimeSpan time)
+    {
+        return time.ToString(@"hh\:mm\:ss");
+    }
+
+    public void Dispose()
+    {
+        EinsatzService.TeamAdded -= OnTeamChanged;
+        EinsatzService.TeamRemoved -= OnTeamChanged;
+        EinsatzService.TeamUpdated -= OnTeamChanged;
+        _refreshTimer?.Dispose();
+    }
+}

@@ -1,5 +1,5 @@
 ﻿// PDF-Export-Service mit QuestPDF
-// Erstellt professionelle PDF-Berichte fü¿½r Einsü¿½tze
+// Erstellt professionelle PDF-Berichte für Einsätze
 
 using System;
 using System.Collections.Generic;
@@ -19,7 +19,7 @@ namespace Einsatzueberwachung.Domain.Services
     {
         public PdfExportService()
         {
-            // QuestPDF Lizenz-Konfiguration (Community License fü¿½r nicht-kommerzielle Nutzung)
+            // QuestPDF Lizenz-Konfiguration (Community License für nicht-kommerzielle Nutzung)
             QuestPDF.Settings.License = LicenseType.Community;
         }
 
@@ -153,7 +153,7 @@ namespace Einsatzueberwachung.Domain.Services
                     AddTableRow(table, "Einsatzort:", einsatzData.Einsatzort);
                     AddTableRow(table, "Alarmiert durch:", einsatzData.Alarmiert);
                     AddTableRow(table, "Einsatzleiter:", einsatzData.Einsatzleiter);
-                    AddTableRow(table, "Fü¿½hrungsassistent:", einsatzData.Fuehrungsassistent);
+                    AddTableRow(table, "Führungsassistent:", einsatzData.Fuehrungsassistent);
                 });
             });
         }
@@ -302,7 +302,7 @@ namespace Einsatzueberwachung.Domain.Services
         {
             container.Column(column =>
             {
-                column.Item().Text($"Funksprü¿½che & Notizen ({notes.Count})")
+                column.Item().Text($"Funksprüche & Notizen ({notes.Count})")
                     .FontSize(16)
                     .Bold()
                     .FontColor(Colors.Blue.Darken1);

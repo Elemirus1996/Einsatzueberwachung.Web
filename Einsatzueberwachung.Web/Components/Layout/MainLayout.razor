@@ -5,6 +5,7 @@
 @inject ThemeService ThemeService
 @inject IJSRuntime JS
 @inject ILogger<MainLayout> Logger
+@inject NavigationManager Navigation
 @implements IDisposable
 
 <a href="#main-content" class="skip-link">Zum Hauptinhalt springen</a>
@@ -35,6 +36,8 @@
 </div>
 
 @code {
+    private DotNetObjectReference<MainLayout>? _dotNetRef;
+
     protected override async Task OnInitializedAsync()
     {
         // Initialisiere Theme Service
@@ -50,6 +53,39 @@
         {
             // Beim ersten Render das gespeicherte Theme anwenden
             await JS.InvokeVoidAsync("forceApplyTheme");
+            
+            // Keyboard Shortcuts initialisieren
+            _dotNetRef = DotNetObjectReference.Create(this);
+            await JS.InvokeVoidAsync("KeyboardShortcuts.initialize", _dotNetRef);
+        }
+    }
+
+    [JSInvokable]
+    public async Task HandleShortcut(string action)
+    {
+        Logger.LogDebug("Keyboard shortcut: {Action}", action);
+        
+        switch (action)
+        {
+            case "navigateHome":
+                Navigation.NavigateTo("/");
+                break;
+            case "navigateMap":
+                Navigation.NavigateTo("/einsatz/karte");
+                break;
+            case "navigateReport":
+                Navigation.NavigateTo("/einsatz/bericht");
+                break;
+            case "navigateMonitor":
+                Navigation.NavigateTo("/einsatz/monitor");
+                break;
+            case "navigateStammdaten":
+                Navigation.NavigateTo("/stammdaten");
+                break;
+            case "toggleDarkMode":
+                await ThemeService.ToggleThemeAsync();
+                break;
+            // Andere Aktionen werden von den jeweiligen Seiten behandelt
         }
     }
 
@@ -66,5 +102,6 @@
     public void Dispose()
     {
         ThemeService.OnThemeChanged -= OnThemeChangedHandler;
+        _dotNetRef?.Dispose();
     }
 }

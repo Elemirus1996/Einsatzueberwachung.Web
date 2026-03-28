@@ -56,7 +56,14 @@
         <div class="col-lg-8">
             <div class="card mb-4">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    <h4>Teams (@_teams.Count)</h4>
+                    <div class="d-flex align-items-center gap-2">
+                        <h4 class="mb-0">Teams (@_teams.Count)</h4>
+                        <button class="btn btn-sm btn-outline-secondary popout-btn" 
+                                @onclick="PopoutTeams" 
+                                title="In neuem Fenster öffnen (Multi-Monitor)">
+                            <i class="bi bi-box-arrow-up-right"></i>
+                        </button>
+                    </div>
                     <button class="btn btn-success" @onclick="ShowAddTeamDialog">
                         + Team hinzufügen
                     </button>
@@ -155,8 +162,15 @@
 
         <div class="col-lg-4">
             <div class="card mb-4">
-                <div class="card-header">
-                    <h4><i class="bi bi-chat-left-text-fill"></i> Notizen & Funksprüche</h4>
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <div class="d-flex align-items-center gap-2">
+                        <h4 class="mb-0"><i class="bi bi-chat-left-text-fill"></i> Notizen & Funksprüche</h4>
+                        <button class="btn btn-sm btn-outline-secondary popout-btn" 
+                                @onclick="PopoutNotes" 
+                                title="In neuem Fenster öffnen (Multi-Monitor)">
+                            <i class="bi bi-box-arrow-up-right"></i>
+                        </button>
+                    </div>
                 </div>
                 <div class="card-body">
                     <!-- Neue Notiz mit Team-Auswahl -->
@@ -654,6 +668,42 @@ OnTeamTypeChanged="UpdateTeamName" />
     private void GoToReport()
     {
         Navigation.NavigateTo("/einsatz/bericht");
+    }
+
+    private async Task PopoutTeams()
+    {
+        try
+        {
+            await JSRuntime.InvokeVoidAsync("MultiMonitor.openInNewWindow", "teams", "/popout/teams");
+        }
+        catch (Exception ex)
+        {
+            ToastService.ShowError($"Fehler: {ex.Message}");
+        }
+    }
+
+    private async Task PopoutNotes()
+    {
+        try
+        {
+            await JSRuntime.InvokeVoidAsync("MultiMonitor.openInNewWindow", "notes", "/popout/notes");
+        }
+        catch (Exception ex)
+        {
+            ToastService.ShowError($"Fehler: {ex.Message}");
+        }
+    }
+
+    private async Task PopoutMap()
+    {
+        try
+        {
+            await JSRuntime.InvokeVoidAsync("MultiMonitor.openInNewWindow", "map", "/einsatz/karte");
+        }
+        catch (Exception ex)
+        {
+            ToastService.ShowError($"Fehler: {ex.Message}");
+        }
     }
 
     private void ShowEndEinsatzDialog()

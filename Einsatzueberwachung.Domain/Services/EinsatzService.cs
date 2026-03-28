@@ -1,4 +1,4 @@
-﻿// Implementierung des Einsatz-Service fü¿½r laufenden Einsatz
+﻿// Implementierung des Einsatz-Service für laufenden Einsatz
 // Quelle: Abgeleitet von WPF ViewModels/MainViewModel.cs
 
 using System;
@@ -241,7 +241,7 @@ namespace Einsatzueberwachung.Domain.Services
 
         private void Team_TimerReset(Team team)
         {
-            _ = AddGlobalNoteAsync($"Timer zurü¿½ckgesetzt", GlobalNotesEntryType.TeamReset, team.TeamId);
+            _ = AddGlobalNoteAsync($"Timer zurückgesetzt", GlobalNotesEntryType.TeamReset, team.TeamId);
         }
 
         private void Team_WarningTriggered(Team team, bool isSecondWarning)
@@ -249,7 +249,7 @@ namespace Einsatzueberwachung.Domain.Services
             var warningType = isSecondWarning ? "Zweite" : "Erste";
             _ = AddGlobalNoteAsync($"{warningType} Warnung erreicht!", GlobalNotesEntryType.TeamWarning, team.TeamId);
             
-            // Event fü¿½r UI (damit Blazor die akustische Warnung abspielen kann)
+            // Event für UI (damit Blazor die akustische Warnung abspielen kann)
             TeamWarningTriggered?.Invoke(team, isSecondWarning);
         }
         
@@ -302,8 +302,8 @@ namespace Einsatzueberwachung.Domain.Services
                 ChangedBy = updatedBy
             };
             
-            // Historie wü¿½rde hier in eine separate Liste/DB gespeichert werden
-            // Fü¿½r In-Memory kü¿½nnen wir sie auch in SessionData aufnehmen
+            // Historie würde hier in eine separate Liste/DB gespeichert werden
+            // Für In-Memory können wir sie auch in SessionData aufnehmen
 
             note.Text = newText;
             note.UpdatedAt = DateTime.Now;
@@ -323,7 +323,7 @@ namespace Einsatzueberwachung.Domain.Services
         public Task<List<GlobalNotesHistory>> GetNoteHistoryAsync(string noteId)
         {
             // TODO: Implementiere Speicherung und Abruf der Historie
-            // Momentan In-Memory, kü¿½nnte erweitert werden
+            // Momentan In-Memory, könnte erweitert werden
             return Task.FromResult(new List<GlobalNotesHistory>());
         }
         

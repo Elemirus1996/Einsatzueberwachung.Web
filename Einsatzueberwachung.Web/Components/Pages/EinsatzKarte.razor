@@ -362,7 +362,7 @@
         _searchAreas = EinsatzService.CurrentEinsatz.SearchAreas.ToList();
         _teams = EinsatzService.Teams;
         
-        // DotNetObjectReference fü¿½r Callbacks erstellen
+        // DotNetObjectReference für Callbacks erstellen
         _dotNetReference = DotNetObjectReference.Create(this);
         
         // Wenn Einsatzort-Adresse vorhanden, versuche zu geocoden
@@ -371,7 +371,7 @@
             _addressSearch = EinsatzService.CurrentEinsatz.MapAddress;
         }
         
-        // Prü¿½fe ob ELW-Position vorhanden
+        // Prüfe ob ELW-Position vorhanden
         _hasElwPosition = EinsatzService.CurrentEinsatz.ElwPosition.HasValue;
         if (_hasElwPosition && EinsatzService.CurrentEinsatz.ElwPosition.HasValue)
         {
@@ -641,34 +641,34 @@
     private async Task ShowHelp()
     {
         await JSRuntime.InvokeVoidAsync("alert", 
-            @"?? Karten-Funktionen:
+            @"🗺️ Karten-Funktionen:
 
-??? KARTENANSICHTEN:
-ü¿½ Straßenkarte: Klassische Straßenkarte mit Details
-ü¿½ Satellit: Satellitenbild der Gegend
-ü¿½ Hybrid: Kombination aus Satellitenbild und Straßennamen
+🖼️ KARTENANSICHTEN:
+• Straßenkarte: Klassische Straßenkarte mit Details
+• Satellit: Satellitenbild der Gegend
+• Hybrid: Kombination aus Satellitenbild und Straßennamen
 
-?? SUCHGEBIETE EINZEICHNEN:
-ü¿½ Verwenden Sie die Zeichenwerkzeuge am linken Rand der Karte
-ü¿½ Polygon: Zeichnen Sie beliebige Formen (Klicken für jeden Punkt, Doppelklick zum Beenden)
-ü¿½ Rechteck: Ziehen Sie ein Rechteck auf
-ü¿½ Marker: Setzen Sie einzelne Marker
+📍 SUCHGEBIETE EINZEICHNEN:
+• Verwenden Sie die Zeichenwerkzeuge am linken Rand der Karte
+• Polygon: Zeichnen Sie beliebige Formen (Klicken für jeden Punkt, Doppelklick zum Beenden)
+• Rechteck: Ziehen Sie ein Rechteck auf
+• Marker: Setzen Sie einzelne Marker
 
-?? ELW-POSITION:
-ü¿½ Zoomen/Verschieben Sie die Karte zur gewünschten Position
-ü¿½ Klicken Sie auf 'ELW-Position setzen'
-ü¿½ Der rote ELW-Marker wird in der Kartenmitte platziert
-ü¿½ Sie können den ELW-Marker mit der Maus verschieben
+🚩 ELW-POSITION:
+• Zoomen/Verschieben Sie die Karte zur gewünschten Position
+• Klicken Sie auf 'ELW-Position setzen'
+• Der rote ELW-Marker wird in der Kartenmitte platziert
+• Sie können den ELW-Marker mit der Maus verschieben
 
-??? KARTE DRUCKEN:
-ü¿½ Klicken Sie auf 'Karte drucken'
-ü¿½ Wählen Sie 'Als PDF speichern', um eine PDF-Datei zu erstellen
-ü¿½ Die Legende mit allen Suchgebieten wird automatisch eingefügt
+🖨️ KARTE DRUCKEN:
+• Klicken Sie auf 'Karte drucken'
+• Wählen Sie 'Als PDF speichern', um eine PDF-Datei zu erstellen
+• Die Legende mit allen Suchgebieten wird automatisch eingefügt
 
-?? TIPPS:
-ü¿½ Alle Änderungen werden automatisch gespeichert
-ü¿½ Suchgebiete können Teams zugewiesen werden
-ü¿½ Die Fläche wird automatisch berechnet");
+💡 TIPPS:
+• Alle Änderungen werden automatisch gespeichert
+• Suchgebiete können Teams zugewiesen werden
+• Die Fläche wird automatisch berechnet");
     }
 
     private string GetRandomColor()
@@ -680,18 +680,18 @@
     
     private string GetTotalArea()
     {
-        if (!_searchAreas.Any()) return "0 mü¿½";
+        if (!_searchAreas.Any()) return "0 m²";
         
         var totalSquareMeters = _searchAreas.Sum(a => a.AreaInSquareMeters);
         
         if (totalSquareMeters < 1)
-            return "< 1 mü¿½";
+            return "< 1 m²";
         else if (totalSquareMeters < 50000)
-            return $"{totalSquareMeters:N0} mü¿½";
+            return $"{totalSquareMeters:N0} m²";
         else if (totalSquareMeters < 1000000)
             return $"{(totalSquareMeters / 10000.0):N2} ha";
         else
-            return $"{(totalSquareMeters / 1000000.0):N2} kmü¿½";
+            return $"{(totalSquareMeters / 1000000.0):N2} km²";
     }
     
     private void ExtractCoordinatesFromGeoJson(SearchArea area)
@@ -732,7 +732,7 @@
         Console.WriteLine($"Shape created: {geoJson}");
         _lastDrawnGeoJson = geoJson;
         
-        // Dialog automatisch ü¿½ffnen
+        // Dialog automatisch öffnen
         await InvokeAsync(() =>
         {
             ShowAddAreaDialog();
@@ -769,7 +769,7 @@
     {
         Console.WriteLine($"Shape deleted: {geoJson}");
         
-        // Lü¿½sche das entsprechende Suchgebiet
+        // Lösche das entsprechende Suchgebiet
         // TODO: Implementiere Mapping zwischen Layer und SearchArea
         await Task.CompletedTask;
     }
@@ -787,7 +787,7 @@
         }
     }
     
-    // Helper-Klasse fü¿½r Geocoding-Result
+    // Helper-Klasse für Geocoding-Result
     private class GeocodeResult
     {
         public bool Success { get; set; }
@@ -797,7 +797,7 @@
         public string Message { get; set; } = "";
     }
     
-    // Helper-Klasse fü¿½r Map-Center
+    // Helper-Klasse für Map-Center
     private class MapCenter
     {
         public double Lat { get; set; }

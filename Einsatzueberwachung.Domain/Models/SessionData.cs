@@ -1,5 +1,5 @@
 ﻿// Quelle: WPF-Projekt Models/SessionData.cs
-// Session-/Stammdaten fü¿½r die Anwendung (Personal, Hunde, Einstellungen)
+// Session-/Stammdaten für die Anwendung (Personal, Hunde, Einstellungen)
 
 using System.Collections.Generic;
 
@@ -52,6 +52,16 @@ namespace Einsatzueberwachung.Domain.Models
         public int DefaultSecondWarningMinutes { get; set; }
         public string UpdateUrl { get; set; }
         public bool AutoCheckUpdates { get; set; }
+        
+        // Sound-Einstellungen
+        public bool SoundAlertsEnabled { get; set; }
+        public int SoundVolume { get; set; } // 0-100
+        public string FirstWarningSound { get; set; } // "beep", "bell", "alarm", "custom"
+        public string SecondWarningSound { get; set; }
+        public int FirstWarningFrequency { get; set; } // Hz für Beep-Töne
+        public int SecondWarningFrequency { get; set; }
+        public bool RepeatSecondWarning { get; set; } // Wiederhole kritische Warnung
+        public int RepeatWarningIntervalSeconds { get; set; }
 
         public AppSettings()
         {
@@ -64,6 +74,16 @@ namespace Einsatzueberwachung.Domain.Models
             DefaultSecondWarningMinutes = 60;
             UpdateUrl = string.Empty;
             AutoCheckUpdates = true;
+            
+            // Sound-Defaults
+            SoundAlertsEnabled = true;
+            SoundVolume = 70;
+            FirstWarningSound = "beep";
+            SecondWarningSound = "alarm";
+            FirstWarningFrequency = 800;
+            SecondWarningFrequency = 1200;
+            RepeatSecondWarning = true;
+            RepeatWarningIntervalSeconds = 30;
         }
     }
 }

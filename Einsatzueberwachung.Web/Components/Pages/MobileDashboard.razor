@@ -17,7 +17,7 @@
                 }
                 else
                 {
-                    <span class="badge bg-warning">ü¿½BUNG</span>
+                    <span class="badge bg-warning">ÜBUNG</span>
                 }
                 @EinsatzService.CurrentEinsatz.Einsatzort
             </p>
@@ -220,7 +220,7 @@
         EinsatzService.TeamUpdated += OnDataChanged;
         EinsatzService.NoteAdded += OnDataChanged;
 
-        // Timer fü¿½r UI-Refresh (1 Sekunde)
+        // Timer für UI-Refresh (1 Sekunde)
         _refreshTimer = new System.Threading.Timer(_ => InvokeAsync(StateHasChanged), null, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(1));
         
         return Task.CompletedTask;

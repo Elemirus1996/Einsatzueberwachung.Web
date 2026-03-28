@@ -32,7 +32,7 @@
 
                         <div class="form-group mb-3">
                             <label class="form-label">Adresse</label>
-                            <InputTextArea @bind-Value="_staffelSettings.StaffelAdresse" class="form-control" rows="3" placeholder="Straü¿½e, PLZ Ort" />
+                            <InputTextArea @bind-Value="_staffelSettings.StaffelAdresse" class="form-control" rows="3" placeholder="Straße, PLZ Ort" />
                         </div>
 
                         <div class="form-group mb-3">
@@ -48,7 +48,7 @@
                         <div class="form-group mb-3">
                             <label class="form-label">Logo-Pfad</label>
                             <InputText @bind-Value="_staffelSettings.StaffelLogoPfad" class="form-control form-control-lg" placeholder="Pfad zum Logo" />
-                            <small class="text-muted">Pfad zu einer Bilddatei fü¿½r den PDF-Export</small>
+                            <small class="text-muted">Pfad zu einer Bilddatei für den PDF-Export</small>
                         </div>
 
                         <button type="submit" class="btn btn-success btn-lg w-100">
@@ -145,6 +145,84 @@
 
                         <hr/>
 
+                        <h5 class="mb-3"><i class="bi bi-volume-up-fill"></i> Sound-Warnungen</h5>
+
+                        <div class="form-check form-switch mb-3">
+                            <InputCheckbox @bind-Value="_appSettings.SoundAlertsEnabled" class="form-check-input" id="soundEnabled" />
+                            <label class="form-check-label" for="soundEnabled">
+                                <i class="bi bi-bell-fill"></i> Akustische Warnungen aktiviert
+                            </label>
+                        </div>
+
+                        @if (_appSettings.SoundAlertsEnabled)
+                        {
+                            <div class="form-group mb-3">
+                                <label class="form-label">Lautstärke: @_appSettings.SoundVolume%</label>
+                                <input type="range" class="form-range" min="0" max="100" step="5"
+                                       value="@_appSettings.SoundVolume"
+                                       @onchange="OnVolumeChanged" />
+                            </div>
+
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Erste Warnung - Sound</label>
+                                    <select class="form-select" @bind="_appSettings.FirstWarningSound">
+                                        <option value="beep">🔔 Beep (Standard)</option>
+                                        <option value="bell">🔔 Glocke</option>
+                                        <option value="alarm">🚨 Alarm</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Frequenz (Hz)</label>
+                                    <InputNumber @bind-Value="_appSettings.FirstWarningFrequency" class="form-control" min="200" max="2000" />
+                                    <small class="text-muted">Standard: 800 Hz</small>
+                                </div>
+                            </div>
+
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Kritische Warnung - Sound</label>
+                                    <select class="form-select" @bind="_appSettings.SecondWarningSound">
+                                        <option value="beep">🔔 Beep</option>
+                                        <option value="bell">🔔 Glocke</option>
+                                        <option value="alarm">🚨 Alarm (Standard)</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Frequenz (Hz)</label>
+                                    <InputNumber @bind-Value="_appSettings.SecondWarningFrequency" class="form-control" min="200" max="2000" />
+                                    <small class="text-muted">Standard: 1200 Hz</small>
+                                </div>
+                            </div>
+
+                            <div class="form-check form-switch mb-3">
+                                <InputCheckbox @bind-Value="_appSettings.RepeatSecondWarning" class="form-check-input" id="repeatWarning" />
+                                <label class="form-check-label" for="repeatWarning">
+                                    Kritische Warnung wiederholen
+                                </label>
+                            </div>
+
+                            @if (_appSettings.RepeatSecondWarning)
+                            {
+                                <div class="form-group mb-3">
+                                    <label class="form-label">Wiederholungs-Intervall (Sekunden)</label>
+                                    <InputNumber @bind-Value="_appSettings.RepeatWarningIntervalSeconds" class="form-control" min="10" max="120" />
+                                    <small class="text-muted">Standard: 30 Sekunden</small>
+                                </div>
+                            }
+
+                            <div class="d-flex gap-2 mb-3">
+                                <button type="button" class="btn btn-outline-primary" @onclick="TestFirstWarning">
+                                    <i class="bi bi-play-fill"></i> Erste Warnung testen
+                                </button>
+                                <button type="button" class="btn btn-outline-danger" @onclick="TestSecondWarning">
+                                    <i class="bi bi-play-fill"></i> Kritische Warnung testen
+                                </button>
+                            </div>
+                        }
+
+                        <hr/>
+
                         <h5 class="mb-3"><i class="bi bi-arrow-repeat"></i> Updates</h5>
 
                         <div class="form-group mb-3">
@@ -218,6 +296,20 @@
             await MasterDataService.SaveSessionDataAsync(sessionData);
             
             await ApplyTheme();
+            
+            // Aktualisiere Audio-Einstellungen
+            await JS.InvokeVoidAsync("AudioAlerts.updateSettings", new
+            {
+                soundAlertsEnabled = _appSettings.SoundAlertsEnabled,
+                soundVolume = _appSettings.SoundVolume,
+                firstWarningSound = _appSettings.FirstWarningSound,
+                secondWarningSound = _appSettings.SecondWarningSound,
+                firstWarningFrequency = _appSettings.FirstWarningFrequency,
+                secondWarningFrequency = _appSettings.SecondWarningFrequency,
+                repeatSecondWarning = _appSettings.RepeatSecondWarning,
+                repeatWarningIntervalSeconds = _appSettings.RepeatWarningIntervalSeconds
+            });
+            
             ToastService.ShowSuccess("App-Einstellungen wurden gespeichert");
         }
         catch (Exception ex)
@@ -302,5 +394,60 @@
             return result;
 
         return TimeSpan.Zero;
+    }
+
+    private void OnVolumeChanged(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out var volume))
+        {
+            _appSettings.SoundVolume = volume;
+        }
+    }
+
+    private async Task TestFirstWarning()
+    {
+        try
+        {
+            // Aktualisiere Audio-Einstellungen
+            await JS.InvokeVoidAsync("AudioAlerts.updateSettings", new
+            {
+                soundAlertsEnabled = _appSettings.SoundAlertsEnabled,
+                soundVolume = _appSettings.SoundVolume,
+                firstWarningSound = _appSettings.FirstWarningSound,
+                firstWarningFrequency = _appSettings.FirstWarningFrequency
+            });
+            
+            // Spiele erste Warnung ab
+            await JS.InvokeVoidAsync("AudioAlerts.playFirstWarning");
+            ToastService.ShowInfo("Erste Warnung abgespielt");
+        }
+        catch (Exception ex)
+        {
+            ToastService.ShowError($"Fehler: {ex.Message}");
+        }
+    }
+
+    private async Task TestSecondWarning()
+    {
+        try
+        {
+            // Aktualisiere Audio-Einstellungen
+            await JS.InvokeVoidAsync("AudioAlerts.updateSettings", new
+            {
+                soundAlertsEnabled = _appSettings.SoundAlertsEnabled,
+                soundVolume = _appSettings.SoundVolume,
+                secondWarningSound = _appSettings.SecondWarningSound,
+                secondWarningFrequency = _appSettings.SecondWarningFrequency,
+                repeatSecondWarning = false // Beim Test nicht wiederholen
+            });
+            
+            // Spiele kritische Warnung ab
+            await JS.InvokeVoidAsync("AudioAlerts.playSecondWarning");
+            ToastService.ShowWarning("Kritische Warnung abgespielt");
+        }
+        catch (Exception ex)
+        {
+            ToastService.ShowError($"Fehler: {ex.Message}");
+        }
     }
 }

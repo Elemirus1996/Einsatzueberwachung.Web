@@ -1,5 +1,5 @@
-﻿// Einsatzü¿½berwachung - Globaler Theme Service
-// Stellt sicher, dass Theme ü¿½ber alle Seiten/Komponenten synchron ist
+﻿// Einsatzüberwachung - Globaler Theme Service
+// Stellt sicher, dass Theme über alle Seiten/Komponenten synchron ist
 
 using Einsatzueberwachung.Domain.Interfaces;using Microsoft.Extensions.Logging;
 namespace Einsatzueberwachung.Domain.Services

@@ -1,0 +1,245 @@
+@page "/popout/notes"
+@using Einsatzueberwachung.Domain.Services
+@using Einsatzueberwachung.Domain.Interfaces
+@using Einsatzueberwachung.Domain.Models
+@using Einsatzueberwachung.Domain.Models.Enums
+@inject IEinsatzService EinsatzService
+@inject IJSRuntime JSRuntime
+@rendermode InteractiveServer
+@implements IDisposable
+
+<PageTitle>Funksprüche - Popout</PageTitle>
+
+<div class="popout-container">
+    <div class="popout-header">
+        <h2><i class="bi bi-chat-left-text-fill"></i> Funksprüche & Notizen</h2>
+        <span class="badge bg-primary">@_notes.Count Einträge</span>
+    </div>
+
+    <!-- Filter-Buttons -->
+    <div class="filter-bar mb-3">
+        <div class="btn-group" role="group">
+            <button type="button" class="btn @(_filter == "" ? "btn-primary" : "btn-outline-primary")" @onclick='() => SetFilter("")'>
+                Alle
+            </button>
+            <button type="button" class="btn @(_filter == "warning" ? "btn-warning" : "btn-outline-warning")" @onclick='() => SetFilter("warning")'>
+                <i class="bi bi-exclamation-triangle-fill"></i> Warnungen
+            </button>
+            <button type="button" class="btn @(_filter == "team" ? "btn-success" : "btn-outline-success")" @onclick='() => SetFilter("team")'>
+                <i class="bi bi-people-fill"></i> Teams
+            </button>
+        </div>
+    </div>
+
+    <div class="notes-popout-list">
+        @foreach (var note in GetFilteredNotes())
+        {
+            <div class="note-card-popout @GetNoteTypeClass(note.Type)">
+                <div class="note-header-popout">
+                    <span class="note-time">
+                        <i class="bi bi-clock-fill"></i>
+                        @note.Timestamp.ToString("HH:mm:ss")
+                    </span>
+                    @if (!string.IsNullOrEmpty(note.SourceTeamName))
+                    {
+                        <span class="note-team badge bg-info">
+                            <i class="bi bi-people-fill"></i> @note.SourceTeamName
+                        </span>
+                    }
+                    <span class="note-type badge @GetTypeStyle(note.Type)">
+                        @GetTypeName(note.Type)
+                    </span>
+                </div>
+                <div class="note-content-popout">
+                    @note.Text
+                </div>
+                @if (note.Replies?.Any() == true)
+                {
+                    <div class="note-replies-popout">
+                        <span class="badge bg-secondary">
+                            <i class="bi bi-chat-dots-fill"></i> @note.Replies.Count Antworten
+                        </span>
+                    </div>
+                }
+            </div>
+        }
+
+        @if (!_notes.Any())
+        {
+            <div class="empty-state">
+                <i class="bi bi-chat-left-text" style="font-size: 3rem; opacity: 0.5;"></i>
+                <p>Noch keine Funksprüche vorhanden</p>
+            </div>
+        }
+    </div>
+</div>
+
+<style>
+    .popout-container {
+        padding: 20px;
+        min-height: 100vh;
+        background: var(--bs-body-bg);
+        color: var(--bs-body-color);
+    }
+
+    .popout-header {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid var(--bs-border-color);
+    }
+
+    .popout-header h2 {
+        margin: 0;
+        flex-grow: 1;
+    }
+
+    .filter-bar {
+        display: flex;
+        gap: 10px;
+    }
+
+    .notes-popout-list {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        max-height: calc(100vh - 150px);
+        overflow-y: auto;
+    }
+
+    .note-card-popout {
+        background: var(--bs-tertiary-bg);
+        border-radius: 10px;
+        padding: 15px;
+        border-left: 4px solid var(--bs-primary);
+        transition: transform 0.1s;
+    }
+
+    .note-card-popout:hover {
+        transform: translateX(3px);
+    }
+
+    .note-card-popout.note-warning {
+        border-left-color: var(--bs-warning);
+        background: rgba(255, 193, 7, 0.1);
+    }
+
+    .note-card-popout.note-critical {
+        border-left-color: var(--bs-danger);
+        background: rgba(220, 53, 69, 0.1);
+    }
+
+    .note-card-popout.note-system {
+        border-left-color: var(--bs-info);
+        opacity: 0.9;
+    }
+
+    .note-header-popout {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 10px;
+        flex-wrap: wrap;
+    }
+
+    .note-time {
+        font-family: 'Consolas', monospace;
+        font-weight: bold;
+        opacity: 0.8;
+    }
+
+    .note-content-popout {
+        font-size: 1rem;
+        line-height: 1.5;
+    }
+
+    .note-replies-popout {
+        margin-top: 10px;
+        padding-top: 10px;
+        border-top: 1px solid var(--bs-border-color);
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 50px;
+        opacity: 0.7;
+    }
+</style>
+
+@code {
+    private List<GlobalNotesEntry> _notes = new();
+    private string _filter = "";
+
+    protected override void OnInitialized()
+    {
+        _notes = EinsatzService.GlobalNotes.OrderByDescending(n => n.Timestamp).ToList();
+        EinsatzService.NoteAdded += OnNoteAdded;
+    }
+
+    private void OnNoteAdded(GlobalNotesEntry note)
+    {
+        InvokeAsync(() =>
+        {
+            _notes = EinsatzService.GlobalNotes.OrderByDescending(n => n.Timestamp).ToList();
+            StateHasChanged();
+        });
+    }
+
+    private void SetFilter(string filter)
+    {
+        _filter = filter;
+    }
+
+    private IEnumerable<GlobalNotesEntry> GetFilteredNotes()
+    {
+        return _filter switch
+        {
+            "warning" => _notes.Where(n => n.Type == GlobalNotesEntryType.TeamWarning),
+            "team" => _notes.Where(n => !string.IsNullOrEmpty(n.SourceTeamId)),
+            _ => _notes
+        };
+    }
+
+    private string GetNoteTypeClass(GlobalNotesEntryType type)
+    {
+        return type switch
+        {
+            GlobalNotesEntryType.TeamWarning => "note-critical",
+            GlobalNotesEntryType.EinsatzUpdate => "note-system",
+            _ => ""
+        };
+    }
+
+    private string GetTypeStyle(GlobalNotesEntryType type)
+    {
+        return type switch
+        {
+            GlobalNotesEntryType.TeamWarning => "bg-danger",
+            GlobalNotesEntryType.EinsatzUpdate => "bg-info",
+            GlobalNotesEntryType.TeamStart => "bg-success",
+            GlobalNotesEntryType.TeamStop => "bg-warning",
+            _ => "bg-secondary"
+        };
+    }
+
+    private string GetTypeName(GlobalNotesEntryType type)
+    {
+        return type switch
+        {
+            GlobalNotesEntryType.Manual => "Manuell",
+            GlobalNotesEntryType.TeamWarning => "Warnung",
+            GlobalNotesEntryType.TeamStart => "Start",
+            GlobalNotesEntryType.TeamStop => "Stop",
+            GlobalNotesEntryType.TeamReset => "Reset",
+            GlobalNotesEntryType.EinsatzUpdate => "System",
+            _ => type.ToString()
+        };
+    }
+
+    public void Dispose()
+    {
+        EinsatzService.NoteAdded -= OnNoteAdded;
+    }
+}
