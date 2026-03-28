@@ -1,5 +1,15 @@
 # 📋 CHANGELOG
 
+## Version 3.12.0 - "Verbesserter Kartendruck" (März 2026)
+
+### 🖨️ Druckverbesserungen
+- **Seite 1:** Karte im Querformat (A4 Landscape)
+- **Seite 2:** Suchgebiete-Liste als Tabelle
+- Uhrzeit und Navigation werden beim Drucken ausgeblendet
+- Optimierte Kopfzeilen für beide Seiten
+
+---
+
 ## Version 3.11.0 - "Tastenkürzel, Sound & Multi-Monitor" (März 2026)
 
 ### 🎯 Hauptverbesserungen

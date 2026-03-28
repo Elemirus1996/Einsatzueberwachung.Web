@@ -90,98 +90,108 @@
     <!-- Karte -->
     <div class="card mb-4 map-page">
         <div class="card-body p-0">
-            <!-- Druck-Kopfzeile (nur beim Drucken sichtbar) -->
-            <div class="print-header">
-                <h2>@EinsatzService.CurrentEinsatz.EinsatzNummer - @EinsatzService.CurrentEinsatz.Einsatzort</h2>
-                <p>@EinsatzService.CurrentEinsatz.EinsatzDatum.ToString("dd.MM.yyyy HH:mm") Uhr</p>
-                <p><strong>Einsatzleiter:</strong> @EinsatzService.CurrentEinsatz.Einsatzleiter</p>
+            <!-- Kompakte Druck-Kopfzeile für Karte (nur beim Drucken sichtbar) -->
+            <div class="print-map-header">
+                <h3>@EinsatzService.CurrentEinsatz.EinsatzNummer - @EinsatzService.CurrentEinsatz.Einsatzort</h3>
+                <small>@EinsatzService.CurrentEinsatz.EinsatzDatum.ToString("dd.MM.yyyy HH:mm") Uhr | Einsatzleiter: @EinsatzService.CurrentEinsatz.Einsatzleiter</small>
             </div>
             
             <div id="einsatzMap" style="height: 600px; width: 100%;"></div>
         </div>
     </div>
     
-    <!-- Legende auf separater Seite (nur beim Drucken) -->
-    <div class="print-legend-page">
-        <div class="print-legend">
-            <h4>?? Legende - Suchgebiete</h4>
-            
-            @if (_hasElwPosition)
-            {
-                <div class="legend-section">
-                    <div class="legend-item elw-item">
-                        <span class="legend-marker elw-marker">??</span>
-                        <div class="legend-details">
-                            <strong>ELW</strong> - Einsatzleitwagen
-                            @if (EinsatzService.CurrentEinsatz.ElwPosition.HasValue)
-                            {
-                                var elw = EinsatzService.CurrentEinsatz.ElwPosition.Value;
-                                <br/><small>Position: @elw.Latitude.ToString("F5"), @elw.Longitude.ToString("F5")</small>
-                            }
-                        </div>
-                    </div>
-                </div>
-            }
-            
-            @if (_searchAreas.Any())
-            {
-                <div class="legend-section">
-                    <h5>Suchgebiete (@_searchAreas.Count)</h5>
-                    @foreach (var area in _searchAreas.OrderBy(a => a.AssignedTeamName ?? "zzz"))
+    <!-- Seite 2: Druckbare Suchgebiete-Liste (nur beim Drucken sichtbar) -->
+    <div class="print-list-page">
+        <div class="print-list-header">
+            <h2><i class="bi bi-geo-alt-fill"></i> Suchgebiete - @EinsatzService.CurrentEinsatz.EinsatzNummer</h2>
+            <p>@EinsatzService.CurrentEinsatz.Einsatzort | @EinsatzService.CurrentEinsatz.EinsatzDatum.ToString("dd.MM.yyyy HH:mm") Uhr</p>
+            <p><strong>Einsatzleiter:</strong> @EinsatzService.CurrentEinsatz.Einsatzleiter</p>
+        </div>
+        
+        @if (_hasElwPosition && EinsatzService.CurrentEinsatz.ElwPosition.HasValue)
+        {
+            var elw = EinsatzService.CurrentEinsatz.ElwPosition.Value;
+            <div class="elw-info">
+                <strong><i class="bi bi-geo-fill"></i> ELW-Position:</strong>
+                @elw.Latitude.ToString("F5")°, @elw.Longitude.ToString("F5")°
+            </div>
+        }
+        
+        @if (_searchAreas.Any())
+        {
+            <table class="search-areas-table">
+                <thead>
+                    <tr>
+                        <th style="width: 5%;">Nr.</th>
+                        <th style="width: 20%;">Name</th>
+                        <th style="width: 20%;">Zugewiesenes Team</th>
+                        <th style="width: 15%;">Status</th>
+                        <th style="width: 15%;">Fläche</th>
+                        <th style="width: 25%;">Notizen</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @{ var index = 1; }
+                    @foreach (var area in _searchAreas.OrderBy(a => a.Name))
                     {
-                        <div class="legend-item">
-                            <span class="legend-color" style="background-color: @area.Color;"></span>
-                            <div class="legend-details">
+                        <tr>
+                            <td>@index</td>
+                            <td>
+                                <span class="color-box" style="background-color: @area.Color;"></span>
                                 <strong>@area.Name</strong>
-                                
+                            </td>
+                            <td>
                                 @if (!string.IsNullOrEmpty(area.AssignedTeamName))
                                 {
-                                    <br/>
-                                    <span class="team-badge">?? @area.AssignedTeamName</span>
-                                }
-                                
-                                @if (area.AreaInSquareMeters > 0)
-                                {
-                                    <span class="area-badge">?? @area.FormattedArea</span>
-                                }
-                                
-                                @if (area.IsCompleted)
-                                {
-                                    <span class="status-badge completed">? Abgeschlossen</span>
+                                    <span class="team-name">@area.AssignedTeamName</span>
                                 }
                                 else
                                 {
-                                    <span class="status-badge in-progress">? In Bearbeitung</span>
+                                    <span style="color: #666; font-style: italic;">Nicht zugewiesen</span>
                                 }
-                                
-                                @if (!string.IsNullOrEmpty(area.Notes))
+                            </td>
+                            <td>
+                                @if (area.IsCompleted)
                                 {
-                                    <br/>
-                                    <small class="notes">?? @area.Notes</small>
+                                    <span class="status-completed">&#10003; Abgeschlossen</span>
                                 }
-                            </div>
-                        </div>
+                                else
+                                {
+                                    <span class="status-in-progress">&#9679; In Bearbeitung</span>
+                                }
+                            </td>
+                            <td>@area.FormattedArea</td>
+                            <td>@(string.IsNullOrEmpty(area.Notes) ? "-" : area.Notes)</td>
+                        </tr>
+                        index++;
                     }
+                </tbody>
+            </table>
+            
+            <div class="statistics-box">
+                <h4><i class="bi bi-bar-chart-fill"></i> Statistik</h4>
+                <div class="stat-row">
+                    <span>Gebiete gesamt:</span>
+                    <span class="stat-value">@_searchAreas.Count</span>
                 </div>
-                
-                <!-- Statistik -->
-                <div class="legend-statistics">
-                    <strong>?? Statistik:</strong>
-                    <ul>
-                        <li>Gebiete gesamt: <strong>@_searchAreas.Count</strong></li>
-                        <li>Abgeschlossen: <strong>@_searchAreas.Count(a => a.IsCompleted)</strong></li>
-                        <li>In Bearbeitung: <strong>@_searchAreas.Count(a => !a.IsCompleted)</strong></li>
-                        <li>Gesamtfläche: <strong>@GetTotalArea()</strong></li>
-                    </ul>
+                <div class="stat-row">
+                    <span>Abgeschlossen:</span>
+                    <span class="stat-value">@_searchAreas.Count(a => a.IsCompleted)</span>
                 </div>
-            }
-            else
-            {
-                <div class="legend-section">
-                    <p style="margin: 10px 0; font-style: italic; color: #666;">Keine Suchgebiete definiert</p>
+                <div class="stat-row">
+                    <span>In Bearbeitung:</span>
+                    <span class="stat-value">@_searchAreas.Count(a => !a.IsCompleted)</span>
                 </div>
-            }
-        </div>
+                <div class="stat-row">
+                    <span>Gesamtfläche:</span>
+                    <span class="stat-value">@GetTotalArea()</span>
+                </div>
+            </div>
+        }
+        else
+        {
+            <p style="text-align: center; font-style: italic; color: #666; padding: 30px;">Keine Suchgebiete definiert</p>
+        }
     </div>
 
     <!-- Suchgebiete Liste -->
@@ -609,18 +619,17 @@
     {
         try
         {
-            // Kurzer Info-Dialog
-            var result = await JSRuntime.InvokeAsync<bool>("confirm", 
-                "Karte drucken?\n\nTipp: Im Druckdialog können Sie 'Als PDF speichern' wählen, um die Karte als PDF-Datei zu exportieren.");
-            
-            if (result)
-            {
-                await JSRuntime.InvokeVoidAsync("LeafletMap.printMap", "einsatzMap");
-            }
+            // Direkt drucken ohne Bestätigungsdialog (für schnellere Bedienung)
+            await JSRuntime.InvokeVoidAsync("LeafletMap.printMap", "einsatzMap");
+        }
+        catch (TaskCanceledException)
+        {
+            // Ignore - kann passieren wenn der Nutzer den Druckdialog schließt
         }
         catch (Exception ex)
         {
             _searchMessage = $"Fehler beim Drucken: {ex.Message}";
+            Console.WriteLine($"Druck-Fehler: {ex.Message}");
         }
     }
     

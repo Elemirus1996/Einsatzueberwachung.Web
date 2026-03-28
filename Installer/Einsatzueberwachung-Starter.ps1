@@ -11,7 +11,7 @@ param(
 $ErrorActionPreference = "Stop"
 
 # Aktuelle Version und GitHub-Repository
-$script:CurrentVersion = "3.11.0"
+$script:CurrentVersion = "3.12.0"
 $script:GitHubRepo = "Elemirus1996/Einsatzueberwachung.Web"
 
 # Farben
