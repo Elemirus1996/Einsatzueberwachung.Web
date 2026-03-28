@@ -4,82 +4,102 @@
 @inject IJSRuntime JS
 @implements IDisposable
 
-<div class="top-row ps-3 navbar navbar-dark">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="" aria-label="Zur Startseite">
-            <i class="bi bi-alarm-fill text-danger" aria-hidden="true"></i> Einsatzüberwachung
-        </a>
+<div class="nav-wrapper">
+    <div class="top-row ps-3 navbar navbar-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="" aria-label="Zur Startseite">
+                <i class="bi bi-alarm-fill text-danger" aria-hidden="true"></i> 
+                <span class="brand-text">Einsatzüberwachung</span>
+            </a>
+            <button type="button" class="btn-sidebar-toggle" 
+                    onclick="(function(){ var p = document.querySelector('.page'); if(p){ p.classList.toggle('sidebar-collapsed'); localStorage.setItem('sidebarCollapsed', p.classList.contains('sidebar-collapsed')); } })();" 
+                    title="Menü ein-/ausklappen">
+                <i class="bi bi-chevron-left toggle-icon" aria-hidden="true"></i>
+            </button>
+        </div>
     </div>
-</div>
 
-<input type="checkbox" title="Navigation menu" class="navbar-toggler" />
+    <div class="nav-scrollable">
+        <nav class="flex-column" aria-label="Hauptnavigation">
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="" Match="NavLinkMatch.All" aria-label="Zur Startseite">
+                    <span class="nav-icon"><i class="bi bi-house-fill" aria-hidden="true"></i></span> 
+                    <span class="nav-text">Home</span>
+                </NavLink>
+            </div>
 
-<div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
-    <nav class="flex-column" aria-label="Hauptnavigation">
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="" Match="NavLinkMatch.All" aria-label="Zur Startseite">
-                <span class="nav-icon"><i class="bi bi-house-fill" aria-hidden="true"></i></span> Home
-            </NavLink>
-        </div>
+            <div class="nav-section-header" role="heading" aria-level="2">
+                <span class="nav-text">Einsatz</span>
+            </div>
 
-        <div class="nav-section-header" role="heading" aria-level="2">Einsatz</div>
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="einsatz/start" aria-label="Neuen Einsatz starten">
+                    <span class="nav-icon"><i class="bi bi-alarm-fill" aria-hidden="true"></i></span> 
+                    <span class="nav-text">Neuer Einsatz</span>
+                </NavLink>
+            </div>
 
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="einsatz/start" aria-label="Neuen Einsatz starten">
-                <span class="nav-icon"><i class="bi bi-alarm-fill" aria-hidden="true"></i></span> Neuer Einsatz
-            </NavLink>
-        </div>
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="einsatz/monitor" aria-label="Einsatz überwachen">
+                    <span class="nav-icon"><i class="bi bi-bar-chart-fill" aria-hidden="true"></i></span> 
+                    <span class="nav-text">Monitor</span>
+                </NavLink>
+            </div>
 
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="einsatz/monitor" aria-label="Einsatz überwachen">
-                <span class="nav-icon"><i class="bi bi-bar-chart-fill" aria-hidden="true"></i></span> Monitor
-            </NavLink>
-        </div>
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="einsatz/karte" aria-label="Einsatzkarte anzeigen">
+                    <span class="nav-icon"><i class="bi bi-map-fill" aria-hidden="true"></i></span> 
+                    <span class="nav-text">Karte</span>
+                </NavLink>
+            </div>
 
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="einsatz/karte" aria-label="Einsatzkarte anzeigen">
-                <span class="nav-icon"><i class="bi bi-map-fill" aria-hidden="true"></i></span> Karte
-            </NavLink>
-        </div>
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="einsatz/bericht" aria-label="Einsatzbericht erstellen">
+                    <span class="nav-icon"><i class="bi bi-file-text-fill" aria-hidden="true"></i></span> 
+                    <span class="nav-text">Bericht</span>
+                </NavLink>
+            </div>
 
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="einsatz/bericht" aria-label="Einsatzbericht erstellen">
-                <span class="nav-icon"><i class="bi bi-file-text-fill" aria-hidden="true"></i></span> Bericht
-            </NavLink>
-        </div>
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="mobile/connect" aria-label="Mobile App verbinden">
+                    <span class="nav-icon"><i class="bi bi-qr-code" aria-hidden="true"></i></span> 
+                    <span class="nav-text">Mobile QR-Code</span>
+                </NavLink>
+            </div>
 
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="mobile/connect" aria-label="Mobile App verbinden">
-                <span class="nav-icon"><i class="bi bi-qr-code" aria-hidden="true"></i></span> Mobile QR-Code
-            </NavLink>
-        </div>
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="archiv" aria-label="Einsatz-Archiv anzeigen">
+                    <span class="nav-icon"><i class="bi bi-archive-fill" aria-hidden="true"></i></span> 
+                    <span class="nav-text">Archiv</span>
+                </NavLink>
+            </div>
 
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="archiv" aria-label="Einsatz-Archiv anzeigen">
-                <span class="nav-icon"><i class="bi bi-archive-fill" aria-hidden="true"></i></span> Archiv
-            </NavLink>
-        </div>
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="wetter" aria-label="Wetter und Flugwetter anzeigen">
+                    <span class="nav-icon"><i class="bi bi-cloud-sun-fill" aria-hidden="true"></i></span> 
+                    <span class="nav-text">Wetter</span>
+                </NavLink>
+            </div>
 
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="wetter" aria-label="Wetter und Flugwetter anzeigen">
-                <span class="nav-icon"><i class="bi bi-cloud-sun-fill" aria-hidden="true"></i></span> Wetter
-            </NavLink>
-        </div>
+            <div class="nav-section-header" role="heading" aria-level="2">
+                <span class="nav-text">Verwaltung</span>
+            </div>
 
-        <div class="nav-section-header" role="heading" aria-level="2">Verwaltung</div>
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="stammdaten" aria-label="Stammdaten verwalten">
+                    <span class="nav-icon"><i class="bi bi-clipboard-data" aria-hidden="true"></i></span> 
+                    <span class="nav-text">Stammdaten</span>
+                </NavLink>
+            </div>
 
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="stammdaten" aria-label="Stammdaten verwalten">
-                <span class="nav-icon"><i class="bi bi-clipboard-data" aria-hidden="true"></i></span> Stammdaten
-            </NavLink>
-        </div>
-
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="einstellungen" aria-label="Einstellungen öffnen">
-                <span class="nav-icon"><i class="bi bi-gear-fill" aria-hidden="true"></i></span> Einstellungen
-            </NavLink>
-        </div>
-    </nav>
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="einstellungen" aria-label="Einstellungen öffnen">
+                    <span class="nav-icon"><i class="bi bi-gear-fill" aria-hidden="true"></i></span> 
+                    <span class="nav-text">Einstellungen</span>
+                </NavLink>
+            </div>
+        </nav>
+    </div>
 </div>
 
 @code {
@@ -102,6 +122,19 @@
         catch (Exception ex)
         {
             Console.WriteLine($"Fehler bei Theme-Initialisierung: {ex.Message}");
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        try
+        {
+            // Wende Sidebar-Status bei jedem Render an (wichtig für Navigation)
+            await JS.InvokeVoidAsync("applySidebarState");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Fehler beim Laden des Sidebar-Status: {ex.Message}");
         }
     }
 

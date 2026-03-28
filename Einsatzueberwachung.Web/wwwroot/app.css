@@ -43,6 +43,7 @@ html, body {
     overflow-y: auto;
     z-index: 100;
     display: block !important;
+    transition: width 0.3s ease;
 }
 
 /* Sidebar Text (Light Theme) */
@@ -76,8 +77,134 @@ main {
     display: flex;
     flex-direction: column;
     overflow: auto;
-    margin-left: 250px !important;
-    width: calc(100% - 250px) !important;
+    margin-left: 250px;
+    width: calc(100% - 250px);
+    transition: margin-left 0.3s ease, width 0.3s ease;
+}
+
+/* ========================================
+   SIDEBAR COLLAPSED STATE
+   ======================================== */
+
+.page.sidebar-collapsed .sidebar {
+    width: 60px !important;
+}
+
+.page.sidebar-collapsed main {
+    margin-left: 60px !important;
+    width: calc(100% - 60px) !important;
+}
+
+/* Nav wrapper in sidebar */
+.sidebar .nav-wrapper {
+    width: 100%;
+    transition: width 0.3s ease;
+}
+
+.page.sidebar-collapsed .nav-wrapper {
+    width: 60px;
+}
+
+/* Brand text - hide when collapsed */
+.page.sidebar-collapsed .brand-text {
+    opacity: 0;
+    width: 0;
+    display: none;
+}
+
+/* Nav text - hide when collapsed */
+.page.sidebar-collapsed .nav-text {
+    opacity: 0;
+    width: 0;
+    overflow: hidden;
+    display: none;
+}
+
+/* Section headers - hide when collapsed */
+.page.sidebar-collapsed .nav-section-header {
+    opacity: 0;
+    height: 0;
+    padding: 0 !important;
+    overflow: hidden;
+}
+
+/* Nav items - center icons when collapsed */
+.page.sidebar-collapsed .nav-item {
+    padding-left: 0.5rem !important;
+    padding-right: 0.5rem !important;
+}
+
+.page.sidebar-collapsed .nav-item .nav-link {
+    justify-content: center;
+    padding: 0.5rem;
+}
+
+.page.sidebar-collapsed .nav-icon {
+    margin-right: 0;
+}
+
+.page.sidebar-collapsed .nav-icon i {
+    font-size: 1.2rem;
+}
+
+/* Top row adjustments for collapsed */
+.page.sidebar-collapsed .top-row.navbar {
+    padding-left: 0.5rem !important;
+    padding-right: 0.5rem !important;
+}
+
+.page.sidebar-collapsed .top-row .container-fluid {
+    justify-content: center;
+    padding: 0;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.page.sidebar-collapsed .navbar-brand {
+    justify-content: center;
+    margin: 0;
+    font-size: 0;
+}
+
+.page.sidebar-collapsed .navbar-brand i {
+    font-size: 1.3rem;
+    margin: 0;
+}
+
+/* Toggle Icon rotates when collapsed */
+.page.sidebar-collapsed .toggle-icon {
+    transform: rotate(180deg);
+}
+
+.toggle-icon {
+    transition: transform 0.3s ease;
+}
+
+/* Toggle Button Styles */
+.btn-sidebar-toggle {
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: white;
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+    margin-left: auto;
+}
+
+.btn-sidebar-toggle:hover {
+    background: rgba(255, 255, 255, 0.25);
+    transform: scale(1.05);
+}
+
+.btn-sidebar-toggle i {
+    font-size: 0.9rem;
+    color: white !important;
 }
 
 /* Mobile: Sidebar oben */
@@ -91,6 +218,33 @@ main {
     main {
         margin-left: 0 !important;
         width: 100% !important;
+    }
+    
+    /* Disable collapsed state on mobile */
+    .page.sidebar-collapsed .sidebar {
+        width: 100%;
+    }
+    
+    .page.sidebar-collapsed main {
+        margin-left: 0;
+        width: 100%;
+    }
+    
+    .page.sidebar-collapsed .brand-text,
+    .page.sidebar-collapsed .nav-text {
+        opacity: 1;
+        width: auto;
+        display: inline;
+    }
+    
+    .page.sidebar-collapsed .nav-section-header {
+        opacity: 1;
+        height: auto;
+        padding: 0.75rem 1rem !important;
+    }
+    
+    .btn-sidebar-toggle {
+        display: none;
     }
 }
 

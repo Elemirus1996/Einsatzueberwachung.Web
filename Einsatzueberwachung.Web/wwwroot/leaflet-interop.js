@@ -396,6 +396,59 @@ initialize: function(mapId, centerLat, centerLng, zoom, dotNetReference) {
         }
     },
     
+    // Passt Kartenausschnitt an ALLE Elemente an (Marker + Suchgebiete)
+    fitAllElements: function(mapId, padding) {
+        try {
+            const mapData = this.maps[mapId];
+            if (!mapData) return false;
+            
+            const allLayers = [];
+            const pad = padding || 0.15; // Standard 15% Padding
+            
+            // Alle Marker sammeln
+            if (mapData.markers) {
+                Object.values(mapData.markers).forEach(marker => {
+                    if (marker) allLayers.push(marker);
+                });
+            }
+            
+            // Alle gezeichneten Elemente (Suchgebiete) aus drawnItems
+            if (mapData.drawnItems) {
+                mapData.drawnItems.eachLayer(layer => {
+                    // Nur hinzufügen wenn nicht schon in markers
+                    if (!allLayers.includes(layer)) {
+                        allLayers.push(layer);
+                    }
+                });
+            }
+            
+            console.log('fitAllElements: Gefundene Elemente:', allLayers.length);
+            
+            if (allLayers.length === 0) {
+                console.log('Keine Elemente zum Zentrieren gefunden');
+                return false;
+            }
+            
+            const group = new L.featureGroup(allLayers);
+            const bounds = group.getBounds();
+            
+            if (bounds.isValid()) {
+                // fitBounds mit maxZoom begrenzen damit nicht zu nah rangezoomt wird
+                mapData.map.fitBounds(bounds.pad(pad), {
+                    maxZoom: 16,
+                    animate: false
+                });
+                console.log('Karte auf', allLayers.length, 'Elemente zentriert, Bounds:', bounds.toBBoxString());
+                return true;
+            }
+            
+            return false;
+        } catch (err) {
+            console.error('Fehler beim Anpassen aller Bounds:', err);
+            return false;
+        }
+    },
+    
     // Geocoding: Adresse zu Koordinaten
     geocodeAddress: async function(address) {
         try {
@@ -418,9 +471,9 @@ initialize: function(mapId, centerLat, centerLng, zoom, dotNetReference) {
         }
     },
     
-    // Druckt die Karte
+    // Druckt die Karte - zentriert vorher auf alle Elemente
     printMap: function(mapId) {
-        log('printMap aufgerufen fÃ¼r:', mapId);
+        log('printMap aufgerufen für:', mapId);
         try {
             const mapData = this.maps[mapId];
             if (!mapData) {
@@ -428,12 +481,64 @@ initialize: function(mapId, centerLat, centerLng, zoom, dotNetReference) {
                 return false;
             }
             
-            log('Starte Druck-Dialog');
-            // Trigger Browser-Druck-Dialog
-            window.print();
+            const map = mapData.map;
+            
+            // Speichere aktuelle Ansicht für später
+            const currentCenter = map.getCenter();
+            const currentZoom = map.getZoom();
+            
+            console.log('printMap: Verwende aktuelle Bildschirmansicht - Center:', currentCenter, 'Zoom:', currentZoom);
+
+            // Vor dem Drucken Ansicht explizit auf aktuelle Bildschirmansicht fixieren
+            const beforePrintHandler = () => {
+                console.log('beforeprint: Setze gespeicherte Ansicht im Print-Layout');
+                setTimeout(() => {
+                    map.invalidateSize();
+                    map.setView(currentCenter, currentZoom, { animate: false });
+
+                    // Zweiter Pass nach Layout-Flush für stabile Position
+                    setTimeout(() => {
+                        map.invalidateSize();
+                        map.setView(currentCenter, currentZoom, { animate: false });
+                    }, 180);
+                }, 120);
+            };
+            
+            // afterprint Event zum Wiederherstellen
+            const afterPrintHandler = () => {
+                window.removeEventListener('beforeprint', beforePrintHandler);
+                window.removeEventListener('afterprint', afterPrintHandler);
+                
+                // Ansicht wiederherstellen
+                setTimeout(() => {
+                    map.invalidateSize();
+                    map.setView(currentCenter, currentZoom);
+                    console.log('printMap: Ansicht wiederhergestellt');
+                }, 200);
+            };
+            
+            window.addEventListener('beforeprint', beforePrintHandler);
+            window.addEventListener('afterprint', afterPrintHandler);
+            
+            // Direkt vor Druck auf die aktuelle Ansicht fixieren
+            setTimeout(() => {
+                map.invalidateSize();
+                map.setView(currentCenter, currentZoom, { animate: false });
+                
+                setTimeout(() => {
+                    map.invalidateSize();
+                    
+                    // Jetzt drucken
+                    setTimeout(() => {
+                        log('Starte Druck-Dialog');
+                        window.print();
+                    }, 300);
+                }, 200);
+            }, 450);
+            
             return true;
-        } catch (error) {
-            error('Fehler beim Drucken der Karte:', error);
+        } catch (err) {
+            console.error('Fehler beim Drucken der Karte:', err);
             return false;
         }
     },
