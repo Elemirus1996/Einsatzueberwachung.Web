@@ -85,6 +85,10 @@
                                 <small class="text-muted">Teams</small>
                             </div>
                             <div class="border rounded p-2 text-center" style="min-width: 80px;">
+                                <div class="h4 mb-0">@GetResourceCount(_selectedEinsatz)</div>
+                                <small class="text-muted">Ressourcen (ohne Teams)</small>
+                            </div>
+                            <div class="border rounded p-2 text-center" style="min-width: 80px;">
                                 <div class="h4 mb-0">@_selectedEinsatz.AnzahlPersonal</div>
                                 <small class="text-muted">Personal</small>
                             </div>
@@ -96,6 +100,51 @@
                                 <div class="h4 mb-0">@_selectedEinsatz.AnzahlDrohnen</div>
                                 <small class="text-muted">Drohnen</small>
                             </div>
+                        </div>
+
+                        <div class="mt-3">
+                            <small class="text-muted d-block mb-1">Beteiligte Personen</small>
+                            @if (GetPersonalNames(_selectedEinsatz).Any())
+                            {
+                                @foreach (var person in GetPersonalNames(_selectedEinsatz))
+                                {
+                                    <span class="badge bg-primary me-1 mb-1">@person</span>
+                                }
+                            }
+                            else
+                            {
+                                <span class="text-muted">Keine Angaben</span>
+                            }
+                        </div>
+
+                        <div class="mt-2">
+                            <small class="text-muted d-block mb-1">Eingesetzte Hunde</small>
+                            @if (GetDogNames(_selectedEinsatz).Any())
+                            {
+                                @foreach (var dog in GetDogNames(_selectedEinsatz))
+                                {
+                                    <span class="badge bg-success me-1 mb-1">@dog</span>
+                                }
+                            }
+                            else
+                            {
+                                <span class="text-muted">Keine Angaben</span>
+                            }
+                        </div>
+
+                        <div class="mt-2">
+                            <small class="text-muted d-block mb-1">Eingesetzte Drohnen</small>
+                            @if (GetDroneNames(_selectedEinsatz).Any())
+                            {
+                                @foreach (var drone in GetDroneNames(_selectedEinsatz))
+                                {
+                                    <span class="badge bg-info text-dark me-1 mb-1">@drone</span>
+                                }
+                            }
+                            else
+                            {
+                                <span class="text-muted">Keine Angaben</span>
+                            }
                         </div>
                     </div>
                 </div>
@@ -492,6 +541,62 @@
         if (lower.Contains("gefunden") || lower.Contains("erfolg")) return "alert-success";
         if (lower.Contains("abgebrochen") || lower.Contains("erfolglos")) return "alert-warning";
         return "alert-secondary";
+    }
+
+    private List<string> GetPersonalNames(ArchivedEinsatz einsatz)
+    {
+        if (einsatz.PersonalNamen.Any())
+        {
+            return einsatz.PersonalNamen;
+        }
+
+        return einsatz.Teams
+            .SelectMany(team => team.MemberNames)
+            .Where(name => !string.IsNullOrWhiteSpace(name))
+            .Select(name => name.Trim())
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .OrderBy(name => name)
+            .ToList();
+    }
+
+    private List<string> GetDogNames(ArchivedEinsatz einsatz)
+    {
+        if (einsatz.HundeNamen.Any())
+        {
+            return einsatz.HundeNamen;
+        }
+
+        return einsatz.Teams
+            .Where(team => !string.IsNullOrWhiteSpace(team.DogName))
+            .Select(team => team.DogName.Trim())
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .OrderBy(name => name)
+            .ToList();
+    }
+
+    private List<string> GetDroneNames(ArchivedEinsatz einsatz)
+    {
+        if (einsatz.DrohnenNamen.Any())
+        {
+            return einsatz.DrohnenNamen;
+        }
+
+        return einsatz.Teams
+            .Where(team => !string.IsNullOrWhiteSpace(team.DroneName))
+            .Select(team => team.DroneName.Trim())
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .OrderBy(name => name)
+            .ToList();
+    }
+
+    private int GetResourceCount(ArchivedEinsatz einsatz)
+    {
+        if (einsatz.AnzahlRessourcen > 0)
+        {
+            return einsatz.AnzahlRessourcen;
+        }
+
+        return einsatz.AnzahlPersonal + einsatz.AnzahlHunde + einsatz.AnzahlDrohnen;
     }
 
     public void Dispose()

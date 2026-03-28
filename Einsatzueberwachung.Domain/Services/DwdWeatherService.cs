@@ -16,6 +16,7 @@ namespace Einsatzueberwachung.Domain.Services
         private readonly HttpClient _httpClient;
         private readonly ILogger<DwdWeatherService>? _logger;
         private const string BrightSkyBaseUrl = "https://api.brightsky.dev";
+        private const string NominatimBaseUrl = "https://nominatim.openstreetmap.org/search";
         
         // Cache fuer Wetterdaten (5 Minuten)
         private WeatherData? _cachedWeather;
@@ -44,7 +45,6 @@ namespace Einsatzueberwachung.Domain.Services
             try
             {
                 // BrightSky API fuer aktuelles Wetter
-                var now = DateTime.UtcNow;
                 var url = $"{BrightSkyBaseUrl}/current_weather?lat={latitude.ToString(System.Globalization.CultureInfo.InvariantCulture)}&lon={longitude.ToString(System.Globalization.CultureInfo.InvariantCulture)}";
                 
                 _logger?.LogInformation("Fetching weather from: {Url}", url);
@@ -94,10 +94,62 @@ namespace Einsatzueberwachung.Domain.Services
 
         public async Task<WeatherData?> GetCurrentWeatherByAddressAsync(string address)
         {
-            // Fuer Adress-basierte Abfragen muessten wir einen Geocoding-Service nutzen
-            // Erstmal Fallback auf manuelle Koordinaten-Eingabe
-            // TODO: Nominatim oder Google Geocoding API integrieren
-            return null;
+            if (string.IsNullOrWhiteSpace(address))
+            {
+                _logger?.LogWarning("Address-based weather lookup was called with an empty address.");
+                return null;
+            }
+
+            try
+            {
+                var encodedAddress = Uri.EscapeDataString(address.Trim());
+                var url = $"{NominatimBaseUrl}?q={encodedAddress}&format=jsonv2&limit=1&addressdetails=0";
+
+                using var request = new HttpRequestMessage(HttpMethod.Get, url);
+                request.Headers.UserAgent.ParseAdd("Einsatzueberwachung.Web/1.0 (+https://github.com/Elemirus1996/Einsatzueberwachung.Web)");
+                request.Headers.Accept.ParseAdd("application/json");
+
+                var response = await _httpClient.SendAsync(request);
+                if (!response.IsSuccessStatusCode)
+                {
+                    _logger?.LogWarning("Nominatim geocoding failed with status {StatusCode} for address '{Address}'", response.StatusCode, address);
+                    return null;
+                }
+
+                var json = await response.Content.ReadAsStringAsync();
+                using var doc = JsonDocument.Parse(json);
+
+                if (doc.RootElement.ValueKind != JsonValueKind.Array || doc.RootElement.GetArrayLength() == 0)
+                {
+                    _logger?.LogWarning("No geocoding result found for address '{Address}'", address);
+                    return null;
+                }
+
+                var firstResult = doc.RootElement[0];
+                if (!firstResult.TryGetProperty("lat", out var latElement) || !firstResult.TryGetProperty("lon", out var lonElement))
+                {
+                    _logger?.LogWarning("Geocoding response for '{Address}' does not contain coordinates", address);
+                    return null;
+                }
+
+                var latText = latElement.GetString();
+                var lonText = lonElement.GetString();
+
+                if (!double.TryParse(latText, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out var latitude) ||
+                    !double.TryParse(lonText, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out var longitude))
+                {
+                    _logger?.LogWarning("Could not parse geocoding coordinates for '{Address}'. lat='{Lat}', lon='{Lon}'", address, latText, lonText);
+                    return null;
+                }
+
+                _logger?.LogInformation("Address '{Address}' geocoded to lat={Lat}, lon={Lon}", address, latitude, longitude);
+                return await GetCurrentWeatherAsync(latitude, longitude);
+            }
+            catch (Exception ex)
+            {
+                _logger?.LogError(ex, "Exception while geocoding address '{Address}'", address);
+                return null;
+            }
         }
 
         public async Task<FlugwetterData?> GetFlugwetterAsync(double latitude, double longitude)

@@ -263,18 +263,81 @@
                             </div>
                             <div class="col-md-4">
                                 <small class="text-muted">Personal:</small>
-                                <div class="fw-bold">@_teams.Sum(t => (string.IsNullOrEmpty(t.HundefuehrerName) ? 0 : 1) + (string.IsNullOrEmpty(t.HelferName) ? 0 : 1))</div>
+                                <div class="fw-bold">@GetCurrentPersonalNames().Count</div>
                             </div>
                             <div class="col-md-4">
                                 <small class="text-muted">Hunde:</small>
-                                <div class="fw-bold">@_teams.Count(t => !string.IsNullOrEmpty(t.DogName))</div>
+                                <div class="fw-bold">@GetCurrentDogNames().Count</div>
                             </div>
+                            <div class="col-md-4 mt-2">
+                                <small class="text-muted">Drohnen:</small>
+                                <div class="fw-bold">@GetCurrentDroneNames().Count</div>
+                            </div>
+                            <div class="col-md-4 mt-2">
+                                <small class="text-muted">Ressourcen gesamt (ohne Teams):</small>
+                                <div class="fw-bold">@GetCurrentTotalResources()</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-3 border rounded p-3">
+                        <h6 class="mb-3">Abfrage vor Archivierung</h6>
+                        <div class="mb-2">
+                            <small class="text-muted d-block">Wer war vor Ort?</small>
+                            @if (GetCurrentPersonalNames().Any())
+                            {
+                                @foreach (var person in GetCurrentPersonalNames())
+                                {
+                                    <span class="badge bg-primary me-1 mb-1">@person</span>
+                                }
+                            }
+                            else
+                            {
+                                <span class="text-muted">Keine Personalzuordnung vorhanden.</span>
+                            }
+                        </div>
+
+                        <div class="mb-2">
+                            <small class="text-muted d-block">Welche Hunde waren im Einsatz?</small>
+                            @if (GetCurrentDogNames().Any())
+                            {
+                                @foreach (var dog in GetCurrentDogNames())
+                                {
+                                    <span class="badge bg-success me-1 mb-1">@dog</span>
+                                }
+                            }
+                            else
+                            {
+                                <span class="text-muted">Keine Hunde im Einsatz.</span>
+                            }
+                        </div>
+
+                        <div class="mb-2">
+                            <small class="text-muted d-block">Welche Drohnen waren im Einsatz?</small>
+                            @if (GetCurrentDroneNames().Any())
+                            {
+                                @foreach (var drone in GetCurrentDroneNames())
+                                {
+                                    <span class="badge bg-info text-dark me-1 mb-1">@drone</span>
+                                }
+                            }
+                            else
+                            {
+                                <span class="text-muted">Keine Drohnen im Einsatz.</span>
+                            }
+                        </div>
+
+                        <div class="form-check mt-3">
+                            <input class="form-check-input" type="checkbox" id="confirmResourceSummary" @bind="_confirmResourceSummary" />
+                            <label class="form-check-label" for="confirmResourceSummary">
+                                Ich habe die eingesetzten Ressourcen und Beteiligten geprueft.
+                            </label>
                         </div>
                     </div>
                 </div>
                 <div class="modal-footer">
                     <button class="btn btn-secondary" @onclick="CloseEndEinsatzDialog">Abbrechen</button>
-                    <button class="btn btn-danger" @onclick="EndEinsatzConfirmed" disabled="@string.IsNullOrEmpty(_endErgebnis)">
+                    <button class="btn btn-danger" @onclick="EndEinsatzConfirmed" disabled="@(string.IsNullOrEmpty(_endErgebnis) || !_confirmResourceSummary)">
                         <i class="bi bi-archive me-1"></i>Einsatz beenden & archivieren
                     </button>
                 </div>
@@ -317,6 +380,7 @@ OnTeamTypeChanged="UpdateTeamName" />
     private string _endErgebnis = "";
     private string _endBemerkungen = "";
     private TimeOnly _endZeit = TimeOnly.FromDateTime(DateTime.Now);
+    private bool _confirmResourceSummary = false;
 
     protected override async Task OnInitializedAsync()
     {
@@ -458,6 +522,22 @@ OnTeamTypeChanged="UpdateTeamName" />
             {
                 _currentTeam.DogName = dog.Name;
                 _currentTeam.DogSpecialization = dog.Specializations;
+
+                // Wenn beim Hund ein Hundefuehrer hinterlegt ist, uebernehme ihn automatisch.
+                if (!string.IsNullOrWhiteSpace(dog.HundefuehrerId))
+                {
+                    var assignedHandler = _personalList.FirstOrDefault(p =>
+                        p.Id == dog.HundefuehrerId &&
+                        p.IsActive &&
+                        p.Skills.HasFlag(Einsatzueberwachung.Domain.Models.Enums.PersonalSkills.Hundefuehrer));
+
+                    if (assignedHandler != null)
+                    {
+                        _currentTeam.HundefuehrerId = assignedHandler.Id;
+                        _currentTeam.HundefuehrerName = assignedHandler.FullName;
+                    }
+                }
+
                 UpdateTeamName();
             }
         }
@@ -711,12 +791,49 @@ OnTeamTypeChanged="UpdateTeamName" />
         _endZeit = TimeOnly.FromDateTime(DateTime.Now);
         _endErgebnis = "";
         _endBemerkungen = "";
+        _confirmResourceSummary = false;
         _showEndDialog = true;
     }
 
     private void CloseEndEinsatzDialog()
     {
         _showEndDialog = false;
+    }
+
+    private List<string> GetCurrentPersonalNames()
+    {
+        return _teams
+            .SelectMany(team => new[] { team.HundefuehrerName, team.HelferName })
+            .Where(name => !string.IsNullOrWhiteSpace(name))
+            .Select(name => name.Trim())
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .OrderBy(name => name)
+            .ToList();
+    }
+
+    private List<string> GetCurrentDogNames()
+    {
+        return _teams
+            .Where(team => !string.IsNullOrWhiteSpace(team.DogName))
+            .Select(team => team.DogName.Trim())
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .OrderBy(name => name)
+            .ToList();
+    }
+
+    private List<string> GetCurrentDroneNames()
+    {
+        return _teams
+            .Where(team => team.IsDroneTeam && !string.IsNullOrWhiteSpace(team.DroneType))
+            .Select(team => team.DroneType.Trim())
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .OrderBy(name => name)
+            .ToList();
+    }
+
+    private int GetCurrentTotalResources()
+    {
+        return GetCurrentPersonalNames().Count + GetCurrentDogNames().Count + GetCurrentDroneNames().Count;
     }
 
     private async Task EndEinsatzConfirmed()

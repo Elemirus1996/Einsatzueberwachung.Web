@@ -69,6 +69,23 @@ public class EinsatzServiceTests
     }
 
     [Fact]
+    public async Task AddTeamAsync_ShouldSyncCurrentEinsatzTeams()
+    {
+        // Arrange
+        var team = new Team
+        {
+            TeamId = "T1",
+            TeamName = "Team 1"
+        };
+
+        // Act
+        await _sut.AddTeamAsync(team);
+
+        // Assert
+        _sut.CurrentEinsatz.Teams.Should().ContainSingle(t => t.TeamId == "T1");
+    }
+
+    [Fact]
     public async Task RemoveTeamAsync_ShouldRemoveTeam()
     {
         // Arrange

@@ -1,5 +1,33 @@
 # 📋 CHANGELOG
 
+## Version 4.0.0 - "Archiv, Team-Automation & Wetter-Adresssuche" (März 2026)
+
+### 🎯 Hauptverbesserungen
+
+#### **Archivierteinsatz mit vollständiger Ressourcenübersicht** 🆕
+- ✅ Beim Einsatzabschluss werden Beteiligte und Ressourcen vollständig mit archiviert
+- 👥 Explizite Speicherung von `PersonalNamen`
+- 🐕 Explizite Speicherung von `HundeNamen`
+- 🚁 Explizite Speicherung von `DrohnenNamen`
+- 📊 Neue Kennzahl `AnzahlRessourcen` (Personal + Hunde + Drohnen)
+- 🧾 Verbesserte Detailansicht im Archiv mit Namenlisten statt nur Zählern
+
+#### **Sicherere Abschluss-Abfrage im Einsatzmonitor** 🆕
+- 🛑 Erweiterter Dialog "Einsatz beenden und archivieren"
+- 🔍 Sichtbare Abfrage: Wer war vor Ort, welche Hunde und welche Drohnen waren im Einsatz
+- ☑️ Pflicht-Bestätigung vor Archivierung, damit keine unvollständigen Abschlüsse passieren
+
+#### **Team-Erstellung schneller gemacht** 🆕
+- ⚡ Beim Auswählen eines Hundes wird der hinterlegte Hundeführer automatisch vorausgewählt
+- 🧠 Nur aktive und qualifizierte Hundeführer werden automatisch übernommen
+
+#### **Wetter über Adresse (Geocoding) implementiert** 🆕
+- 🌍 `GetCurrentWeatherByAddressAsync()` nutzt jetzt Nominatim zur Adressauflösung
+- 📍 Ermittelte Koordinaten werden automatisch an die bestehende BrightSky-Wetterabfrage übergeben
+- 🪵 Erweiterte Fehlerbehandlung und Logging für Geocoding-Fehlerfälle
+
+---
+
 ## Version 3.12.0 - "Verbesserter Kartendruck" (März 2026)
 
 ### 🖨️ Druckverbesserungen

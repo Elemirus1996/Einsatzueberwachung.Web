@@ -249,7 +249,7 @@
                     <h4><i class="bi bi-info-circle-fill"></i> System-Information</h4>
                 </div>
                 <div class="card-body">
-                    <p><strong>Version:</strong> 3.0.0</p>
+                    <p><strong>Version:</strong> @_appVersion</p>
                     <p><strong>Framework:</strong> .NET 8 / Blazor Server</p>
                     <p><strong>Plattform:</strong> Web-basiert</p>
                 </div>
@@ -261,9 +261,12 @@
 @code {
     private StaffelSettings _staffelSettings = new();
     private AppSettings _appSettings = new();
+    private string _appVersion = "Unbekannt";
 
     protected override async Task OnInitializedAsync()
     {
+        _appVersion = GetType().Assembly.GetName().Version?.ToString(3) ?? "Unbekannt";
+
         var sessionData = await MasterDataService.LoadSessionDataAsync();
         _staffelSettings = sessionData.StaffelSettings;
         _appSettings = sessionData.AppSettings;

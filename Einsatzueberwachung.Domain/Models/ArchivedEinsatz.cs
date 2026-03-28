@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Einsatzueberwachung.Domain.Models
 {
@@ -42,6 +43,10 @@ namespace Einsatzueberwachung.Domain.Models
         public int AnzahlPersonal { get; set; }
         public int AnzahlHunde { get; set; }
         public int AnzahlDrohnen { get; set; }
+        public int AnzahlRessourcen { get; set; }
+        public List<string> PersonalNamen { get; set; } = new();
+        public List<string> HundeNamen { get; set; } = new();
+        public List<string> DrohnenNamen { get; set; } = new();
         public List<ArchivedTeam> Teams { get; set; } = new();
 
         // === Notizen und Bereiche ===
@@ -88,21 +93,47 @@ namespace Einsatzueberwachung.Domain.Models
                 ElwPosition = data.ElwPosition
             };
 
+            var personalNamen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            var hundeNamen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            var drohnenNamen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
             // Teams archivieren
             if (data.Teams != null)
             {
                 foreach (var team in data.Teams)
                 {
                     archived.Teams.Add(ArchivedTeam.FromTeam(team));
-                    // Zähle Personal
-                    if (!string.IsNullOrEmpty(team.HundefuehrerName)) archived.AnzahlPersonal++;
-                    if (!string.IsNullOrEmpty(team.HelferName)) archived.AnzahlPersonal++;
-                    // Zähle Hunde
-                    if (!string.IsNullOrEmpty(team.DogName)) archived.AnzahlHunde++;
-                    // Zähle Drohnen
-                    if (team.IsDroneTeam) archived.AnzahlDrohnen++;
+
+                    if (!string.IsNullOrWhiteSpace(team.HundefuehrerName))
+                    {
+                        personalNamen.Add(team.HundefuehrerName.Trim());
+                    }
+
+                    if (!string.IsNullOrWhiteSpace(team.HelferName))
+                    {
+                        personalNamen.Add(team.HelferName.Trim());
+                    }
+
+                    if (!string.IsNullOrWhiteSpace(team.DogName))
+                    {
+                        hundeNamen.Add(team.DogName.Trim());
+                    }
+
+                    if (team.IsDroneTeam && !string.IsNullOrWhiteSpace(team.DroneType))
+                    {
+                        drohnenNamen.Add(team.DroneType.Trim());
+                    }
                 }
             }
+
+            archived.PersonalNamen = personalNamen.OrderBy(name => name).ToList();
+            archived.HundeNamen = hundeNamen.OrderBy(name => name).ToList();
+            archived.DrohnenNamen = drohnenNamen.OrderBy(name => name).ToList();
+
+            archived.AnzahlPersonal = archived.PersonalNamen.Count;
+            archived.AnzahlHunde = archived.HundeNamen.Count;
+            archived.AnzahlDrohnen = archived.DrohnenNamen.Count;
+            archived.AnzahlRessourcen = archived.AnzahlPersonal + archived.AnzahlHunde + archived.AnzahlDrohnen;
 
             return archived;
         }

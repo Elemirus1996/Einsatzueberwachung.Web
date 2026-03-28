@@ -33,6 +33,8 @@ namespace Einsatzueberwachung.Domain.Services
             _currentEinsatz = new EinsatzData();
             _teams = new List<Team>();
             _globalNotes = new List<GlobalNotesEntry>();
+
+            EnsureCurrentEinsatzTeamReference();
         }
 
         public Task StartEinsatzAsync(EinsatzData einsatzData)
@@ -40,6 +42,7 @@ namespace Einsatzueberwachung.Domain.Services
             _currentEinsatz = einsatzData;
             _teams.Clear();
             _globalNotes.Clear();
+            EnsureCurrentEinsatzTeamReference();
 
             var startNote = new GlobalNotesEntry
             {
@@ -433,8 +436,15 @@ namespace Einsatzueberwachung.Domain.Services
                 EinsatzDatum = DateTime.Now,
                 IstEinsatz = true
             };
+
+            EnsureCurrentEinsatzTeamReference();
             
             EinsatzChanged?.Invoke();
+        }
+
+        private void EnsureCurrentEinsatzTeamReference()
+        {
+            _currentEinsatz.Teams = _teams;
         }
     }
 }
