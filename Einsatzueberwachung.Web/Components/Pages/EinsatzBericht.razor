@@ -4,6 +4,7 @@
 @using Einsatzueberwachung.Domain.Services
 @inject IEinsatzService EinsatzService
 @inject IPdfExportService PdfExportService
+@inject IJSRuntime JSRuntime
 @inject NavigationManager Navigation
 @inject ToastService ToastService
 @rendermode InteractiveServer
@@ -237,22 +238,16 @@
 
         try
         {
-            await Task.Delay(500); // Simulate export
+            // Exportiere als Byte-Array für direkten Browser-Download
+            var pdfBytes = await PdfExportService.ExportEinsatzToPdfBytesAsync(_einsatz, _teams, _notes);
+            var fileName = $"Einsatzbericht_{_einsatz.EinsatzNummer}_{DateTime.Now:yyyyMMdd_HHmmss}.pdf";
             
-            var result = await PdfExportService.ExportEinsatzToPdfAsync(_einsatz, _teams, _notes);
+            // Trigger Browser-Download
+            await JSRuntime.InvokeVoidAsync("downloadFileFromByteArray", fileName, pdfBytes, "application/pdf");
             
-            if (result.Success)
-            {
-                _exportMessage = $"<i class='bi bi-check-circle-fill'></i> PDF erfolgreich erstellt: {result.FilePath}";
-                _exportSuccess = true;
-                ToastService.ShowSuccess($"PDF wurde erfolgreich exportiert: {result.FilePath}");
-            }
-            else
-            {
-                _exportMessage = $"<i class='bi bi-x-circle-fill'></i> Fehler beim Export: {result.ErrorMessage}";
-                _exportSuccess = false;
-                ToastService.ShowError($"Fehler beim PDF-Export: {result.ErrorMessage}");
-            }
+            _exportMessage = $"<i class='bi bi-check-circle-fill'></i> PDF erfolgreich erstellt und heruntergeladen";
+            _exportSuccess = true;
+            ToastService.ShowSuccess($"PDF wurde erfolgreich exportiert: {fileName}");
         }
         catch (Exception ex)
         {

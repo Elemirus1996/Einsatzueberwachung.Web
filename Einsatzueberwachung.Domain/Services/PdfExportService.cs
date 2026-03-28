@@ -364,5 +364,423 @@ namespace Einsatzueberwachung.Domain.Services
                 _ => Colors.Grey.Darken1
             };
         }
+
+        /// <summary>
+        /// Exportiert einen archivierten Einsatz als PDF (speichert Datei)
+        /// </summary>
+        public async Task<PdfExportResult> ExportArchivedEinsatzToPdfAsync(ArchivedEinsatz archivedEinsatz)
+        {
+            try
+            {
+                var filename = $"Einsatzbericht_{archivedEinsatz.EinsatzNummer}_{archivedEinsatz.EinsatzDatum:yyyyMMdd}.pdf";
+                var documentsPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+                var einsatzPath = Path.Combine(documentsPath, "Einsatzueberwachung", "Berichte");
+                
+                if (!Directory.Exists(einsatzPath))
+                {
+                    Directory.CreateDirectory(einsatzPath);
+                }
+
+                var filePath = Path.Combine(einsatzPath, filename);
+                var pdfDocument = CreateArchivedEinsatzDocument(archivedEinsatz);
+
+                await Task.Run(() =>
+                {
+                    pdfDocument.GeneratePdf(filePath);
+                });
+
+                return new PdfExportResult
+                {
+                    Success = true,
+                    FilePath = filePath
+                };
+            }
+            catch (Exception ex)
+            {
+                return new PdfExportResult
+                {
+                    Success = false,
+                    ErrorMessage = ex.Message
+                };
+            }
+        }
+
+        /// <summary>
+        /// Exportiert einen archivierten Einsatz als PDF-Byte-Array (für Browser-Download)
+        /// </summary>
+        public async Task<byte[]> ExportArchivedEinsatzToPdfBytesAsync(ArchivedEinsatz archivedEinsatz)
+        {
+            var pdfDocument = CreateArchivedEinsatzDocument(archivedEinsatz);
+            
+            return await Task.Run(() =>
+            {
+                using var stream = new MemoryStream();
+                pdfDocument.GeneratePdf(stream);
+                return stream.ToArray();
+            });
+        }
+
+        /// <summary>
+        /// Exportiert einen aktiven Einsatz als PDF-Byte-Array (für Browser-Download)
+        /// </summary>
+        public async Task<byte[]> ExportEinsatzToPdfBytesAsync(EinsatzData einsatzData, List<Team> teams, List<GlobalNotesEntry> notes)
+        {
+            return await Task.Run(() =>
+            {
+                using var stream = new MemoryStream();
+                
+                Document.Create(container =>
+                {
+                    container.Page(page =>
+                    {
+                        page.Size(PageSizes.A4);
+                        page.Margin(2, Unit.Centimetre);
+                        page.PageColor(Colors.White);
+                        page.DefaultTextStyle(x => x.FontSize(11));
+
+                        page.Header()
+                            .Height(100)
+                            .Background(Colors.Blue.Lighten3)
+                            .Padding(20)
+                            .Column(column =>
+                            {
+                                column.Item().Text("EINSATZBERICHT")
+                                    .FontSize(24)
+                                    .Bold()
+                                    .FontColor(Colors.Blue.Darken2);
+
+                                if (!string.IsNullOrEmpty(einsatzData.StaffelName))
+                                {
+                                    column.Item().Text(einsatzData.StaffelName)
+                                        .FontSize(14)
+                                        .FontColor(Colors.Grey.Darken1);
+                                }
+                                
+                                column.Item().Text($"Rettungshundestaffel")
+                                    .FontSize(12)
+                                    .FontColor(Colors.Grey.Darken1);
+                            });
+
+                        page.Content()
+                            .Column(column =>
+                            {
+                                column.Item().PaddingVertical(10).Element(container => ComposeGrunddaten(container, einsatzData));
+                                column.Item().PaddingVertical(10).Element(container => ComposeTeams(container, teams));
+                                
+                                if (einsatzData.SearchAreas.Any())
+                                {
+                                    column.Item().PaddingVertical(10).Element(container => ComposeSuchgebiete(container, einsatzData.SearchAreas.ToList()));
+                                }
+
+                                column.Item().PageBreak();
+                                column.Item().PaddingVertical(10).Element(container => ComposeNotizen(container, notes));
+                            });
+
+                        page.Footer()
+                            .AlignCenter()
+                            .Text(text =>
+                            {
+                                text.Span("Erstellt am: ");
+                                text.Span($"{DateTime.Now:dd.MM.yyyy HH:mm:ss}").Bold();
+                                text.Span(" | Seite ");
+                                text.CurrentPageNumber();
+                                text.Span(" von ");
+                                text.TotalPages();
+                            });
+                    });
+                })
+                .GeneratePdf(stream);
+                
+                return stream.ToArray();
+            });
+        }
+
+        /// <summary>
+        /// Erstellt das PDF-Dokument für einen archivierten Einsatz
+        /// </summary>
+        private Document CreateArchivedEinsatzDocument(ArchivedEinsatz einsatz)
+        {
+            return Document.Create(container =>
+            {
+                container.Page(page =>
+                {
+                    page.Size(PageSizes.A4);
+                    page.Margin(2, Unit.Centimetre);
+                    page.PageColor(Colors.White);
+                    page.DefaultTextStyle(x => x.FontSize(11));
+
+                    page.Header()
+                        .Height(100)
+                        .Background(einsatz.IstEinsatz ? Colors.Red.Lighten3 : Colors.Blue.Lighten3)
+                        .Padding(20)
+                        .Column(column =>
+                        {
+                            column.Item().Text(einsatz.IstEinsatz ? "EINSATZBERICHT" : "ÜBUNGSBERICHT")
+                                .FontSize(24)
+                                .Bold()
+                                .FontColor(einsatz.IstEinsatz ? Colors.Red.Darken2 : Colors.Blue.Darken2);
+
+                            if (!string.IsNullOrEmpty(einsatz.StaffelName))
+                            {
+                                column.Item().Text(einsatz.StaffelName)
+                                    .FontSize(14)
+                                    .FontColor(Colors.Grey.Darken1);
+                            }
+                            
+                            column.Item().Text("Rettungshundestaffel")
+                                .FontSize(12)
+                                .FontColor(Colors.Grey.Darken1);
+                        });
+
+                    page.Content()
+                        .Column(column =>
+                        {
+                            // Grunddaten
+                            column.Item().PaddingVertical(10).Element(c => ComposeArchivedGrunddaten(c, einsatz));
+
+                            // Ergebnis
+                            column.Item().PaddingVertical(10).Element(c => ComposeErgebnis(c, einsatz));
+
+                            // Teams
+                            if (einsatz.Teams?.Any() == true)
+                            {
+                                column.Item().PaddingVertical(10).Element(c => ComposeArchivedTeams(c, einsatz.Teams));
+                            }
+
+                            // Suchgebiete
+                            if (einsatz.SearchAreas?.Any() == true)
+                            {
+                                column.Item().PaddingVertical(10).Element(c => ComposeSuchgebiete(c, einsatz.SearchAreas));
+                            }
+
+                            // Notizen
+                            if (einsatz.GlobalNotesEntries?.Any() == true)
+                            {
+                                column.Item().PageBreak();
+                                column.Item().PaddingVertical(10).Element(c => ComposeNotizen(c, einsatz.GlobalNotesEntries));
+                            }
+                        });
+
+                    page.Footer()
+                        .AlignCenter()
+                        .Text(text =>
+                        {
+                            text.Span("Archiviert am: ");
+                            text.Span($"{einsatz.ArchivedAt:dd.MM.yyyy HH:mm}").Bold();
+                            text.Span(" | Erstellt am: ");
+                            text.Span($"{DateTime.Now:dd.MM.yyyy HH:mm}");
+                            text.Span(" | Seite ");
+                            text.CurrentPageNumber();
+                            text.Span(" von ");
+                            text.TotalPages();
+                        });
+                });
+            });
+        }
+
+        /// <summary>
+        /// Komponiert die archivierten Teams
+        /// </summary>
+        private void ComposeArchivedTeams(IContainer container, List<ArchivedTeam> teams)
+        {
+            container.Column(column =>
+            {
+                column.Item().Text($"Teams ({teams.Count})")
+                    .FontSize(16)
+                    .Bold()
+                    .FontColor(Colors.Blue.Darken1);
+
+                column.Item().PaddingTop(10).Table(table =>
+                {
+                    table.ColumnsDefinition(columns =>
+                    {
+                        columns.RelativeColumn(2);
+                        columns.RelativeColumn(2);
+                        columns.RelativeColumn(3);
+                        columns.RelativeColumn(2);
+                    });
+
+                    // Header
+                    table.Header(header =>
+                    {
+                        header.Cell().Element(CellStyle).Text("Team").Bold();
+                        header.Cell().Element(CellStyle).Text("Hund/Drohne").Bold();
+                        header.Cell().Element(CellStyle).Text("Personal").Bold();
+                        header.Cell().Element(CellStyle).Text("Status").Bold();
+
+                        static IContainer CellStyle(IContainer container)
+                        {
+                            return container.Background(Colors.Blue.Lighten3).Padding(5);
+                        }
+                    });
+
+                    // Rows
+                    foreach (var team in teams)
+                    {
+                        table.Cell().Element(CellStyle).Text(team.TeamName);
+                        
+                        table.Cell().Element(CellStyle).Column(col =>
+                        {
+                            if (!string.IsNullOrEmpty(team.DroneName))
+                            {
+                                col.Item().Text($"Drohne: {team.DroneName}").FontSize(9);
+                            }
+                            else if (!string.IsNullOrEmpty(team.DogName))
+                            {
+                                col.Item().Text(team.DogName).FontSize(9);
+                            }
+                            else
+                            {
+                                col.Item().Text("-").FontSize(9);
+                            }
+                        });
+
+                        table.Cell().Element(CellStyle).Column(col =>
+                        {
+                            foreach (var member in team.MemberNames)
+                            {
+                                col.Item().Text(member).FontSize(9);
+                            }
+                            if (!team.MemberNames.Any())
+                            {
+                                col.Item().Text("-").FontSize(9);
+                            }
+                        });
+
+                        table.Cell().Element(CellStyle).Column(col =>
+                        {
+                            col.Item().Text(team.Status).FontSize(9);
+                            if (team.AusrueckZeit.HasValue)
+                            {
+                                col.Item().Text($"Ausrück: {team.AusrueckZeit.Value:HH:mm}").FontSize(8).Italic();
+                            }
+                            if (team.EinrueckZeit.HasValue)
+                            {
+                                col.Item().Text($"Einrück: {team.EinrueckZeit.Value:HH:mm}").FontSize(8).Italic();
+                            }
+                        });
+
+                        static IContainer CellStyle(IContainer container)
+                        {
+                            return container.BorderBottom(1).BorderColor(Colors.Grey.Lighten2).Padding(5);
+                        }
+                    }
+                });
+            });
+        }
+
+        /// <summary>
+        /// Komponiert die Grunddaten eines archivierten Einsatzes
+        /// </summary>
+        private void ComposeArchivedGrunddaten(IContainer container, ArchivedEinsatz einsatz)
+        {
+            container.Column(column =>
+            {
+                column.Item().Text("Grunddaten")
+                    .FontSize(16)
+                    .Bold()
+                    .FontColor(Colors.Blue.Darken1);
+
+                column.Item().PaddingTop(10).Table(table =>
+                {
+                    table.ColumnsDefinition(columns =>
+                    {
+                        columns.ConstantColumn(150);
+                        columns.RelativeColumn();
+                    });
+
+                    AddTableRow(table, "Einsatznummer:", einsatz.EinsatzNummer);
+                    AddTableRow(table, "Einsatztyp:", einsatz.EinsatzTyp);
+                    AddTableRow(table, "Datum:", einsatz.EinsatzDatum.ToString("dd.MM.yyyy"));
+                    
+                    if (einsatz.AlarmierungsZeit.HasValue)
+                    {
+                        AddTableRow(table, "Alarmierung:", einsatz.AlarmierungsZeit.Value.ToString("HH:mm"));
+                    }
+                    
+                    if (einsatz.EinsatzEnde.HasValue)
+                    {
+                        AddTableRow(table, "Einsatzende:", einsatz.EinsatzEnde.Value.ToString("HH:mm"));
+                    }
+                    
+                    AddTableRow(table, "Dauer:", einsatz.DauerFormatiert);
+                    AddTableRow(table, "Einsatzort:", einsatz.Einsatzort);
+                    AddTableRow(table, "Alarmiert durch:", einsatz.Alarmiert);
+                    AddTableRow(table, "Einsatzleiter:", einsatz.Einsatzleiter);
+                    AddTableRow(table, "Führungsassistent:", einsatz.Fuehrungsassistent);
+                });
+
+                // Statistiken
+                column.Item().PaddingTop(15).Row(row =>
+                {
+                    row.RelativeItem().Border(1).BorderColor(Colors.Grey.Lighten1).Padding(10).Column(col =>
+                    {
+                        col.Item().AlignCenter().Text($"{einsatz.AnzahlTeams}").FontSize(24).Bold();
+                        col.Item().AlignCenter().Text("Teams").FontSize(10);
+                    });
+                    row.RelativeItem().Border(1).BorderColor(Colors.Grey.Lighten1).Padding(10).Column(col =>
+                    {
+                        col.Item().AlignCenter().Text($"{einsatz.AnzahlPersonal}").FontSize(24).Bold();
+                        col.Item().AlignCenter().Text("Personal").FontSize(10);
+                    });
+                    row.RelativeItem().Border(1).BorderColor(Colors.Grey.Lighten1).Padding(10).Column(col =>
+                    {
+                        col.Item().AlignCenter().Text($"{einsatz.AnzahlHunde}").FontSize(24).Bold();
+                        col.Item().AlignCenter().Text("Hunde").FontSize(10);
+                    });
+                    row.RelativeItem().Border(1).BorderColor(Colors.Grey.Lighten1).Padding(10).Column(col =>
+                    {
+                        col.Item().AlignCenter().Text($"{einsatz.AnzahlDrohnen}").FontSize(24).Bold();
+                        col.Item().AlignCenter().Text("Drohnen").FontSize(10);
+                    });
+                });
+            });
+        }
+
+        /// <summary>
+        /// Komponiert das Ergebnis eines archivierten Einsatzes
+        /// </summary>
+        private void ComposeErgebnis(IContainer container, ArchivedEinsatz einsatz)
+        {
+            var ergebnisLower = (einsatz.Ergebnis ?? "").ToLowerInvariant();
+            var bgColor = Colors.Grey.Lighten3;
+            var textColor = Colors.Grey.Darken2;
+            
+            if (ergebnisLower.Contains("gefunden") || ergebnisLower.Contains("erfolg"))
+            {
+                bgColor = Colors.Green.Lighten3;
+                textColor = Colors.Green.Darken2;
+            }
+            else if (ergebnisLower.Contains("abgebrochen") || ergebnisLower.Contains("erfolglos"))
+            {
+                bgColor = Colors.Orange.Lighten3;
+                textColor = Colors.Orange.Darken2;
+            }
+
+            container.Column(column =>
+            {
+                column.Item().Text("Ergebnis")
+                    .FontSize(16)
+                    .Bold()
+                    .FontColor(Colors.Blue.Darken1);
+
+                column.Item().PaddingTop(10).Background(bgColor).Padding(15).Column(col =>
+                {
+                    col.Item().Text(einsatz.Ergebnis ?? "Kein Ergebnis angegeben")
+                        .FontSize(14)
+                        .Bold()
+                        .FontColor(textColor);
+                    
+                    if (!string.IsNullOrEmpty(einsatz.Bemerkungen))
+                    {
+                        col.Item().PaddingTop(10).Text("Bemerkungen:")
+                            .FontSize(10)
+                            .Bold();
+                        col.Item().Text(einsatz.Bemerkungen)
+                            .FontSize(10);
+                    }
+                });
+            });
+        }
     }
 }

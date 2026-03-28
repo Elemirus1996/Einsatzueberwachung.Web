@@ -48,31 +48,19 @@
     {
         if (firstRender)
         {
-            await ApplyCurrentTheme();
+            // Beim ersten Render das gespeicherte Theme anwenden
+            await JS.InvokeVoidAsync("forceApplyTheme");
         }
     }
 
     private async void OnThemeChangedHandler()
     {
-        await InvokeAsync(async () =>
+        // Theme wird bereits von broadcastThemeChange angewendet
+        // Hier nur StateHasChanged für Blazor-UI-Updates
+        await InvokeAsync(() =>
         {
-            await ApplyCurrentTheme();
             StateHasChanged();
         });
-    }
-
-    private async Task ApplyCurrentTheme()
-    {
-        try
-        {
-            var theme = ThemeService.CurrentTheme;
-            await JS.InvokeVoidAsync("eval", $"document.documentElement.setAttribute('data-bs-theme', '{theme}');");
-            Logger.LogDebug("Theme in MainLayout angewendet: {Theme}", theme);
-        }
-        catch (Exception ex)
-        {
-            Logger.LogError(ex, "Fehler beim Anwenden des Themes in MainLayout");
-        }
     }
 
     public void Dispose()

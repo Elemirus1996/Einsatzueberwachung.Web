@@ -35,14 +35,25 @@
     // Theme SOFORT beim Laden anwenden
     loadAndApplyTheme();
 
+    // Flag um intentionale Theme-Änderungen zu markieren
+    // Verhindert dass der MutationObserver während eines Wechsels eingreift
+    let intentionalThemeChange = false;
+    let themeChangeTimeout = null;
+
     // MutationObserver um sicherzustellen, dass Theme bleibt
     const observer = new MutationObserver(function(mutations) {
         mutations.forEach(function(mutation) {
             if (mutation.type === 'attributes' && mutation.attributeName === 'data-bs-theme') {
+                // Wenn gerade ein intentionaler Wechsel stattfindet, nicht eingreifen
+                if (intentionalThemeChange) {
+                    log('Intentionaler Theme-Wechsel erkannt, Observer ignoriert');
+                    return;
+                }
+                
                 const currentTheme = document.documentElement.getAttribute('data-bs-theme');
                 const savedTheme = localStorage.getItem('theme');
                 
-                // Wenn Theme nicht mit gespeichertem ï¿½bereinstimmt, korrigiere es
+                // Wenn Theme nicht mit gespeichertem übereinstimmt, korrigiere es
                 if (savedTheme && currentTheme !== savedTheme) {
                     log('Theme-Drift erkannt, korrigiere:', savedTheme);
                     document.documentElement.setAttribute('data-bs-theme', savedTheme);
@@ -87,15 +98,25 @@
     }
 
     // Funktion zum Anwenden des Themes
-    function applyTheme(theme) {
+    function applyTheme(theme, isIntentional = false) {
         if (theme === 'dark' || theme === 'light') {
             const currentTheme = document.documentElement.getAttribute('data-bs-theme');
             
             if (currentTheme !== theme) {
+                // Wenn intentionale Änderung, Flag setzen
+                if (isIntentional) {
+                    intentionalThemeChange = true;
+                    // Timeout zum Zurücksetzen des Flags
+                    if (themeChangeTimeout) clearTimeout(themeChangeTimeout);
+                    themeChangeTimeout = setTimeout(() => {
+                        intentionalThemeChange = false;
+                    }, 200);
+                }
+                
                 log('Wende Theme an:', theme);
                 document.documentElement.setAttribute('data-bs-theme', theme);
                 
-                // Trigger custom event fï¿½r Blazor-Komponenten
+                // Trigger custom event für Blazor-Komponenten
                 window.dispatchEvent(new CustomEvent('theme-changed', {
                     detail: { theme: theme }
                 }));
@@ -106,14 +127,21 @@
         }
     }
 
-    // Funktion zum Broadcasten von Theme-ï¿½nderungen
+    // Funktion zum Broadcasten von Theme-Änderungen
     window.broadcastThemeChange = function (theme) {
-        log('Broadcasting Theme-Ã„nderung:', theme);
+        log('Broadcasting Theme-Änderung:', theme);
+        
+        // Setze intentional flag bevor irgendwas passiert
+        intentionalThemeChange = true;
+        if (themeChangeTimeout) clearTimeout(themeChangeTimeout);
+        themeChangeTimeout = setTimeout(() => {
+            intentionalThemeChange = false;
+        }, 200);
         
         // Speichere in LocalStorage (triggert storage event in anderen Tabs)
         localStorage.setItem('theme', theme);
         
-        // Broadcast via BroadcastChannel falls verfÃ¼gbar
+        // Broadcast via BroadcastChannel falls verfügbar
         if (themeChannel) {
             try {
                 themeChannel.postMessage({
@@ -127,8 +155,8 @@
             }
         }
         
-        // Wende Theme auch im aktuellen Tab an
-        applyTheme(theme);
+        // Wende Theme auch im aktuellen Tab an (mit intentional flag)
+        applyTheme(theme, true);
     };
 
     // Forciere Theme-Anwendung (fï¿½r Blazor-Navigation)

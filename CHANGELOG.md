@@ -1,5 +1,42 @@
 # 📋 CHANGELOG
 
+## Version 3.10.0 - "PDF Export & Theme Fix" (März 2026)
+
+### 🎯 Hauptverbesserungen
+
+#### **PDF-Export für Archiv** 🆕
+- 📄 **Archiv-PDF-Export**
+  - Archivierte Einsätze können direkt als PDF exportiert werden
+  - Professionelles Layout mit Staffel-Header
+  - Farbliche Unterscheidung: Einsatz (rot) / Übung (blau)
+  - Statistik-Box mit Teams, Personal, Hunden, Drohnen
+  - Ergebnisdarstellung mit Bemerkungen
+  - Team-Tabelle mit Status und Zeiten
+
+- 📥 **Direkter Browser-Download**
+  - PDFs werden direkt im Browser heruntergeladen
+  - Kein Server-Dateispeicher mehr nötig
+  - Funktioniert auch im Netzwerk-Betrieb
+
+#### **Theme-Switching ohne Neuladen** 🔧
+- 🌙 **Sofortiger Theme-Wechsel**
+  - Light/Dark Mode wechselt jetzt ohne Seiten-Reload
+  - Optimierter MutationObserver verhindert Theme-Drift
+  - `intentionalThemeChange`-Flag für saubere Übergänge
+  - Broadcast-Channel für Tab-Synchronisation
+
+### 🛠️ Technische Details
+- 📦 **IPdfExportService erweitert**
+  - `ExportArchivedEinsatzToPdfAsync()` - Archiv als PDF-Datei
+  - `ExportArchivedEinsatzToPdfBytesAsync()` - für Browser-Download
+  - `ExportEinsatzToPdfBytesAsync()` - Aktive Einsätze für Browser-Download
+
+- 🎨 **theme-sync.js optimiert**
+  - Flag-basierte Steuerung verhindert Race-Conditions
+  - Debouncing für saubere Theme-Übergänge
+
+---
+
 ## Version 3.9.0 - "Flugwetter" (Februar 2026)
 
 ### 🎯 Hauptverbesserungen

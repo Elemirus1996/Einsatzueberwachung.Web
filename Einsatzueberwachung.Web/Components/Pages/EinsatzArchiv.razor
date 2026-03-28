@@ -3,6 +3,7 @@
 @using Einsatzueberwachung.Domain.Interfaces
 @using Einsatzueberwachung.Domain.Models
 @inject IArchivService ArchivService
+@inject IPdfExportService PdfExportService
 @inject IJSRuntime JSRuntime
 @rendermode InteractiveServer
 
@@ -38,9 +39,18 @@
                     </span>
                     @_selectedEinsatz.Einsatzort
                 </h4>
-                <button class="btn btn-outline-secondary" @onclick="CloseDetail">
-                    <i class="bi bi-x-lg"></i> Schliessen
-                </button>
+                <div class="btn-group">
+                    <button class="btn btn-success" @onclick="() => ExportSelectedToPdf()" disabled="@_isExportingPdf">
+                        @if (_isExportingPdf)
+                        {
+                            <span class="spinner-border spinner-border-sm me-1"></span>
+                        }
+                        <i class="bi bi-file-pdf-fill me-1"></i> PDF Export
+                    </button>
+                    <button class="btn btn-outline-secondary" @onclick="CloseDetail">
+                        <i class="bi bi-x-lg"></i> Schliessen
+                    </button>
+                </div>
             </div>
             <div class="card-body">
                 <div class="row">
@@ -328,6 +338,7 @@
     private ArchivedEinsatz? _deleteCandidate;
 
     private System.Timers.Timer? _searchTimer;
+    private bool _isExportingPdf = false;
 
     protected override async Task OnInitializedAsync()
     {
@@ -423,6 +434,27 @@
         var data = await ArchivService.ExportAllAsJsonAsync();
         var fileName = $"Einsatz_Archiv_{DateTime.Now:yyyy-MM-dd}.json";
         await JSRuntime.InvokeVoidAsync("downloadFileFromByteArray", fileName, data, "application/json");
+    }
+
+    private async Task ExportSelectedToPdf()
+    {
+        if (_selectedEinsatz == null) return;
+        
+        try
+        {
+            _isExportingPdf = true;
+            StateHasChanged();
+            
+            var pdfBytes = await PdfExportService.ExportArchivedEinsatzToPdfBytesAsync(_selectedEinsatz);
+            var fileName = $"Einsatzbericht_{_selectedEinsatz.EinsatzNummer}_{_selectedEinsatz.EinsatzDatum:yyyyMMdd}.pdf";
+            
+            await JSRuntime.InvokeVoidAsync("downloadFileFromByteArray", fileName, pdfBytes, "application/pdf");
+        }
+        finally
+        {
+            _isExportingPdf = false;
+            StateHasChanged();
+        }
     }
 
     private async Task ImportArchiv(InputFileChangeEventArgs e)

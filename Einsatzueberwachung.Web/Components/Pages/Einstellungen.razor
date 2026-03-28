@@ -236,11 +236,11 @@
         sessionData.AppSettings = _appSettings;
         await MasterDataService.SaveSessionDataAsync(sessionData);
         
-        // Update ThemeService (triggert automatisch alle subscribten Komponenten)
-        await ThemeService.SetThemeAsync(isDark);
-        
-        // Broadcast an alle Tabs
+        // ZUERST: Broadcast an alle Tabs (aktualisiert localStorage und wendet Theme an)
         await JS.InvokeVoidAsync("broadcastThemeChange", isDark ? "dark" : "light");
+        
+        // DANN: Update ThemeService (für interne State-Konsistenz)
+        await ThemeService.SetThemeAsync(isDark);
         
         StateHasChanged();
     }

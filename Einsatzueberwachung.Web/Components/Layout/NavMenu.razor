@@ -124,12 +124,15 @@
 
         try
         {
+            // Berechne neues Theme
+            var newTheme = ThemeService.IsDarkMode ? "light" : "dark";
+            
+            // ZUERST: Broadcast Theme-Änderung an alle Tabs/Fenster
+            await JS.InvokeVoidAsync("broadcastThemeChange", newTheme);
+            
+            // DANN: Update ThemeService (für interne State-Konsistenz)
             await ThemeService.ToggleThemeAsync();
             _isDarkMode = ThemeService.IsDarkMode;
-            
-            // Broadcast Theme-Änderung an alle Tabs/Fenster
-            var theme = ThemeService.CurrentTheme;
-            await JS.InvokeVoidAsync("broadcastThemeChange", theme);
             
             StateHasChanged();
         }
