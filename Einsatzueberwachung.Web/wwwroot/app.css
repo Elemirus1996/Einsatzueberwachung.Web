@@ -2363,13 +2363,7 @@ textarea:focus-visible {
 }
 
 /* Fullscreen mode adjustments */
-:fullscreen .sidebar {
-    display: none !important;
-}
-
-:fullscreen main {
-    margin-left: 0 !important;
-}
+/* Sidebar bleibt im Vollbildmodus sichtbar */
 
 /* Dark Mode - Live-Uhr */
 [data-bs-theme="dark"] .header-with-clock.top-row {

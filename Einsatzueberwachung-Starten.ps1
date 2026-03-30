@@ -14,7 +14,7 @@ param(
 )
 
 # Aktuelle Version (wird bei Updates automatisch angepasst)
-$script:CurrentVersion = "4.1.0"
+$script:CurrentVersion = "4.2.0"
 $script:GitHubRepo = "Elemirus1996/Einsatzueberwachung.Web"
 
 # Farbdefinitionen fuer bessere Lesbarkeit
@@ -181,6 +181,41 @@ function Test-DotNetInstallation {
     }
 }
 
+function Install-HttpsCertificate {
+    Write-Host "Pruefe HTTPS-Zertifikat..." -ForegroundColor $Colors.Info
+    
+    try {
+        # Pruefe ob Zertifikat bereits vertrauenswuerdig ist
+        $certCheck = dotnet dev-certs https --check --trust 2>&1
+        
+        if ($LASTEXITCODE -eq 0) {
+            Write-Host "[OK] HTTPS-Zertifikat ist bereits vertrauenswuerdig" -ForegroundColor $Colors.Success
+            return $true
+        }
+        
+        Write-Host "[i] HTTPS-Zertifikat wird eingerichtet..." -ForegroundColor $Colors.Info
+        
+        # Zertifikat bereinigen und neu erstellen
+        dotnet dev-certs https --clean 2>&1 | Out-Null
+        
+        # Neues Zertifikat erstellen und als vertrauenswuerdig markieren
+        $result = dotnet dev-certs https --trust 2>&1
+        
+        if ($LASTEXITCODE -eq 0) {
+            Write-Host "[OK] HTTPS-Zertifikat erfolgreich installiert" -ForegroundColor $Colors.Success
+            Write-Host "     Browser wird die Seite jetzt als sicher anzeigen" -ForegroundColor $Colors.Info
+            return $true
+        } else {
+            Write-Host "[!] Zertifikat konnte nicht als vertrauenswuerdig markiert werden" -ForegroundColor $Colors.Warning
+            Write-Host "    Browser wird eine Warnung anzeigen (kann ignoriert werden)" -ForegroundColor $Colors.Info
+            return $false
+        }
+    } catch {
+        Write-Host "[!] Fehler bei Zertifikat-Pruefung: $($_.Exception.Message)" -ForegroundColor $Colors.Warning
+        return $false
+    }
+}
+
 function Get-LocalIPAddress {
     try {
         $adapters = Get-NetIPAddress -AddressFamily IPv4 | 
@@ -193,6 +228,55 @@ function Get-LocalIPAddress {
         Write-Host "[!] Konnte lokale IP-Adresse nicht ermitteln" -ForegroundColor $Colors.Warning
     }
     return "localhost"
+}
+
+function Wait-ForServer {
+    param(
+        [string]$Url,
+        [int]$TimeoutSeconds = 60
+    )
+    
+    Write-Host "Warte auf Server..." -ForegroundColor $Colors.Info
+    
+    # SSL-Zertifikatspruefung ignorieren (fuer selbstsignierte Zertifikate)
+    if (-not ([System.Management.Automation.PSTypeName]'TrustAllCertsPolicy').Type) {
+        Add-Type @"
+            using System.Net;
+            using System.Security.Cryptography.X509Certificates;
+            public class TrustAllCertsPolicy : ICertificatePolicy {
+                public bool CheckValidationResult(
+                    ServicePoint srvPoint, X509Certificate certificate,
+                    WebRequest request, int certificateProblem) {
+                    return true;
+                }
+            }
+"@
+    }
+    [System.Net.ServicePointManager]::CertificatePolicy = New-Object TrustAllCertsPolicy
+    [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+    
+    $startTime = Get-Date
+    $spinner = @('|', '/', '-', '\')
+    $spinIdx = 0
+    
+    while ((Get-Date) - $startTime -lt [TimeSpan]::FromSeconds($TimeoutSeconds)) {
+        try {
+            $response = Invoke-WebRequest -Uri $Url -TimeoutSec 2 -UseBasicParsing -ErrorAction Stop
+            if ($response.StatusCode -eq 200) {
+                Write-Host "`r[OK] Server ist bereit!                    " -ForegroundColor $Colors.Success
+                return $true
+            }
+        } catch {
+            # Server noch nicht bereit - warten
+        }
+        
+        $spinIdx = ($spinIdx + 1) % 4
+        Write-Host "`r  $($spinner[$spinIdx]) Server startet...          " -NoNewline -ForegroundColor $Colors.Info
+        Start-Sleep -Milliseconds 500
+    }
+    
+    Write-Host "`r[!] Timeout beim Warten auf Server" -ForegroundColor $Colors.Warning
+    return $false
 }
 
 function Show-StartMenu {
@@ -222,17 +306,40 @@ function Start-LocalMode {
     Write-Host "============================================================" -ForegroundColor $Colors.Success
     Write-Host ""
     Write-Host "Die Anwendung wird gestartet..." -ForegroundColor $Colors.Info
-    Write-Host "Browser oeffnet automatisch: https://localhost:7059" -ForegroundColor $Colors.Info
-    Write-Host ""
-    Write-Host ">> Druecken Sie STRG+C zum Beenden" -ForegroundColor $Colors.Warning
     Write-Host ""
     
     # Wechsle ins Projektverzeichnis
     $scriptPath = Split-Path -Parent $MyInvocation.MyCommand.Path
     Set-Location "$scriptPath\Einsatzueberwachung.Web"
     
-    # Starte die Anwendung
-    dotnet run --launch-profile https
+    # Starte Server im Hintergrund (ohne auto-browser)
+    $serverJob = Start-Job -ScriptBlock {
+        param($workDir)
+        Set-Location $workDir
+        dotnet run --no-launch-profile --urls "https://localhost:7059;http://localhost:5059"
+    } -ArgumentList (Get-Location).Path
+    
+    # Warte auf Server
+    if (Wait-ForServer -Url "https://localhost:7059" -TimeoutSeconds 60) {
+        # Browser oeffnen
+        Write-Host "Oeffne Browser..." -ForegroundColor $Colors.Info
+        Start-Process "https://localhost:7059"
+        Write-Host ""
+    }
+    
+    Write-Host ">> Druecken Sie STRG+C zum Beenden" -ForegroundColor $Colors.Warning
+    Write-Host ""
+    
+    # Zeige Server-Output im Vordergrund
+    try {
+        while ($serverJob.State -eq 'Running') {
+            Receive-Job -Job $serverJob
+            Start-Sleep -Milliseconds 500
+        }
+    } finally {
+        Stop-Job -Job $serverJob -ErrorAction SilentlyContinue
+        Remove-Job -Job $serverJob -ErrorAction SilentlyContinue
+    }
 }
 
 function Start-NetworkMode {
@@ -287,16 +394,40 @@ function Start-NetworkMode {
     Write-Host "QR-Code fuer mobilen Zugriff:" -ForegroundColor $Colors.Info
     Write-Host "  >> Oeffnen Sie die Einstellungen in der Anwendung" -ForegroundColor $Colors.Info
     Write-Host ""
-    Write-Host ">> Druecken Sie STRG+C zum Beenden" -ForegroundColor $Colors.Warning
-    Write-Host ""
     
     # Wechsle ins Projektverzeichnis
     $scriptPath = Split-Path -Parent $MyInvocation.MyCommand.Path
     Set-Location "$scriptPath\Einsatzueberwachung.Web"
     
-    # Starte die Anwendung mit Netzwerk-URLs
-    $env:ASPNETCORE_URLS = "https://*:7059;http://*:5059"
-    dotnet run --no-launch-profile
+    # Starte Server im Hintergrund
+    $serverJob = Start-Job -ScriptBlock {
+        param($workDir)
+        Set-Location $workDir
+        $env:ASPNETCORE_URLS = "https://*:7059;http://*:5059"
+        dotnet run --no-launch-profile
+    } -ArgumentList (Get-Location).Path
+    
+    # Warte auf Server
+    if (Wait-ForServer -Url "https://localhost:7059" -TimeoutSeconds 60) {
+        # Browser oeffnen
+        Write-Host "Oeffne Browser..." -ForegroundColor $Colors.Info
+        Start-Process "https://localhost:7059"
+        Write-Host ""
+    }
+    
+    Write-Host ">> Druecken Sie STRG+C zum Beenden" -ForegroundColor $Colors.Warning
+    Write-Host ""
+    
+    # Zeige Server-Output im Vordergrund
+    try {
+        while ($serverJob.State -eq 'Running') {
+            Receive-Job -Job $serverJob
+            Start-Sleep -Milliseconds 500
+        }
+    } finally {
+        Stop-Job -Job $serverJob -ErrorAction SilentlyContinue
+        Remove-Job -Job $serverJob -ErrorAction SilentlyContinue
+    }
 }
 
 function New-DesktopShortcut {
@@ -370,6 +501,9 @@ if (-not (Test-DotNetInstallation)) {
     Read-Host "Druecken Sie Enter zum Beenden"
     exit 1
 }
+
+# HTTPS-Zertifikat pruefen und installieren
+Install-HttpsCertificate
 
 Write-Host ""
 

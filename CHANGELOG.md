@@ -1,5 +1,23 @@
 # 📋 CHANGELOG
 
+## Version 4.2.0 - "Stabilität & Zertifikate" (März 2026)
+
+### 🎯 Hauptverbesserungen
+
+#### **Verbesserter Start-Workflow** 🆕
+- 🔒 HTTPS-Zertifikat wird automatisch als vertrauenswürdig installiert
+- ⏳ Browser öffnet erst wenn Server bereit ist (kein "Seite nicht erreichbar" mehr)
+- 🖥️ Sidebar bleibt auch im Vollbildmodus sichtbar
+- 🎬 Splash-Screen verschwindet korrekt bei Navigation
+
+### 🛠️ Technische Details
+- **Aktualisierte Dateien:**
+  - [Einsatzueberwachung-Starten.ps1](Einsatzueberwachung-Starten.ps1) - Wait-ForServer, Install-HttpsCertificate
+  - [app.css](Einsatzueberwachung.Web/wwwroot/app.css) - Fullscreen behält Sidebar
+  - [App.razor](Einsatzueberwachung.Web/Components/App.razor) - Splash-Screen Fix
+
+---
+
 ## Version 4.1.0 - "Branding & UX-Verbesserungen" (März 2026)
 
 ### 🎯 Hauptverbesserungen

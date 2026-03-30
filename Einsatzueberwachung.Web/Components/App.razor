@@ -1,30 +1,30 @@
-ï»¿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en" data-bs-theme="light">
 
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <meta name="description" content="Tablet-optimierte Rettungshunde EinsatzÃ¼berwachung" />
+    <meta name="description" content="Tablet-optimierte Rettungshunde Einsatzüberwachung" />
     <meta name="theme-color" content="#2196F3" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-    <meta name="apple-mobile-web-app-title" content="EinsatzÃ¼berwachung" />
+    <meta name="apple-mobile-web-app-title" content="Einsatzüberwachung" />
     <base href="/" />
     
     <!-- PWA Manifest -->
     <link rel="manifest" href="/manifest.json" />
     
-    <!-- Bootstrap 5.3+ fÃ¼r Dark Mode Support -->
+    <!-- Bootstrap 5.3+ für Dark Mode Support -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" 
           integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" 
           crossorigin="anonymous">
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.2/font/bootstrap-icons.min.css">
     <!-- Dark Mode Base Styles -->
-    <link rel="stylesheet" href="/dark-mode-base.css?v=4.1.0" />
-    <link rel="stylesheet" href="/app.css?v=4.1.0" />
-    <link rel="stylesheet" href="/notes-enhanced.css?v=4.1.0" />
-    <link rel="stylesheet" href="/mobile-dashboard.css?v=4.1.0" />
-    <link rel="stylesheet" href="/print-map.css?v=4.1.0" />
+    <link rel="stylesheet" href="/dark-mode-base.css?v=4.2.0" />
+    <link rel="stylesheet" href="/app.css?v=4.2.0" />
+    <link rel="stylesheet" href="/notes-enhanced.css?v=4.2.0" />
+    <link rel="stylesheet" href="/mobile-dashboard.css?v=4.2.0" />
+    <link rel="stylesheet" href="/print-map.css?v=4.2.0" />
     <link rel="icon" type="image/png" href="/favicon.png" />
     
     <!-- Leaflet CSS -->
@@ -36,11 +36,11 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css" />
     
     <!-- Leaflet Custom CSS -->
-    <link rel="stylesheet" href="/leaflet-custom.css?v=4.1.0" />
+    <link rel="stylesheet" href="/leaflet-custom.css?v=4.2.0" />
     
     <HeadOutlet />
     
-    <!-- Theme Loader Script - LÃ¤dt VOR Blazor -->
+    <!-- Theme Loader Script - Lädt VOR Blazor -->
     <script>
         (function() {
             try {
@@ -79,7 +79,7 @@
             }
         };
         
-        // Event Delegation fÃ¼r Sidebar-Toggle (CSP-kompatibel, funktioniert auch nach Blazor-Navigation)
+        // Event Delegation für Sidebar-Toggle (CSP-kompatibel, funktioniert auch nach Blazor-Navigation)
         document.addEventListener('click', function(e) {
             if (e.target.closest('.btn-sidebar-toggle')) {
                 window.toggleSidebar();
@@ -93,7 +93,7 @@
         window.toggleFullscreen = function() {
             if (!document.fullscreenElement) {
                 document.documentElement.requestFullscreen().catch(function(err) {
-                    console.log('Fullscreen nicht mÃ¶glich:', err.message);
+                    console.log('Fullscreen nicht möglich:', err.message);
                 });
             } else {
                 document.exitFullscreen();
@@ -112,7 +112,7 @@
             }
         });
         
-        // F11 Taste abfangen fÃ¼r Vollbild
+        // F11 Taste abfangen für Vollbild
         document.addEventListener('keydown', function(e) {
             if (e.key === 'F11') {
                 e.preventDefault();
@@ -120,12 +120,12 @@
             }
         });
         
-        // Initial und bei DOM-Ã„nderungen anwenden
+        // Initial und bei DOM-Änderungen anwenden
         document.addEventListener('DOMContentLoaded', function() {
             window.applySidebarState();
         });
         
-        // MutationObserver fÃ¼r Blazor-Navigation
+        // MutationObserver für Blazor-Navigation
         var sidebarObserver = new MutationObserver(function(mutations) {
             window.applySidebarState();
         });
@@ -145,7 +145,7 @@
     <!-- Splash Screen -->
     <div id="splash-screen" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(135deg, #1a237e 0%, #0d47a1 50%, #1565c0 100%); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 99999; transition: opacity 0.5s ease-out;">
         <img src="/logo.png" alt="Logo" style="width: 180px; height: 180px; margin-bottom: 2rem; animation: pulse 2s ease-in-out infinite;" />
-        <h1 style="color: white; font-size: 1.8rem; font-weight: 600; margin-bottom: 1rem; text-align: center;">EinsatzÃ¼berwachung</h1>
+        <h1 style="color: white; font-size: 1.8rem; font-weight: 600; margin-bottom: 1rem; text-align: center;">Einsatzüberwachung</h1>
         <div style="color: rgba(255,255,255,0.8); font-size: 1rem; margin-bottom: 2rem;">Rettungshunde-Einsatz-Koordination</div>
         <div style="width: 200px; height: 4px; background: rgba(255,255,255,0.2); border-radius: 2px; overflow: hidden;">
             <div style="width: 100%; height: 100%; background: white; border-radius: 2px; animation: loading 1.5s ease-in-out infinite;"></div>
@@ -162,28 +162,39 @@
         }
     </style>
     <script>
-        // Splash Screen ausblenden wenn Blazor geladen ist
-        document.addEventListener('DOMContentLoaded', function() {
+        // Splash Screen ausblenden - sofort starten, nicht auf DOMContentLoaded warten
+        (function() {
+            // Prüfe ob Splash bereits gezeigt wurde (Session)
+            if (sessionStorage.getItem('splashShown')) {
+                var splash = document.getElementById('splash-screen');
+                if (splash) splash.remove();
+                return;
+            }
+            
+            function hideSplash() {
+                var splash = document.getElementById('splash-screen');
+                if (splash) {
+                    sessionStorage.setItem('splashShown', 'true');
+                    splash.style.opacity = '0';
+                    setTimeout(function() { splash.remove(); }, 500);
+                }
+            }
+            
+            // Prüfe regelmäßig ob Blazor geladen ist
             var checkBlazor = setInterval(function() {
                 var blazorContent = document.querySelector('.page');
                 if (blazorContent) {
                     clearInterval(checkBlazor);
-                    var splash = document.getElementById('splash-screen');
-                    if (splash) {
-                        splash.style.opacity = '0';
-                        setTimeout(function() { splash.remove(); }, 500);
-                    }
+                    hideSplash();
                 }
             }, 100);
-            // Fallback: Nach 5 Sekunden trotzdem ausblenden
+            
+            // Fallback: Nach 3 Sekunden trotzdem ausblenden
             setTimeout(function() {
-                var splash = document.getElementById('splash-screen');
-                if (splash) {
-                    splash.style.opacity = '0';
-                    setTimeout(function() { splash.remove(); }, 500);
-                }
-            }, 5000);
-        });
+                clearInterval(checkBlazor);
+                hideSplash();
+            }, 3000);
+        })();
     </script>
 
     <Routes />
@@ -200,37 +211,37 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
     
     <!-- Custom Leaflet Interop -->
-    <script src="/leaflet-interop.js?v=4.1.0"></script>
+    <script src="/leaflet-interop.js?v=4.2.0"></script>
     
     <!-- Audio Alerts System -->
-    <script src="/audio-alerts.js?v=4.1.0"></script>
+    <script src="/audio-alerts.js?v=4.2.0"></script>
     
     <!-- Theme Sync System -->
-    <script src="/theme-sync.js?v=4.1.0"></script>
+    <script src="/theme-sync.js?v=4.2.0"></script>
     
     <!-- QR Code Loader System -->
-    <script src="/load-qrcodes.js?v=4.1.0"></script>
+    <script src="/load-qrcodes.js?v=4.2.0"></script>
     
     <!-- Live Clock System -->
-    <script src="/js/clock.js?v=4.1.0"></script>
+    <script src="/js/clock.js?v=4.2.0"></script>
     
     <!-- Service Worker Manager -->
-    <script src="/service-worker-manager.js?v=4.1.0"></script>
+    <script src="/service-worker-manager.js?v=4.2.0"></script>
     
     <!-- Swipe Handler -->
-    <script src="/swipe-handler.js?v=4.1.0"></script>
+    <script src="/swipe-handler.js?v=4.2.0"></script>
     
     <!-- Keyboard Shortcuts System -->
-    <script src="/keyboard-shortcuts.js?v=4.1.0"></script>
+    <script src="/keyboard-shortcuts.js?v=4.2.0"></script>
     
     <!-- Multi-Monitor Support -->
-    <script src="/multi-monitor.js?v=4.1.0"></script>
+    <script src="/multi-monitor.js?v=4.2.0"></script>
     
-    <!-- File Download Helper fÃ¼r Excel Export -->
-    <script src="/file-download.js?v=4.1.0"></script>
+    <!-- File Download Helper für Excel Export -->
+    <script src="/file-download.js?v=4.2.0"></script>
     
     <!-- Sidebar Toggle -->
-    <script src="/sidebar.js?v=4.1.0"></script>
+    <script src="/sidebar.js?v=4.2.0"></script>
     
     <script src="_framework/blazor.web.js"></script>
 

@@ -4,9 +4,9 @@
   <TargetFramework>net8.0</TargetFramework>
   <Nullable>enable</Nullable>
   <ImplicitUsings>enable</ImplicitUsings>
-  <Version>4.1.0</Version>
-  <AssemblyVersion>4.1.0.0</AssemblyVersion>
-  <FileVersion>4.1.0.0</FileVersion>
+  <Version>4.2.0</Version>
+  <AssemblyVersion>4.2.0.0</AssemblyVersion>
+  <FileVersion>4.2.0.0</FileVersion>
   <Product>EinsatzÃ¼berwachung Web - Mobile Dashboard mit Dark Mode</Product>
   <Description>Moderne Web-Anwendung fÃ¼r Rettungshunde-EinsÃ¤tze mit mobilem Dashboard, Dark Mode und erweiterten Funktionen</Description>
 </PropertyGroup>
