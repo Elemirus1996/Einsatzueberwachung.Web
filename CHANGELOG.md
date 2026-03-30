@@ -1,5 +1,15 @@
 # 📋 CHANGELOG
 
+## Version 4.3.1 - "Hotfix: Port 5001 & Fehlerbanner" (März 2026)
+
+### 🎯 Hauptverbesserungen
+
+- 🔁 Weiterleitung der Ladeseite auf `https://localhost:5001` korrigiert
+- 🧭 Starter-Skripte auf Port 5001 (HTTPS) und 5000 (HTTP) vereinheitlicht
+- 🛑 Dauerhaft sichtbares "An unhandled error has occurred"-Banner standardmäßig ausgeblendet
+
+---
+
 ## Version 4.3.0 - "Ladeseite statt Splash" (März 2026)
 
 ### 🎯 Hauptverbesserungen

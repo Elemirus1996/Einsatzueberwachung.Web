@@ -11,7 +11,7 @@ param(
 $ErrorActionPreference = "Stop"
 
 # Aktuelle Version und GitHub-Repository
-$script:CurrentVersion = "4.3.0"
+$script:CurrentVersion = "4.3.1"
 $script:GitHubRepo = "Elemirus1996/Einsatzueberwachung.Web"
 
 # Farben
@@ -351,17 +351,17 @@ function Start-Application {
         # Fallback: Direkt URL öffnen
         Write-Host ""
         Write-Host "Öffne Browser..." -ForegroundColor $Colors.Info
-        $browserUrl = "https://localhost:7059"
+        $browserUrl = "https://localhost:5001"
         Start-Process $browserUrl
     }
     
     # Starte dotnet
     if ($IsNetworkMode) {
-        $env:ASPNETCORE_URLS = "https://localhost:7059;http://0.0.0.0:5000"
+        $env:ASPNETCORE_URLS = "https://localhost:5001;http://0.0.0.0:5000"
         $env:ASPNETCORE_ENVIRONMENT = "Production"
         dotnet run --project $projectPath --configuration Release --no-launch-profile
     } else {
-        $env:ASPNETCORE_URLS = "https://localhost:7059;http://localhost:5000"
+        $env:ASPNETCORE_URLS = "https://localhost:5001;http://localhost:5000"
         $env:ASPNETCORE_ENVIRONMENT = "Production"
         dotnet run --project $projectPath --configuration Release --no-launch-profile
     }
@@ -401,3 +401,5 @@ if ($choice -eq "2") {
 }
 
 Start-Application -IsNetworkMode $NetworkMode
+
+

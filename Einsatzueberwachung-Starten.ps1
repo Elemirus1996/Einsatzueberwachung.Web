@@ -14,7 +14,7 @@ param(
 )
 
 # Aktuelle Version (wird bei Updates automatisch angepasst)
-$script:CurrentVersion = "4.3.0"
+$script:CurrentVersion = "4.3.1"
 $script:GitHubRepo = "Elemirus1996/Einsatzueberwachung.Web"
 
 # Farbdefinitionen fuer bessere Lesbarkeit
@@ -284,11 +284,11 @@ function Show-StartMenu {
     Write-Host "Waehlen Sie den Start-Modus:" -ForegroundColor $Colors.Header
     Write-Host ""
     Write-Host "  [1] Lokaler Modus (nur dieser Computer)" -ForegroundColor White
-    Write-Host "      >> https://localhost:7059" -ForegroundColor $Colors.Info
+    Write-Host "      >> https://localhost:5001" -ForegroundColor $Colors.Info
     Write-Host ""
     Write-Host "  [2] Netzwerk-Modus (Zugriff von anderen Geraeten)" -ForegroundColor White
     $localIP = Get-LocalIPAddress
-    Write-Host "      >> https://${localIP}:7059" -ForegroundColor $Colors.Info
+    Write-Host "      >> https://${localIP}:5001" -ForegroundColor $Colors.Info
     Write-Host ""
     Write-Host "  [3] Desktop-Verknuepfung erstellen" -ForegroundColor White
     Write-Host ""
@@ -316,7 +316,7 @@ function Start-LocalMode {
         Start-Process $loadingPage
     } else {
         # Fallback: Direkt die URL oeffnen
-        Start-Process "https://localhost:7059"
+        Start-Process "https://localhost:5001"
     }
     
     Write-Host "Die Anwendung wird gestartet..." -ForegroundColor $Colors.Info
@@ -327,7 +327,7 @@ function Start-LocalMode {
     Set-Location "$scriptPath\Einsatzueberwachung.Web"
     
     # Starte Server (blockierend - Browser wartet automatisch)
-    dotnet run --no-launch-profile --urls "https://localhost:7059;http://localhost:5059"
+    dotnet run --no-launch-profile --urls "https://localhost:5001;http://localhost:5000"
 }
 
 function Start-NetworkMode {
@@ -362,7 +362,7 @@ function Start-NetworkMode {
                                 -Direction Inbound `
                                 -Action Allow `
                                 -Protocol TCP `
-                                -LocalPort 7059 `
+                                -LocalPort 5001 `
                                 -ErrorAction Stop | Out-Null
             Write-Host "[OK] Firewall-Regel erstellt" -ForegroundColor $Colors.Success
         } else {
@@ -376,8 +376,8 @@ function Start-NetworkMode {
     Write-Host "Die Anwendung wird gestartet..." -ForegroundColor $Colors.Info
     Write-Host ""
     Write-Host "Zugriff ueber:" -ForegroundColor $Colors.Header
-    Write-Host "  >> Lokal:    https://localhost:7059" -ForegroundColor $Colors.Success
-    Write-Host "  >> Netzwerk: https://${localIP}:7059" -ForegroundColor $Colors.Success
+    Write-Host "  >> Lokal:    https://localhost:5001" -ForegroundColor $Colors.Success
+    Write-Host "  >> Netzwerk: https://${localIP}:5001" -ForegroundColor $Colors.Success
     Write-Host ""
     Write-Host "QR-Code fuer mobilen Zugriff:" -ForegroundColor $Colors.Info
     Write-Host "  >> Oeffnen Sie die Einstellungen in der Anwendung" -ForegroundColor $Colors.Info
@@ -392,7 +392,7 @@ function Start-NetworkMode {
         Write-Host "Oeffne Ladeseite im Browser..." -ForegroundColor $Colors.Info
         Start-Process $loadingPage
     } else {
-        Start-Process "https://localhost:7059"
+        Start-Process "https://localhost:5001"
     }
     
     Write-Host ">> Druecken Sie STRG+C zum Beenden" -ForegroundColor $Colors.Warning
@@ -401,7 +401,7 @@ function Start-NetworkMode {
     Set-Location "$scriptPath\Einsatzueberwachung.Web"
     
     # Starte Server (blockierend - Browser wartet automatisch)
-    $env:ASPNETCORE_URLS = "https://*:7059;http://*:5059"
+    $env:ASPNETCORE_URLS = "https://*:5001;http://*:5000"
     dotnet run --no-launch-profile
 }
 
@@ -534,3 +534,5 @@ while ($true) {
         }
     }
 }
+
+

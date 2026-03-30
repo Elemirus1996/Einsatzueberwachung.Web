@@ -1,16 +1,16 @@
-ï»¿@page "/"
+@page "/"
 @inject IEinsatzService EinsatzService
 @inject NavigationManager Navigation
 @rendermode InteractiveServer
 
-<PageTitle>EinsatzÃ¼berwachung</PageTitle>
+<PageTitle>Einsatzüberwachung</PageTitle>
 
 <div class="home-container">
     <div class="hero-section">
         <div class="hero-content">
-            <h1 class="display-3"><i class="bi bi-alarm-fill"></i> EinsatzÃ¼berwachung</h1>
-            <p class="lead">Moderne Web-Anwendung fÃ¼r die Koordination von Rettungshunde-EinsÃ¤tzen</p>
-            <p class="text-white-50">Version 4.3.0 â€¢ Dark Mode â€¢ Mobile Support â€¢ PDF-Export â€¢ Auto-Update</p>
+            <h1 class="display-3"><i class="bi bi-alarm-fill"></i> Einsatzüberwachung</h1>
+            <p class="lead">Moderne Web-Anwendung für die Koordination von Rettungshunde-Einsätzen</p>
+            <p class="text-white-50">Version 4.3.1 • Dark Mode • Mobile Support • PDF-Export • Auto-Update</p>
         </div>
     </div>
 
@@ -20,8 +20,8 @@
                 <div class="action-card card-primary" @onclick='() => Navigation.NavigateTo("/einsatz/start")' role="button" tabindex="0" title="Klicken zum Starten">
                     <div class="action-icon"><i class="bi bi-alarm-fill"></i></div>
                     <h3>Neuer Einsatz</h3>
-                    <p>Starten Sie einen neuen Einsatz oder eine Ãœbung</p>
-                    <small style="opacity: 0.85; font-size: 0.9rem; font-weight: 500;">âžœ Jetzt Ã¶ffnen</small>
+                    <p>Starten Sie einen neuen Einsatz oder eine Übung</p>
+                    <small style="opacity: 0.85; font-size: 0.9rem; font-weight: 500;">? Jetzt öffnen</small>
                 </div>
             </div>
 
@@ -31,8 +31,8 @@
                     <div class="action-card card-success" @onclick='() => Navigation.NavigateTo("/einsatz/monitor")' role="button" tabindex="0" title="Klicken zum Anzeigen">
                         <div class="action-icon"><i class="bi bi-bar-chart-fill"></i></div>
                         <h3>Einsatzmonitor</h3>
-                        <p>ZurÃ¼ck zum laufenden Einsatz (@EinsatzService.Teams.Count Teams aktiv)</p>
-                        <small style="opacity: 0.85; font-size: 0.9rem; font-weight: 500;">âžœ Jetzt Ã¶ffnen</small>
+                        <p>Zurück zum laufenden Einsatz (@EinsatzService.Teams.Count Teams aktiv)</p>
+                        <small style="opacity: 0.85; font-size: 0.9rem; font-weight: 500;">? Jetzt öffnen</small>
                     </div>
                 </div>
             }
@@ -42,7 +42,7 @@
                     <div class="action-icon"><i class="bi bi-clipboard-data"></i></div>
                     <h3>Stammdaten</h3>
                     <p>Personal und Hunde verwalten</p>
-                    <small style="opacity: 0.85; font-size: 0.9rem; font-weight: 500;">âžœ Jetzt Ã¶ffnen</small>
+                    <small style="opacity: 0.85; font-size: 0.9rem; font-weight: 500;">? Jetzt öffnen</small>
                 </div>
             </div>
 
@@ -51,7 +51,7 @@
                     <div class="action-icon"><i class="bi bi-gear-fill"></i></div>
                     <h3>Einstellungen</h3>
                     <p>Staffel-Daten und App-Konfiguration</p>
-                    <small style="opacity: 0.85; font-size: 0.9rem; font-weight: 500;">âžœ Jetzt Ã¶ffnen</small>
+                    <small style="opacity: 0.85; font-size: 0.9rem; font-weight: 500;">? Jetzt öffnen</small>
                 </div>
             </div>
         </div>
@@ -68,7 +68,7 @@
                         <i class="bi bi-clock-history"></i>
                     </div>
                     <h4>Team-Timer</h4>
-                    <p>Automatische Ãœberwachung der Einsatzzeiten mit Warnungen</p>
+                    <p>Automatische Überwachung der Einsatzzeiten mit Warnungen</p>
                 </div>
             </div>
             <div class="col-12 col-md-6 col-lg-3">
@@ -86,7 +86,7 @@
                         <i class="bi bi-file-pdf-fill"></i>
                     </div>
                     <h4>PDF-Export</h4>
-                    <p>VollstÃ¤ndiger Einsatzbericht als PDF</p>
+                    <p>Vollständiger Einsatzbericht als PDF</p>
                 </div>
             </div>
             <div class="col-12 col-md-6 col-lg-3">
@@ -95,7 +95,7 @@
                         <i class="bi bi-phone-fill"></i>
                     </div>
                     <h4>Mobile Dashboard</h4>
-                    <p>Echtzeit-Updates fÃ¼r EinsatzkrÃ¤fte</p>
+                    <p>Echtzeit-Updates für Einsatzkräfte</p>
                 </div>
             </div>
         </div>
@@ -105,3 +105,4 @@
 @code {
     
 }
+
