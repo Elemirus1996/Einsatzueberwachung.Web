@@ -11,7 +11,7 @@ param(
 $ErrorActionPreference = "Stop"
 
 # Aktuelle Version und GitHub-Repository
-$script:CurrentVersion = "4.3.1"
+$script:CurrentVersion = "4.3.2"
 $script:GitHubRepo = "Elemirus1996/Einsatzueberwachung.Web"
 
 # Farben
@@ -401,5 +401,6 @@ if ($choice -eq "2") {
 }
 
 Start-Application -IsNetworkMode $NetworkMode
+
 
 

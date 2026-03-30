@@ -1,6 +1,6 @@
 [Setup]
 AppName=Einsatzüberwachung
-AppVersion=4.3.1
+AppVersion=4.3.2
 AppId={{B8C1B81C-2C7F-4D58-9B4F-83A6F3E1C2C5}
 AppPublisher=Rettungshunde-Einsatz-Koordination
 AppPublisherURL=https://github.com/Elemirus1996/Einsatzueberwachung.Web
@@ -48,7 +48,7 @@ Filename: "{app}\Einsatzueberwachung-Starter.bat"; Description: "Einsatzüberwac
 [Code]
 const
   AppIdValue = '{B8C1B81C-2C7F-4D58-9B4F-83A6F3E1C2C5}';
-  CurrentVersion = '4.3.1';
+  CurrentVersion = '4.3.2';
 
 function IsDotNetInstalled: Boolean;
 var
@@ -216,4 +216,5 @@ begin
     end;
   end;
 end;
+
 

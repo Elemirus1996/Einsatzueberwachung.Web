@@ -1,0 +1,96 @@
+@page "/drohne"
+@using System.Globalization
+@using Einsatzueberwachung.Domain.Interfaces
+@inject IEinsatzService EinsatzService
+
+<PageTitle>Drohne | Einsatzüberwachung</PageTitle>
+
+<div class="container-fluid">
+    <div class="page-header mb-4">
+        <h1><i class="bi bi-airplane-fill me-2"></i>Drohne</h1>
+        <p class="text-muted mb-0">Drohnenwetter für den aktuellen Einsatzstandort</p>
+    </div>
+
+    <div class="card mb-3">
+        <div class="card-body">
+            <div class="row g-3 align-items-end">
+                <div class="col-lg-5">
+                    <label class="form-label fw-bold">Einsatzadresse</label>
+                    <input class="form-control" value="@_address" readonly />
+                </div>
+                <div class="col-md-3 col-lg-2">
+                    <label class="form-label fw-bold">Breitengrad</label>
+                    <input class="form-control" value="@FormatCoord(_latitude)" readonly />
+                </div>
+                <div class="col-md-3 col-lg-2">
+                    <label class="form-label fw-bold">Laengengrad</label>
+                    <input class="form-control" value="@FormatCoord(_longitude)" readonly />
+                </div>
+                <div class="col-md-6 col-lg-3 d-grid gap-2">
+                    <form method="post" action="https://drohnenwetter.de/results" target="drohnenwetter-frame">
+                        <input type="hidden" name="lat" value="@FormatCoord(_latitude)" />
+                        <input type="hidden" name="lon" value="@FormatCoord(_longitude)" />
+                        <input type="hidden" name="address" value="@_addressForPost" />
+                        <button type="submit" class="btn btn-primary w-100" disabled="@(!_hasLocationData)">
+                            <i class="bi bi-cloud-check me-1"></i>Drohnenwetter laden
+                        </button>
+                    </form>
+                    <a class="btn btn-outline-secondary w-100" href="https://drohnenwetter.de/" target="_blank" rel="noopener noreferrer">
+                        <i class="bi bi-box-arrow-up-right me-1"></i>Extern öffnen
+                    </a>
+                </div>
+            </div>
+
+            @if (!_hasLocationData)
+            {
+                <div class="alert alert-warning mt-3 mb-0">
+                    <i class="bi bi-exclamation-triangle me-2"></i>
+                    Kein Einsatzstandort vorhanden. Bitte zuerst Einsatzort oder ELW-Position setzen.
+                </div>
+            }
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body p-0">
+            <iframe
+                name="drohnenwetter-frame"
+                src="https://drohnenwetter.de/"
+                title="Drohnenwetter"
+                style="width:100%; min-height:75vh; border:0; border-radius:0.5rem;">
+            </iframe>
+        </div>
+    </div>
+</div>
+
+@code {
+    private string _address = string.Empty;
+    private string _addressForPost = string.Empty;
+    private double? _latitude;
+    private double? _longitude;
+    private bool _hasLocationData;
+
+    protected override void OnInitialized()
+    {
+        var einsatz = EinsatzService.CurrentEinsatz;
+
+        _latitude = einsatz.ElwLatitude;
+        _longitude = einsatz.ElwLongitude;
+        _address = string.IsNullOrWhiteSpace(einsatz.MapAddress)
+            ? einsatz.Einsatzort
+            : einsatz.MapAddress;
+
+        _hasLocationData =
+            (!string.IsNullOrWhiteSpace(_address)) ||
+            (_latitude.HasValue && _longitude.HasValue);
+
+        _addressForPost = string.IsNullOrWhiteSpace(_address) ? "GPS" : _address;
+    }
+
+    private static string FormatCoord(double? value)
+    {
+        return value.HasValue
+            ? value.Value.ToString("F6", CultureInfo.InvariantCulture)
+            : string.Empty;
+    }
+}

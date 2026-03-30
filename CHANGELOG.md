@@ -1,5 +1,16 @@
 # 📋 CHANGELOG
 
+## Version 4.3.2 - "Drohnenwetter-Seite" (März 2026)
+
+### 🎯 Hauptverbesserungen
+
+- ✈️ Neue Seite **Drohne** hinzugefügt
+- 🌐 Direkte Integration von drohnenwetter.de in der Anwendung
+- 📍 Übergabe des Einsatzstandorts (ELW-Koordinaten oder Einsatzadresse) an drohnenwetter.de
+- 🧭 Neuer Navigationseintrag **Drohne** im Seitenmenü
+
+---
+
 ## Version 4.3.1 - "Hotfix: Port 5001 & Fehlerbanner" (März 2026)
 
 ### 🎯 Hauptverbesserungen
