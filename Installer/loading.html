@@ -111,6 +111,11 @@
     </div>
     <div class="time" id="time">Warte seit 0 Sekunden</div>
     
+    <button id="openBtn" onclick="window.location.href='https://localhost:7059'" 
+            style="margin-top: 1.5rem; padding: 0.8rem 2rem; font-size: 1rem; background: white; color: #1a237e; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; display: none;">
+        Anwendung öffnen
+    </button>
+    
     <div class="error" id="error">
         <p>Der Server antwortet nicht.</p>
         <p style="margin-top: 0.5rem;"><a href="javascript:location.reload()">Erneut versuchen</a></p>
@@ -119,9 +124,11 @@
     <script>
         const APP_URL = 'https://localhost:7059';
         const MAX_WAIT_SECONDS = 120;
+        const CHECK_INTERVAL = 2000; // Alle 2 Sekunden prüfen
         
         let startTime = Date.now();
         let attempts = 0;
+        let redirecting = false;
         
         function updateTime() {
             const elapsed = Math.floor((Date.now() - startTime) / 1000);
@@ -132,55 +139,87 @@
             document.getElementById('status').textContent = text;
         }
         
-        async function checkServer() {
+        function tryRedirect() {
+            if (redirecting) return;
+            redirecting = true;
+            updateStatus('Weiterleitung zur Anwendung...');
+            window.location.href = APP_URL;
+        }
+        
+        function checkServer() {
             attempts++;
             const elapsed = Math.floor((Date.now() - startTime) / 1000);
             
             if (elapsed > MAX_WAIT_SECONDS) {
                 document.getElementById('error').style.display = 'block';
-                updateStatus('Zeitüberschreitung');
+                updateStatus('Zeitüberschreitung - klicken Sie auf den Link unten');
                 return;
             }
             
-            try {
-                // Versuche die App zu erreichen
-                const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 3000);
+            // Verwende ein verstecktes iframe zum Testen
+            const iframe = document.createElement('iframe');
+            iframe.style.cssText = 'position:absolute;width:1px;height:1px;opacity:0;pointer-events:none;';
+            
+            let handled = false;
+            
+            // onload wird ausgelöst wenn die Seite im iframe lädt
+            iframe.onload = function() {
+                if (handled) return;
+                handled = true;
                 
-                const response = await fetch(APP_URL, {
-                    method: 'HEAD',
-                    mode: 'no-cors',
-                    signal: controller.signal
-                });
+                // Prüfe ob es wirklich unsere Seite ist
+                try {
+                    // Wenn wir hier sind, hat der iframe etwas geladen
+                    setTimeout(() => {
+                        if (iframe.parentNode) iframe.parentNode.removeChild(iframe);
+                        tryRedirect();
+                    }, 100);
+                } catch(e) {
+                    // Cross-origin - aber das bedeutet der Server läuft!
+                    setTimeout(() => {
+                        if (iframe.parentNode) iframe.parentNode.removeChild(iframe);
+                        tryRedirect();
+                    }, 100);
+                }
+            };
+            
+            document.body.appendChild(iframe);
+            iframe.src = APP_URL;
+            
+            // Timeout für diesen Versuch
+            setTimeout(() => {
+                if (handled) return;
+                handled = true;
                 
-                clearTimeout(timeoutId);
+                try { 
+                    if (iframe.parentNode) iframe.parentNode.removeChild(iframe); 
+                } catch(e) {}
                 
-                // Bei no-cors können wir den Status nicht prüfen,
-                // aber wenn kein Fehler kommt, ist der Server da
-                updateStatus('Server bereit! Weiterleitung...');
+                // Status rotieren
+                const messages = [
+                    'Server wird gestartet...',
+                    'Bitte warten...',
+                    'Verbindung wird hergestellt...'
+                ];
+                updateStatus(messages[attempts % messages.length]);
                 
-                // Kurz warten damit die Meldung sichtbar ist
-                setTimeout(() => {
-                    window.location.href = APP_URL;
-                }, 500);
-                
-            } catch (error) {
-                // Server noch nicht bereit
-                if (attempts % 3 === 0) {
-                    updateStatus('Server wird gestartet...');
-                } else if (attempts % 3 === 1) {
-                    updateStatus('Verbindung wird hergestellt...');
-                } else {
-                    updateStatus('Bitte warten...');
+                // Nach 5 Versuchen den manuellen Button anzeigen
+                if (attempts >= 5) {
+                    document.getElementById('openBtn').style.display = 'block';
                 }
                 
-                // Erneut versuchen
-                setTimeout(checkServer, 1000);
-            }
+                // Nächster Versuch
+                setTimeout(checkServer, CHECK_INTERVAL);
+            }, 3000);
         }
         
         // Zeit-Anzeige aktualisieren
         setInterval(updateTime, 1000);
+        
+        // Button nach 10 Sekunden trotzdem anzeigen
+        setTimeout(() => {
+            document.getElementById('openBtn').style.display = 'block';
+        }, 10000);
         
         // Server-Check starten
         checkServer();
