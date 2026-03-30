@@ -14,7 +14,7 @@ param(
 )
 
 # Aktuelle Version (wird bei Updates automatisch angepasst)
-$script:CurrentVersion = "4.3.3"
+$script:CurrentVersion = "4.3.4"
 $script:GitHubRepo = "Elemirus1996/Einsatzueberwachung.Web"
 
 # Farbdefinitionen fuer bessere Lesbarkeit
@@ -534,6 +534,7 @@ while ($true) {
         }
     }
 }
+
 
 
 

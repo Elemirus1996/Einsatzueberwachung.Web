@@ -125,6 +125,7 @@
         const APP_URL = 'https://localhost:5001';
         const MAX_WAIT_SECONDS = 120;
         const CHECK_INTERVAL = 2000; // Alle 2 Sekunden prüfen
+        const REDIRECT_DELAY_MS = 7000; // Zusatzwartezeit vor Weiterleitung
         
         let startTime = Date.now();
         let attempts = 0;
@@ -142,8 +143,10 @@
         function tryRedirect() {
             if (redirecting) return;
             redirecting = true;
-            updateStatus('Weiterleitung zur Anwendung...');
-            window.location.href = APP_URL;
+            updateStatus('Server bereit. Weiterleitung in 7 Sekunden...');
+            setTimeout(() => {
+                window.location.href = APP_URL;
+            }, REDIRECT_DELAY_MS);
         }
         
         function checkServer() {

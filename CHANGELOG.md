@@ -1,5 +1,14 @@
 # 📋 CHANGELOG
 
+## Version 4.3.4 - "Start-Ladeseite Verzögerung" (März 2026)
+
+### 🎯 Hauptverbesserungen
+
+- ⏳ Weiterleitung von der Start-Ladeseite zur App um zusätzliche 7 Sekunden verzögert
+- 📝 Statusmeldung auf der Ladeseite entsprechend angepasst
+
+---
+
 ## Version 4.3.3 - "Drohne Live-Update" (März 2026)
 
 ### 🎯 Hauptverbesserungen
