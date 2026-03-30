@@ -20,7 +20,7 @@ namespace Einsatzueberwachung.Domain.Services
         private const string GITHUB_REPO = "Einsatzueberwachung.Web";
         private const string GITHUB_API_URL = "https://api.github.com/repos/{0}/{1}/releases/latest";
         
-        public string CurrentVersion { get; set; } = "4.3.2";
+        public string CurrentVersion { get; set; } = "4.3.3";
         public UpdateCheckResult? LastCheckResult { get; set; }
 
         public GitHubUpdateService(HttpClient httpClient, ILogger<GitHubUpdateService> logger)
@@ -169,5 +169,6 @@ namespace Einsatzueberwachung.Domain.Services
         public string? ErrorMessage { get; set; }
     }
 }
+
 
 

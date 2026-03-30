@@ -1,5 +1,15 @@
 # 📋 CHANGELOG
 
+## Version 4.3.3 - "Drohne Live-Update" (März 2026)
+
+### 🎯 Hauptverbesserungen
+
+- 🔄 Drohne-Seite übernimmt Einsatzort jetzt automatisch aus "Neuer Einsatz"
+- ⏱️ Automatische Aktualisierung der Drohnenwetter-Daten alle 5 Minuten
+- 🔁 Manueller Button "Jetzt neu laden" ergänzt
+
+---
+
 ## Version 4.3.2 - "Drohnenwetter-Seite" (März 2026)
 
 ### 🎯 Hauptverbesserungen
