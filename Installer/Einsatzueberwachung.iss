@@ -1,12 +1,13 @@
 [Setup]
 AppName=Einsatzüberwachung
-AppVersion=4.0.0
+AppVersion=4.1.0
 AppId={{B8C1B81C-2C7F-4D58-9B4F-83A6F3E1C2C5}
 AppPublisher=Rettungshunde-Einsatz-Koordination
 AppPublisherURL=https://github.com/Elemirus1996/Einsatzueberwachung.Web
 DefaultDirName={userpf}\Einsatzueberwachung
 DefaultGroupName=Einsatzüberwachung
 OutputBaseFilename=EinsatzueberwachungSetup
+SetupIconFile=Einsatzueberwachung.ico
 Compression=lzma2/max
 SolidCompression=yes
 ArchitecturesInstallIn64BitMode=x64
@@ -23,6 +24,8 @@ Name: "german"; MessagesFile: "compiler:Languages\German.isl"
 Name: "desktopicon"; Description: "Desktop-Verknüpfung erstellen"; GroupDescription: "Zusätzliche Symbole:"; Flags: unchecked
 
 [Files]
+; Icon-Datei
+Source: "Einsatzueberwachung.ico"; DestDir: "{app}"; Flags: ignoreversion
 ; Solution file
 Source: "..\Einsatzueberwachung.Web.sln"; DestDir: "{app}"; Flags: ignoreversion
 ; Hauptprojekt Dateien (ohne bin/obj)
@@ -33,8 +36,8 @@ Source: "Einsatzueberwachung-Starter.ps1"; DestDir: "{app}"; Flags: ignoreversio
 Source: "Einsatzueberwachung-Starter.bat"; DestDir: "{app}"; Flags: ignoreversion replacesameversion
 
 [Icons]
-Name: "{autoprograms}\Einsatzüberwachung"; Filename: "{app}\Einsatzueberwachung-Starter.bat"
-Name: "{autodesktop}\Einsatzüberwachung"; Filename: "{app}\Einsatzueberwachung-Starter.bat"; Tasks: desktopicon
+Name: "{autoprograms}\Einsatzüberwachung"; Filename: "{app}\Einsatzueberwachung-Starter.bat"; IconFilename: "{app}\Einsatzueberwachung.ico"
+Name: "{autodesktop}\Einsatzüberwachung"; Filename: "{app}\Einsatzueberwachung-Starter.bat"; IconFilename: "{app}\Einsatzueberwachung.ico"; Tasks: desktopicon
 
 [Run]
 Filename: "{app}\Einsatzueberwachung-Starter.bat"; Description: "Einsatzüberwachung jetzt starten"; Flags: postinstall nowait skipifsilent
@@ -42,7 +45,7 @@ Filename: "{app}\Einsatzueberwachung-Starter.bat"; Description: "Einsatzüberwac
 [Code]
 const
   AppIdValue = '{B8C1B81C-2C7F-4D58-9B4F-83A6F3E1C2C5}';
-  CurrentVersion = '4.0.0';
+  CurrentVersion = '4.1.0';
 
 function IsDotNetInstalled: Boolean;
 var

@@ -194,8 +194,6 @@ namespace Einsatzueberwachung.Domain.Services
                 
                 // Sichtweite (BrightSky liefert in Metern)
                 var sichtweiteM = data.Visibility ?? 10000;
-                var sichtweiteMeilen = sichtweiteM / 1609.34; // Umrechnung in Statute Miles für Kategorien
-                
                 // Wind
                 var windSpeed = data.GetWindSpeed();
                 var windGust = data.GetWindGustSpeed();
@@ -383,7 +381,19 @@ namespace Einsatzueberwachung.Domain.Services
             var temp = $"{(data.Temperature >= 0 ? "" : "M")}{Math.Abs((int)(data.Temperature ?? 0)):D2}/{(data.DewPoint >= 0 ? "" : "M")}{Math.Abs((int)(data.DewPoint ?? 0)):D2}";
             var qnh = $"Q{(int)(data.PressureMsl ?? 1013)}";
 
-            var station = string.IsNullOrEmpty(stationName) ? "ZZZZ" : stationName.ToUpper().Replace(" ", "").Substring(0, Math.Min(4, stationName.Length));
+            var station = "ZZZZ";
+            if (!string.IsNullOrWhiteSpace(stationName))
+            {
+                var stationCode = stationName.ToUpperInvariant().Replace(" ", string.Empty);
+                if (stationCode.Length >= 4)
+                {
+                    station = stationCode.Substring(0, 4);
+                }
+                else if (stationCode.Length > 0)
+                {
+                    station = stationCode.PadRight(4, 'X');
+                }
+            }
             
             return $"{station} {zeitUtc} {wind} {vis} {temp} {qnh} (Berechnet)";
         }

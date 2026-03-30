@@ -1,6 +1,6 @@
 # ============================================================
 # Einsatzueberwachung - Verbesserter Starter mit IP-Anzeige
-# Version: 4.0 mit automatischer Update-Prüfung
+# Version: 4.1 mit automatischer Update-Prüfung
 # ============================================================
 
 param(
@@ -11,7 +11,7 @@ param(
 $ErrorActionPreference = "Stop"
 
 # Aktuelle Version und GitHub-Repository
-$script:CurrentVersion = "3.15.0"
+$script:CurrentVersion = "4.1.0"
 $script:GitHubRepo = "Elemirus1996/Einsatzueberwachung.Web"
 
 # Farben

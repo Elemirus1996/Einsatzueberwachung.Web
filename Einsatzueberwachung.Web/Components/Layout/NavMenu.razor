@@ -8,11 +8,10 @@
     <div class="top-row ps-3 navbar navbar-dark">
         <div class="container-fluid">
             <a class="navbar-brand" href="" aria-label="Zur Startseite">
-                <i class="bi bi-alarm-fill text-danger" aria-hidden="true"></i> 
+                <img src="/favicon.png" alt="Logo" class="navbar-logo" aria-hidden="true" /> 
                 <span class="brand-text">Einsatzüberwachung</span>
             </a>
-            <button type="button" class="btn-sidebar-toggle" 
-                    onclick="(function(){ var p = document.querySelector('.page'); if(p){ p.classList.toggle('sidebar-collapsed'); localStorage.setItem('sidebarCollapsed', p.classList.contains('sidebar-collapsed')); } })();" 
+            <button type="button" class="btn-sidebar-toggle" id="sidebar-toggle-btn"
                     title="Menü ein-/ausklappen">
                 <i class="bi bi-chevron-left toggle-icon" aria-hidden="true"></i>
             </button>

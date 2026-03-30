@@ -1,5 +1,32 @@
 # 📋 CHANGELOG
 
+## Version 4.1.0 - "Branding & UX-Verbesserungen" (März 2026)
+
+### 🎯 Hauptverbesserungen
+
+#### **Neues App-Branding** 🆕
+- 🐕 Eigenes App-Logo (Rettungshund-Design) für alle Bereiche
+- 🖼️ Logo in der Sidebar-Navigation
+- 📱 Neue PWA-Icons (favicon, 192x192, 512x512)
+- 🎬 Animierter Splash-Screen beim App-Start
+- 📦 Installer zeigt das neue Logo im Setup-Wizard
+
+#### **Verbessertes UI/UX** 🆕
+- 📌 Header mit Uhrzeit bleibt beim Scrollen fixiert (sticky)
+- 🖥️ Vollbild-Modus Button in der Header-Leiste (oder F11)
+- 🏷️ Einheitliche Browser-Tab-Titel: "Seite | Einsatzüberwachung"
+- 🔧 NavMenu-Toggle CSP-kompatibel (Fix für Kunden-Browser)
+
+### 🛠️ Technische Details
+- **Aktualisierte Dateien:**
+  - [NavMenu.razor](Einsatzueberwachung.Web/Components/Layout/NavMenu.razor) - Logo statt Alarm-Icon
+  - [MainLayout.razor](Einsatzueberwachung.Web/Components/Layout/MainLayout.razor) - Vollbild-Button
+  - [App.razor](Einsatzueberwachung.Web/Components/App.razor) - Splash-Screen, CSP-Fix
+  - Alle Seiten - Dynamische PageTitle
+  - [Einsatzueberwachung.iss](Installer/Einsatzueberwachung.iss) - Setup-Icon
+
+---
+
 ## Version 4.0.0 - "Archiv, Team-Automation & Wetter-Adresssuche" (März 2026)
 
 ### 🎯 Hauptverbesserungen

@@ -2237,6 +2237,9 @@ textarea:focus-visible {
     justify-content: center !important;
     padding: 12px 1rem !important;
     border: none !important;
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 50 !important;
 }
 
 .live-datetime {
@@ -2278,6 +2281,9 @@ textarea:focus-visible {
     padding: 15px 1rem !important;
     border: none !important;
     height: auto !important;
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 50 !important;
 }
 
 .live-datetime {
@@ -2321,6 +2327,48 @@ textarea:focus-visible {
 
 .header-with-clock a:hover {
     color: #cccccc !important;
+}
+
+/* Header Actions (Fullscreen Button etc.) */
+.header-actions {
+    position: absolute;
+    right: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.btn-fullscreen {
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: white;
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 1.1rem;
+}
+
+.btn-fullscreen:hover {
+    background: rgba(255, 255, 255, 0.25);
+    transform: scale(1.05);
+}
+
+.btn-fullscreen:active {
+    transform: scale(0.95);
+}
+
+/* Fullscreen mode adjustments */
+:fullscreen .sidebar {
+    display: none !important;
+}
+
+:fullscreen main {
+    margin-left: 0 !important;
 }
 
 /* Dark Mode - Live-Uhr */

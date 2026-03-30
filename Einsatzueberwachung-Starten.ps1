@@ -1,7 +1,7 @@
 # ============================================================
 # Einsatzueberwachung - Universal Starter mit Desktop-Verknuepfung
 # ============================================================
-# Version: 4.0
+# Version: 4.1
 # Beschreibung: Automatischer Start der Einsatzueberwachung mit
 #               Update-Pruefung, allen Pruefungen und Optionen
 # ============================================================
@@ -14,7 +14,7 @@ param(
 )
 
 # Aktuelle Version (wird bei Updates automatisch angepasst)
-$script:CurrentVersion = "4.0.0"
+$script:CurrentVersion = "4.1.0"
 $script:GitHubRepo = "Elemirus1996/Einsatzueberwachung.Web"
 
 # Farbdefinitionen fuer bessere Lesbarkeit
