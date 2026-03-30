@@ -14,7 +14,7 @@ param(
 )
 
 # Aktuelle Version (wird bei Updates automatisch angepasst)
-$script:CurrentVersion = "4.2.0"
+$script:CurrentVersion = "4.3.0"
 $script:GitHubRepo = "Elemirus1996/Einsatzueberwachung.Web"
 
 # Farbdefinitionen fuer bessere Lesbarkeit
@@ -305,41 +305,29 @@ function Start-LocalMode {
     Write-Host "   STARTE LOKALEN MODUS" -ForegroundColor $Colors.Success
     Write-Host "============================================================" -ForegroundColor $Colors.Success
     Write-Host ""
-    Write-Host "Die Anwendung wird gestartet..." -ForegroundColor $Colors.Info
-    Write-Host ""
     
     # Wechsle ins Projektverzeichnis
     $scriptPath = Split-Path -Parent $MyInvocation.MyCommand.Path
-    Set-Location "$scriptPath\Einsatzueberwachung.Web"
     
-    # Starte Server im Hintergrund (ohne auto-browser)
-    $serverJob = Start-Job -ScriptBlock {
-        param($workDir)
-        Set-Location $workDir
-        dotnet run --no-launch-profile --urls "https://localhost:7059;http://localhost:5059"
-    } -ArgumentList (Get-Location).Path
-    
-    # Warte auf Server
-    if (Wait-ForServer -Url "https://localhost:7059" -TimeoutSeconds 60) {
-        # Browser oeffnen
-        Write-Host "Oeffne Browser..." -ForegroundColor $Colors.Info
+    # Ladeseite im Browser oeffnen (wartet automatisch auf Server)
+    $loadingPage = Join-Path $scriptPath "Installer\loading.html"
+    if (Test-Path $loadingPage) {
+        Write-Host "Oeffne Ladeseite im Browser..." -ForegroundColor $Colors.Info
+        Start-Process $loadingPage
+    } else {
+        # Fallback: Direkt die URL oeffnen
         Start-Process "https://localhost:7059"
-        Write-Host ""
     }
     
+    Write-Host "Die Anwendung wird gestartet..." -ForegroundColor $Colors.Info
+    Write-Host ""
     Write-Host ">> Druecken Sie STRG+C zum Beenden" -ForegroundColor $Colors.Warning
     Write-Host ""
     
-    # Zeige Server-Output im Vordergrund
-    try {
-        while ($serverJob.State -eq 'Running') {
-            Receive-Job -Job $serverJob
-            Start-Sleep -Milliseconds 500
-        }
-    } finally {
-        Stop-Job -Job $serverJob -ErrorAction SilentlyContinue
-        Remove-Job -Job $serverJob -ErrorAction SilentlyContinue
-    }
+    Set-Location "$scriptPath\Einsatzueberwachung.Web"
+    
+    # Starte Server (blockierend - Browser wartet automatisch)
+    dotnet run --no-launch-profile --urls "https://localhost:7059;http://localhost:5059"
 }
 
 function Start-NetworkMode {
@@ -397,37 +385,24 @@ function Start-NetworkMode {
     
     # Wechsle ins Projektverzeichnis
     $scriptPath = Split-Path -Parent $MyInvocation.MyCommand.Path
-    Set-Location "$scriptPath\Einsatzueberwachung.Web"
     
-    # Starte Server im Hintergrund
-    $serverJob = Start-Job -ScriptBlock {
-        param($workDir)
-        Set-Location $workDir
-        $env:ASPNETCORE_URLS = "https://*:7059;http://*:5059"
-        dotnet run --no-launch-profile
-    } -ArgumentList (Get-Location).Path
-    
-    # Warte auf Server
-    if (Wait-ForServer -Url "https://localhost:7059" -TimeoutSeconds 60) {
-        # Browser oeffnen
-        Write-Host "Oeffne Browser..." -ForegroundColor $Colors.Info
+    # Ladeseite im Browser oeffnen (wartet automatisch auf Server)
+    $loadingPage = Join-Path $scriptPath "Installer\loading.html"
+    if (Test-Path $loadingPage) {
+        Write-Host "Oeffne Ladeseite im Browser..." -ForegroundColor $Colors.Info
+        Start-Process $loadingPage
+    } else {
         Start-Process "https://localhost:7059"
-        Write-Host ""
     }
     
     Write-Host ">> Druecken Sie STRG+C zum Beenden" -ForegroundColor $Colors.Warning
     Write-Host ""
     
-    # Zeige Server-Output im Vordergrund
-    try {
-        while ($serverJob.State -eq 'Running') {
-            Receive-Job -Job $serverJob
-            Start-Sleep -Milliseconds 500
-        }
-    } finally {
-        Stop-Job -Job $serverJob -ErrorAction SilentlyContinue
-        Remove-Job -Job $serverJob -ErrorAction SilentlyContinue
-    }
+    Set-Location "$scriptPath\Einsatzueberwachung.Web"
+    
+    # Starte Server (blockierend - Browser wartet automatisch)
+    $env:ASPNETCORE_URLS = "https://*:7059;http://*:5059"
+    dotnet run --no-launch-profile
 }
 
 function New-DesktopShortcut {

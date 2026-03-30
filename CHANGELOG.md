@@ -1,5 +1,25 @@
 # 📋 CHANGELOG
 
+## Version 4.3.0 - "Ladeseite statt Splash" (März 2026)
+
+### 🎯 Hauptverbesserungen
+
+#### **Smarte Ladeseite** 🆕
+- 🔄 Browser zeigt Ladeseite während Server startet (statt "Seite nicht erreichbar")
+- ⏳ Automatische Weiterleitung zur App wenn Server bereit ist
+- ❌ Splash-Screen entfernt (verursachte Probleme bei Navigation)
+- 🎨 Schöne Ladeanimation mit Logo und Fortschrittsanzeige
+
+### 🛠️ Technische Details
+- **Neue Dateien:**
+  - [loading.html](Installer/loading.html) - Eigenständige Ladeseite
+- **Aktualisierte Dateien:**
+  - [App.razor](Einsatzueberwachung.Web/Components/App.razor) - Splash-Screen entfernt
+  - [Einsatzueberwachung-Starten.ps1](Einsatzueberwachung-Starten.ps1) - Öffnet Ladeseite
+  - [Einsatzueberwachung-Starter.ps1](Installer/Einsatzueberwachung-Starter.ps1) - Öffnet Ladeseite
+
+---
+
 ## Version 4.2.0 - "Stabilität & Zertifikate" (März 2026)
 
 ### 🎯 Hauptverbesserungen

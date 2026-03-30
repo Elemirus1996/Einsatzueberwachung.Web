@@ -1,6 +1,6 @@
 [Setup]
 AppName=Einsatzüberwachung
-AppVersion=4.2.0
+AppVersion=4.3.0
 AppId={{B8C1B81C-2C7F-4D58-9B4F-83A6F3E1C2C5}
 AppPublisher=Rettungshunde-Einsatz-Koordination
 AppPublisherURL=https://github.com/Elemirus1996/Einsatzueberwachung.Web
@@ -26,6 +26,9 @@ Name: "desktopicon"; Description: "Desktop-Verknüpfung erstellen"; GroupDescrip
 [Files]
 ; Icon-Datei
 Source: "Einsatzueberwachung.ico"; DestDir: "{app}"; Flags: ignoreversion
+; Ladeseite fuer Browser
+Source: "loading.html"; DestDir: "{app}"; Flags: ignoreversion
+Source: "logo-512.png"; DestDir: "{app}"; Flags: ignoreversion
 ; Solution file
 Source: "..\Einsatzueberwachung.Web.sln"; DestDir: "{app}"; Flags: ignoreversion
 ; Hauptprojekt Dateien (ohne bin/obj)
@@ -45,7 +48,7 @@ Filename: "{app}\Einsatzueberwachung-Starter.bat"; Description: "Einsatzüberwac
 [Code]
 const
   AppIdValue = '{B8C1B81C-2C7F-4D58-9B4F-83A6F3E1C2C5}';
-  CurrentVersion = '4.2.0';
+  CurrentVersion = '4.3.0';
 
 function IsDotNetInstalled: Boolean;
 var

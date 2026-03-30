@@ -11,7 +11,7 @@ param(
 $ErrorActionPreference = "Stop"
 
 # Aktuelle Version und GitHub-Repository
-$script:CurrentVersion = "4.2.0"
+$script:CurrentVersion = "4.3.0"
 $script:GitHubRepo = "Elemirus1996/Einsatzueberwachung.Web"
 
 # Farben
@@ -341,15 +341,19 @@ function Start-Application {
     # Zeige Zugriffsinformationen
     Show-AccessInfo -LocalUrl $localUrl -NetworkUrls $networkUrls
     
-    # Browser oeffnen (verwende den tatsächlichen Port)
-    Write-Host ""
-    Write-Host "Öffne Browser..." -ForegroundColor $Colors.Info
-    Start-Sleep -Seconds 2
-    
-    # Öffne immer localhost im Browser (auch im Netzwerk-Modus)
-    $browserUrl = "http://localhost:5000"
-    Write-Host "Öffne: $browserUrl" -ForegroundColor $Colors.Info
-    Start-Process $browserUrl
+    # Ladeseite im Browser oeffnen (wartet automatisch auf Server)
+    $loadingPage = Join-Path $PSScriptRoot "loading.html"
+    if (Test-Path $loadingPage) {
+        Write-Host ""
+        Write-Host "Öffne Ladeseite im Browser..." -ForegroundColor $Colors.Info
+        Start-Process $loadingPage
+    } else {
+        # Fallback: Direkt URL öffnen
+        Write-Host ""
+        Write-Host "Öffne Browser..." -ForegroundColor $Colors.Info
+        $browserUrl = "https://localhost:7059"
+        Start-Process $browserUrl
+    }
     
     # Starte dotnet
     if ($IsNetworkMode) {
