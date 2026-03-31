@@ -401,11 +401,6 @@ OnTeamTypeChanged="UpdateTeamName" />
         EinsatzService.TeamWarningTriggered += OnWarningTriggered;
         EinsatzService.EinsatzChanged += OnEinsatzChanged;
 
-        foreach (var team in _teams)
-        {
-            team.TimerTick += OnTimerTick;
-        }
-
         _refreshTimer = new System.Threading.Timer(_ => InvokeAsync(StateHasChanged), null, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(1));
     }
     
@@ -699,11 +694,6 @@ OnTeamTypeChanged="UpdateTeamName" />
         InvokeAsync(StateHasChanged);
     }
 
-    private void OnTimerTick(Team team)
-    {
-        InvokeAsync(StateHasChanged);
-    }
-
     private async void OnWarningTriggered(Team team, bool isSecondWarning)
     {
         await InvokeAsync(async () =>
@@ -876,11 +866,6 @@ OnTeamTypeChanged="UpdateTeamName" />
         EinsatzService.NoteAdded -= OnDataChanged;
         EinsatzService.TeamWarningTriggered -= OnWarningTriggered;
         EinsatzService.EinsatzChanged -= OnEinsatzChanged;
-
-        foreach (var team in _teams)
-        {
-            team.TimerTick -= OnTimerTick;
-        }
     }
     
     private void OnEinsatzChanged()

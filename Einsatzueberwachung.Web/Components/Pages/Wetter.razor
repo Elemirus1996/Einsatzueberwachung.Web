@@ -169,6 +169,21 @@
                         }
                     </div>
                     <div class="card-body">
+                        <div class="d-flex flex-wrap gap-2 mb-3">
+                            <a class="btn btn-outline-info btn-sm" href="@DrohnenwetterUrl" target="_blank" rel="noopener noreferrer" @onclick="CopyDrohnenwetterLink">
+                                <i class="bi bi-box-arrow-up-right me-1"></i>Drohnenwetter.de öffnen
+                            </a>
+                            <button class="btn btn-outline-secondary btn-sm" @onclick="CopyDrohnenwetterLink">
+                                <i class="bi bi-clipboard me-1"></i>Link kopieren
+                            </button>
+                            @if (_drohnenwetterLinkCopied)
+                            {
+                                <span class="badge bg-success align-self-center">
+                                    <i class="bi bi-check-circle me-1"></i>In Zwischenablage kopiert
+                                </span>
+                            }
+                        </div>
+
                         @if (_flugwetterData != null)
                         {
                             <!-- Flugkategorie-Anzeige -->
@@ -458,6 +473,8 @@
 </style>
 
 @code {
+    private const string DrohnenwetterUrl = "https://drohnenwetter.de/";
+
     private double _latitude = 51.1657;  // Deutschland Mitte
     private double _longitude = 10.4515;
     private string _addressInput = "";
@@ -469,6 +486,7 @@
     private double? _cloudBase;
     
     private bool _isLoading = false;
+    private bool _drohnenwetterLinkCopied = false;
     private string? _error;
     
     private System.Timers.Timer? _refreshTimer;
@@ -619,6 +637,24 @@
     private async Task RefreshWeather()
     {
         await LoadWeatherData();
+    }
+
+    private async Task CopyDrohnenwetterLink()
+    {
+        try
+        {
+            await JSRuntime.InvokeVoidAsync("navigator.clipboard.writeText", DrohnenwetterUrl);
+            _drohnenwetterLinkCopied = true;
+            StateHasChanged();
+
+            await Task.Delay(3000);
+            _drohnenwetterLinkCopied = false;
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Fehler beim Kopieren des Drohnenwetter-Links: {ex.Message}");
+        }
     }
 
     private string FormatSichtweite(double km)

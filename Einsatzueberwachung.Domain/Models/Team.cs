@@ -1,18 +1,18 @@
 ﻿// Quelle: WPF-Projekt Models/Team.cs
 // Repräsentiert ein Team (Hund+Hundeführer+Helfer oder Drohnenteam) mit Timer und Warnungen
-// Hinweis: Timer-Logik wurde für Blazor angepasst (System.Threading.Timer statt DispatcherTimer)
+// Hinweis: Timer-Logik wird zentral durch TeamTimerService gesteuert (ein Timer für alle Teams)
 
 using System;
-using System.Threading;
 using Einsatzueberwachung.Domain.Models.Enums;
 
 namespace Einsatzueberwachung.Domain.Models
 {
     public class Team : IDisposable
     {
-        private Timer? _timer;
-        private DateTime _startTime;
         private bool _disposed = false;
+
+        // Startzeit des Timers, gesetzt von StartTimer() und vom TeamTimerService gelesen
+        public DateTime StartTime { get; private set; }
 
         public string TeamId { get; set; }
         public string TeamName { get; set; }
@@ -73,14 +73,9 @@ namespace Einsatzueberwachung.Domain.Models
 
         public void StartTimer()
         {
-            if (_timer == null)
-            {
-                _timer = new Timer(Timer_Tick, null, TimeSpan.Zero, TimeSpan.FromSeconds(1));
-            }
-
             if (!IsRunning)
             {
-                _startTime = DateTime.Now - ElapsedTime;
+                StartTime = DateTime.Now - ElapsedTime;
                 IsRunning = true;
                 TimerStarted?.Invoke(this);
             }
@@ -91,8 +86,6 @@ namespace Einsatzueberwachung.Domain.Models
             if (IsRunning)
             {
                 IsRunning = false;
-                _timer?.Dispose();
-                _timer = null;
                 TimerStopped?.Invoke(this);
             }
         }
@@ -106,23 +99,7 @@ namespace Einsatzueberwachung.Domain.Models
             TimerReset?.Invoke(this);
         }
 
-        private void Timer_Tick(object? state)
-        {
-            if (!IsRunning) return;
-
-            try
-            {
-                var currentTime = DateTime.Now - _startTime;
-                ElapsedTime = currentTime;
-                CheckWarnings();
-                TimerTick?.Invoke(this);
-            }
-            catch
-            {
-            }
-        }
-
-        private void CheckWarnings()
+        public void CheckWarnings()
         {
             var totalMinutes = (int)ElapsedTime.TotalMinutes;
 
@@ -139,12 +116,19 @@ namespace Einsatzueberwachung.Domain.Models
             }
         }
 
+        // Aufgerufen vom zentralen TeamTimerService einmal pro Sekunde
+        public void Tick(DateTime now)
+        {
+            if (!IsRunning) return;
+            ElapsedTime = now - StartTime;
+            CheckWarnings();
+            TimerTick?.Invoke(this);
+        }
+
         public void Dispose()
         {
             if (!_disposed)
             {
-                _timer?.Dispose();
-                _timer = null;
                 IsRunning = false;
                 _disposed = true;
             }

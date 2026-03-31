@@ -1,0 +1,190 @@
+EINSATZUEBERWACHUNG - MIGRATIONSPLAN AUF EXTERNEN SERVER MIT INTERNET-ZUGRIFF
+Version: 1.0
+Datum: 30.03.2026
+
+ZIEL
+- Die Anwendung soll stabil im ELW nutzbar bleiben.
+- Mobile Geraete sollen auch ausserhalb des lokalen WLANs sicher mit der Anwendung kommunizieren.
+- Kommunikation soll verschluesselt (HTTPS) und authentifiziert erfolgen.
+
+AUSGANGSLAGE
+- Aktuell laeuft die App lokal (Kestrel, Ports 5000/5001).
+- Zugriff ist primaer auf LAN/WLAN ausgelegt.
+- Fuer entfernte Clients wird Internet-Reichweite benoetigt.
+
+============================================================
+ZIELARCHITEKTUR (EMPFEHLUNG)
+============================================================
+
+Option A (Empfohlen): VPS/Cloud-Server + Reverse Proxy + HTTPS
+- Standort App: Externer Linux/Windows Server im Rechenzentrum.
+- Reverse Proxy: Nginx oder Caddy (TLS-Termination, Rate-Limiting, Header-Hardening).
+- App: .NET Kestrel intern auf localhost:5000.
+- Public Zugriff: https://einsatz.<deine-domain>
+- Mobile Clients: Zugriff ueber Internet (4G/5G/WLAN weltweit).
+
+Option B (Alternative ohne Portfreigabe am ELW): Cloudflare Tunnel
+- App bleibt ggf. im ELW oder auf kleinem Server.
+- cloudflared baut ausgehenden Tunnel auf, kein eingehender Port am Router noetig.
+- Public Zugriff ueber Cloudflare-Hostname mit TLS.
+- Schnell testbar, gut fuer Pilotphase.
+
+Option C (Geschlossenes Netz): WireGuard VPN
+- Nur bekannte Teilnehmer (ELW + autorisierte Mobilgeraete) koennen zugreifen.
+- Kein oeffentlicher Zugriff ohne VPN-Client.
+- Sehr sicher, aber mehr Betriebsaufwand pro Endgeraet.
+
+EMPFEHLUNG FUER EUREN EINSATZFALL
+- Primar Option A fuer robuste Verfuegbarkeit und einfache Bedienung.
+- Optional zusaetzlich WireGuard fuer Admin-Zugriff.
+
+============================================================
+PHASENPLAN
+============================================================
+
+PHASE 0 - ENTSCHEIDUNG UND RAHMEN
+1) Betriebsmodell festlegen:
+   - Oeffentlich erreichbar (mit Login) oder nur via VPN.
+2) Domain festlegen, z. B. einsatz.<deine-domain>
+3) Verantwortlichkeiten festlegen:
+   - Technik/Betrieb, Zertifikate, Monitoring, Notfallkontakt.
+
+PHASE 1 - SERVER BEREITSTELLUNG
+1) Server bereitstellen (mindestens):
+   - 2 vCPU, 4 GB RAM, 40+ GB SSD.
+2) Betriebssystem hardenen:
+   - Sicherheitsupdates, Zeitsync, Firewall aktiv.
+3) Benutzer- und SSH/RDP-Konzept:
+   - Kein Standard-Admin fuer Tagesbetrieb.
+
+PHASE 2 - APP DEPLOYMENT
+1) .NET Runtime installieren (passend zur App).
+2) Anwendung als Service einrichten:
+   - Linux: systemd
+   - Windows: NSSM/Windows Service
+3) App intern nur lokal binden:
+   - ASPNETCORE_URLS=http://127.0.0.1:5000
+
+PHASE 3 - REVERSE PROXY + TLS
+1) Nginx/Caddy installieren.
+2) TLS Zertifikat (Let's Encrypt) einrichten.
+3) Proxy-Regeln:
+   - 443 -> 127.0.0.1:5000
+   - HTTP 80 nur Redirect auf HTTPS.
+4) WebSocket/SignalR weiterleiten:
+   - Upgrade-Header korrekt setzen.
+
+PHASE 4 - SICHERHEIT
+1) Geheimnisse ersetzen (kritisch):
+   - JWT Key in appsettings auf starken, langen Wert setzen.
+   - Standard-Auth-Benutzer/Passwort ersetzen.
+2) Konfiguration haerten:
+   - AllowedHosts auf echte Domain begrenzen.
+   - Security Headers (HSTS, X-Content-Type-Options, Referrer-Policy).
+3) Optional:
+   - 2FA vorgelagert (z. B. Cloudflare Access, Keycloak, Entra).
+4) Zugriffsschutz API/Hubs:
+   - Token-Lifetime, Revocation-Strategie, Audit-Logging.
+
+PHASE 5 - DATEN UND BACKUP
+1) Persistenzpfade definieren (Archiv/Export/Logs).
+2) Taegliche Backups:
+   - App-Daten + Konfiguration + Zertifikate + Restore-Test.
+3) Aufbewahrung:
+   - z. B. 30 Tage rolling + monatliche Sicherung.
+
+PHASE 6 - MOBILE WEITVERBINDUNG
+1) Mobilclients auf neue Domain umstellen.
+2) SignalR-Verbindung ueber HTTPS testen (4G/5G).
+3) Testmatrix:
+   - Hohe Latenz
+   - Verbindungsabbruch
+   - Reconnect-Verhalten
+4) Fallback festlegen:
+   - Wenn Internet ausfaellt: lokaler ELW-Notbetrieb.
+
+PHASE 7 - GO-LIVE
+1) Wartungsfenster und Rollback-Plan.
+2) DNS umschalten.
+3) Smoke Tests:
+   - Login
+   - Einsatzstart
+   - Team-Updates
+   - Mobile Sync
+   - Wetter/Drohne
+4) Monitoring in den ersten 24h eng verfolgen.
+
+============================================================
+NETZWERK- UND FIREWALL-REGELN
+============================================================
+
+Extern offen:
+- TCP 443 (HTTPS)
+- Optional TCP 80 nur fuer Redirect/ACME Challenge
+
+Intern geschlossen:
+- Kestrel-Port 5000/5001 NICHT oeffentlich freigeben
+
+Server Firewall:
+- Nur notwendige Ports erlauben
+- SSH/RDP nur von Admin-IP oder via VPN/Bastion
+
+============================================================
+BETRIEB IM ELW (PRAXIS)
+============================================================
+
+- ELW nutzt die externe URL als primaeren Zugriff.
+- Bei Netzausfall im Feld:
+  1) Lokale ELW-Instanz als Notfallmodus startbar halten.
+  2) Datenabgleich-Strategie definieren (manuell/automatisch).
+- Empfohlene Zusatzmassnahme:
+  - LTE/5G-Router mit Multi-SIM oder Failover.
+
+============================================================
+MONITORING UND ALARME
+============================================================
+
+Mindestens ueberwachen:
+- Uptime Endpoint: /health
+- TLS Ablaufdatum
+- CPU/RAM/Disk
+- Fehlerquote (HTTP 5xx)
+- SignalR Disconnect-Rate
+
+Alarmkanal:
+- E-Mail + Messenger (z. B. Teams/Signal)
+- Eskalation bei Downtime > 2 Minuten
+
+============================================================
+ABNAHMEKRITERIEN
+============================================================
+
+Technisch bestanden wenn:
+- App ueber Internet via HTTPS erreichbar ist.
+- Mobilgeraet ausserhalb WLAN kann Einsatzdaten lesen/schreiben.
+- SignalR Realtime-Updates funktionieren stabil > 60 Minuten Dauertest.
+- Restore aus Backup wurde erfolgreich getestet.
+- Standard-Credentials sind ersetzt und dokumentiert.
+
+============================================================
+UMSETZUNGS-CHECKLISTE (KURZ)
+============================================================
+
+[ ] Domain + DNS eingerichtet
+[ ] Server gehardnet
+[ ] App als Service laeuft
+[ ] Reverse Proxy + TLS aktiv
+[ ] JWT/Auth-Secrets ersetzt
+[ ] Firewall korrekt
+[ ] Backup + Restore getestet
+[ ] Mobile Fernzugriff getestet
+[ ] Rollback-Plan dokumentiert
+[ ] Betriebsteam eingewiesen
+
+============================================================
+EMPFOHLENE NAECHSTE SCHRITTE
+============================================================
+
+1) Pilot mit Option A auf Testdomain aufsetzen.
+2) 1-2 reale Feldtests mit Mobilfunk durchfuehren.
+3) Danach produktiver Cutover mit Wartungsfenster.

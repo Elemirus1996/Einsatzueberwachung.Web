@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
 using Einsatzueberwachung.Domain.Interfaces;
 using Einsatzueberwachung.Domain.Models;
@@ -16,6 +17,9 @@ namespace Einsatzueberwachung.Domain.Services
     {
         private readonly string _dataPath;
         private SessionData? _sessionData;
+        private Timer? _debounceTimer;
+        private static readonly JsonSerializerOptions _writeOptions = new JsonSerializerOptions { WriteIndented = true };
+        private const int SaveDelayMs = 500;
 
         public MasterDataService()
         {
@@ -55,12 +59,38 @@ namespace Einsatzueberwachung.Domain.Services
             return _sessionData;
         }
 
-        public async Task SaveSessionDataAsync(SessionData sessionData)
+        public Task SaveSessionDataAsync(SessionData sessionData)
         {
             _sessionData = sessionData;
+            ScheduleSave();
+            return Task.CompletedTask;
+        }
+
+        // Schreibt sofort auf Disk (z.B. beim App-Shutdown oder explizitem Flush)
+        public async Task FlushAsync()
+        {
+            _debounceTimer?.Dispose();
+            _debounceTimer = null;
+            if (_sessionData != null)
+                await WriteToDiskAsync(_sessionData);
+        }
+
+        private void ScheduleSave()
+        {
+            // Timer-Debounce: bei jedem Aufruf wird der Timer zurückgesetzt.
+            // Nach 500ms Inaktivität wird tatsächlich auf Disk geschrieben.
+            _debounceTimer?.Dispose();
+            _debounceTimer = new Timer(
+                async _ => await WriteToDiskAsync(_sessionData!),
+                null,
+                SaveDelayMs,
+                Timeout.Infinite);
+        }
+
+        private async Task WriteToDiskAsync(SessionData sessionData)
+        {
             var filePath = Path.Combine(_dataPath, "SessionData.json");
-            var options = new JsonSerializerOptions { WriteIndented = true };
-            var json = JsonSerializer.Serialize(sessionData, options);
+            var json = JsonSerializer.Serialize(sessionData, _writeOptions);
             await File.WriteAllTextAsync(filePath, json);
         }
 

@@ -168,6 +168,9 @@ builder.Services.AddHostedService(sp => sp.GetRequiredService<Einsatzueberwachun
 // SignalR Broadcast Service für mobile Updates
 builder.Services.AddHostedService<Einsatzueberwachung.Web.Services.SignalRBroadcastService>();
 
+// Zentraler Timer-Service: ersetzt pro-Team System.Threading.Timer (1 Timer für alle Teams)
+builder.Services.AddHostedService<Einsatzueberwachung.Web.Services.TeamTimerService>();
+
 var app = builder.Build();
 
 // Response Compression aktivieren

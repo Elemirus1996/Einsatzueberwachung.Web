@@ -1,5 +1,16 @@
 # 📋 CHANGELOG
 
+## Version 4.3.5 - "Externer Server & Migrations-Plan" (März 2026)
+
+### 🎯 Hauptverbesserungen
+
+- 📋 Umfassender Migrations-Plan für externe Server-Bereitstellung erstellt
+- 🌐 Strategie für Internet-Zugang und Remote-Mobile-Geräte dokumentiert
+- 📊 7-Phasen-Rollout-Plan mit Firewall-, Netzwerk- und Monitoring-Strategien
+- 🔐 Sicherheits- und Betriebsrichtlinien für externe Bereitstellung
+
+---
+
 ## Version 4.3.4 - "Start-Ladeseite Verzögerung" (März 2026)
 
 ### 🎯 Hauptverbesserungen
